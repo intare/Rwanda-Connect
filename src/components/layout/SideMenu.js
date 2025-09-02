@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, User, Bookmark, Settings } from 'lucide-react';
+import SubscriptionBadge from '../subscription/SubscriptionBadge';
 
 const SideMenu = ({ showMenu, setShowMenu, currentUser, onEditProfile, onLogout }) => {
   const [selectedRegion, setSelectedRegion] = useState('All Regions');
@@ -23,9 +24,12 @@ const SideMenu = ({ showMenu, setShowMenu, currentUser, onEditProfile, onLogout 
                 alt={currentUser.fullName}
                 className="w-12 h-12 rounded-full object-cover border-2 border-white"
               />
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold">{currentUser.fullName}</h3>
                 <p className="text-sm opacity-90">{currentUser.location}</p>
+                <div className="mt-1">
+                  <SubscriptionBadge user={currentUser} />
+                </div>
               </div>
             </div>
           )}

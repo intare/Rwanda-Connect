@@ -1,17 +1,18 @@
 import React from 'react';
-import { Home, Briefcase, BookOpen, Users } from 'lucide-react';
+import { Home, Briefcase, BookOpen, Calendar, Users, Building } from 'lucide-react';
 
 const BottomNav = ({ activeTab, setActiveTab }) => {
   const navItems = [
     { key: 'home', icon: Home, label: 'Home' },
     { key: 'opportunities', icon: Briefcase, label: 'Opportunities' },
-    { key: 'playbook', icon: BookOpen, label: 'Playbook' },
+    { key: 'properties', icon: Building, label: 'Properties' },
+    { key: 'events', icon: Calendar, label: 'Events' },
     { key: 'community', icon: Users, label: 'Community' }
   ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-black">
-      <div className="grid grid-cols-4 p-2">
+      <div className="grid grid-cols-5 p-2">
         {navItems.map(({ key, icon: Icon, label }) => (
           <button
             key={key}

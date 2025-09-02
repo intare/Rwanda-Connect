@@ -12,7 +12,14 @@ export const dummyUsers = [
     interests: ['Technology', 'Investment', 'Business'],
     joinDate: 'Jan 2024',
     phone: '+1-416-555-0123',
-    profession: 'Software Engineer'
+    profession: 'Software Engineer',
+    subscription: {
+      plan: 'monthly',
+      planName: 'Monthly Plan',
+      price: 10,
+      startDate: '2025-01-01T00:00:00.000Z',
+      status: 'active'
+    }
   },
   // ... other users
 ];

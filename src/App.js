@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './data/useAuth';
 import LoginScreen from './components/auth/LoginScreen';
+import SubscriptionScreen from './components/auth/SubscriptionScreen';
+import PaymentMethodScreen from './components/auth/PaymentMethodScreen';
 import ProfileEditScreen from './components/auth/ProfileEditScreen';
 import Header from './components/layout/Header';
 import SideMenu from './components/layout/SideMenu';
@@ -10,6 +12,8 @@ import OpportunitiesContent from './components/home/OpportunitiesContent';
 import PlaybookContent from './components/home/PlaybookContent';
 import FilterPanel from './components/community/FilterPanel';
 import CommunityContent from './components/community/CommunityContent';
+import EventsContent from './components/events/EventsContent';
+import PropertiesContent from './components/properties/PropertiesContent';
 
 const App = () => {
   // Main app state
@@ -17,6 +21,9 @@ const App = () => {
   const [notifications, setNotifications] = useState(3);
   const [showMenu, setShowMenu] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [showSubscription, setShowSubscription] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [bookmarkedItems, setBookmarkedItems] = useState(new Set());
   
   // Search and filtering states
@@ -100,7 +107,53 @@ const App = () => {
     auth.handleLogout();
     setShowMenu(false);
     setShowProfileEdit(false);
+    setShowSubscription(false);
+    setShowPayment(false);
+    setSelectedPlan(null);
   };
+
+  // Subscription handlers
+  const handleSubscriptionComplete = () => {
+    setShowSubscription(false);
+  };
+
+  const handleSubscriptionSkip = () => {
+    setShowSubscription(false);
+  };
+
+  const handlePlanSelected = (plan) => {
+    if (plan.price > 0) {
+      setSelectedPlan(plan);
+      setShowSubscription(false);
+      setShowPayment(true);
+    } else {
+      // Free trial, no payment needed
+      handleSubscriptionComplete();
+    }
+  };
+
+  // Payment handlers
+  const handlePaymentComplete = () => {
+    setShowPayment(false);
+    setSelectedPlan(null);
+  };
+
+  const handlePaymentBack = () => {
+    setShowPayment(false);
+    setShowSubscription(true);
+    setSelectedPlan(null);
+  };
+
+  // Check if user needs to see subscription screen
+  React.useEffect(() => {
+    if (auth.isAuthenticated && 
+        auth.currentUser && 
+        !auth.currentUser.subscription && 
+        !showSubscription && 
+        !showPayment) {
+      setShowSubscription(true);
+    }
+  }, [auth.isAuthenticated, auth.currentUser, showSubscription, showPayment]);
 
   // Filter object to pass to components
   const filters = {
@@ -121,6 +174,20 @@ const App = () => {
     <div className="max-w-sm mx-auto bg-gray-50 min-h-screen relative">
       {!auth.isAuthenticated ? (
         <LoginScreen auth={auth} />
+      ) : showPayment && selectedPlan ? (
+        <PaymentMethodScreen
+          selectedPlan={selectedPlan}
+          onBack={handlePaymentBack}
+          onComplete={handlePaymentComplete}
+          auth={auth}
+        />
+      ) : showSubscription ? (
+        <SubscriptionScreen 
+          auth={auth} 
+          onComplete={handleSubscriptionComplete}
+          onSkip={handleSubscriptionSkip}
+          onPlanSelected={handlePlanSelected}
+        />
       ) : (
         <>
           {showProfileEdit && (
@@ -164,6 +231,8 @@ const App = () => {
               />
             )}
             {activeTab === 'playbook' && <PlaybookContent />}
+            {activeTab === 'events' && <EventsContent />}
+            {activeTab === 'properties' && <PropertiesContent />}
             {activeTab === 'community' && <CommunityContent />}
           </div>
           
