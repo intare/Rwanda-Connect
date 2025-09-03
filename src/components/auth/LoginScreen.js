@@ -36,7 +36,7 @@ const LoginScreen = ({ auth }) => {
             <img 
               src={process.env.PUBLIC_URL + "/logo.jpeg"} 
               alt="Rwanda Connect Logo" 
-              className="w-42 h-42 object-contain"
+              className="w-32 h-32 object-contain"
               onError={(e) => {
                 e.target.style.display = 'none';
               }}

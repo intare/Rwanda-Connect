@@ -20,7 +20,7 @@ const Header = ({
           <img 
             src="/logo.jpeg" 
             alt="Rwanda Connect" 
-            className="w-10 h-10 object-contain"
+            className="w-8 h-8 object-contain"
             onError={(e) => {
               e.target.style.display = 'none';
               e.target.nextSibling.style.display = 'block';
