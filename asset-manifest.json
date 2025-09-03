@@ -1,16 +1,27 @@
 {
   "files": {
-    "main.css": "/Rwanda-Connect/static/css/main.6b416c83.css",
-    "main.js": "/Rwanda-Connect/static/js/main.2cb03c64.js",
+    "main.css": "/Rwanda-Connect/static/css/main.3dca003b.css",
+    "main.js": "/Rwanda-Connect/static/js/main.7f7e3b46.js",
     "static/js/453.b463f85c.chunk.js": "/Rwanda-Connect/static/js/453.b463f85c.chunk.js",
+    "static/media/2.jpeg": "/Rwanda-Connect/static/media/2.db12daa0e696ec6eb490.jpeg",
+    "static/media/3.jpg": "/Rwanda-Connect/static/media/3.1fd1c24c304dee3ed32e.jpg",
+    "static/media/4.jpg": "/Rwanda-Connect/static/media/4.38d4f0fbbf41fea19f9b.jpg",
+    "static/media/6.jpg": "/Rwanda-Connect/static/media/6.0499a3df638d8ea4c4e3.jpg",
+    "static/media/8.jpeg": "/Rwanda-Connect/static/media/8.405ebdb06581a416b319.jpeg",
+    "static/media/10.jpeg": "/Rwanda-Connect/static/media/10.b2efb42e3243f0698b1d.jpeg",
+    "static/media/5.jpg": "/Rwanda-Connect/static/media/5.43e308cf42ce293f77ca.jpg",
+    "static/media/1.jpeg": "/Rwanda-Connect/static/media/1.7960ad4cbf98b8dafcd0.jpeg",
+    "static/media/7.jpeg": "/Rwanda-Connect/static/media/7.1f0716a03320e247fb89.jpeg",
     "static/media/musoni.jpeg": "/Rwanda-Connect/static/media/musoni.2dbdb2a4403af822614b.jpeg",
+    "static/media/11.jpeg": "/Rwanda-Connect/static/media/11.30c9845f7ab5c32e000a.jpeg",
+    "static/media/9.jpeg": "/Rwanda-Connect/static/media/9.1a008b17d269a0250533.jpeg",
     "index.html": "/Rwanda-Connect/index.html",
-    "main.6b416c83.css.map": "/Rwanda-Connect/static/css/main.6b416c83.css.map",
-    "main.2cb03c64.js.map": "/Rwanda-Connect/static/js/main.2cb03c64.js.map",
+    "main.3dca003b.css.map": "/Rwanda-Connect/static/css/main.3dca003b.css.map",
+    "main.7f7e3b46.js.map": "/Rwanda-Connect/static/js/main.7f7e3b46.js.map",
     "453.b463f85c.chunk.js.map": "/Rwanda-Connect/static/js/453.b463f85c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.6b416c83.css",
-    "static/js/main.2cb03c64.js"
+    "static/css/main.3dca003b.css",
+    "static/js/main.7f7e3b46.js"
   ]
 }
