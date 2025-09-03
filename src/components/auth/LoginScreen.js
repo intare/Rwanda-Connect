@@ -184,16 +184,6 @@ const LoginScreen = ({ auth }) => {
             </button>
           </form>
         )}
-
-        <div className="mt-6 pt-6 border-t border-black">
-          <div className="text-center text-sm text-gray-600">
-            <p className="mb-2">Demo Credentials:</p>
-            <p className="text-xs bg-gray-50 p-2 rounded">
-              <strong>Email:</strong> demo@rwandaconnect.com<br />
-              <strong>Password:</strong> demo123
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
