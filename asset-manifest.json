@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Rwanda-Connect/static/css/main.3dca003b.css",
-    "main.js": "/Rwanda-Connect/static/js/main.7f7e3b46.js",
+    "main.css": "/Rwanda-Connect/static/css/main.88b871ae.css",
+    "main.js": "/Rwanda-Connect/static/js/main.cf91f6a8.js",
     "static/js/453.b463f85c.chunk.js": "/Rwanda-Connect/static/js/453.b463f85c.chunk.js",
     "static/media/2.jpeg": "/Rwanda-Connect/static/media/2.db12daa0e696ec6eb490.jpeg",
     "static/media/3.jpg": "/Rwanda-Connect/static/media/3.1fd1c24c304dee3ed32e.jpg",
@@ -16,12 +16,12 @@
     "static/media/11.jpeg": "/Rwanda-Connect/static/media/11.30c9845f7ab5c32e000a.jpeg",
     "static/media/9.jpeg": "/Rwanda-Connect/static/media/9.1a008b17d269a0250533.jpeg",
     "index.html": "/Rwanda-Connect/index.html",
-    "main.3dca003b.css.map": "/Rwanda-Connect/static/css/main.3dca003b.css.map",
-    "main.7f7e3b46.js.map": "/Rwanda-Connect/static/js/main.7f7e3b46.js.map",
+    "main.88b871ae.css.map": "/Rwanda-Connect/static/css/main.88b871ae.css.map",
+    "main.cf91f6a8.js.map": "/Rwanda-Connect/static/js/main.cf91f6a8.js.map",
     "453.b463f85c.chunk.js.map": "/Rwanda-Connect/static/js/453.b463f85c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.3dca003b.css",
-    "static/js/main.7f7e3b46.js"
+    "static/css/main.88b871ae.css",
+    "static/js/main.cf91f6a8.js"
   ]
 }
