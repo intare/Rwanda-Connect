@@ -828,6 +828,7 @@ const seed = async () => {
       data: {
         email: 'community@rwandaconnect.com',
         password: 'community123',
+        role: 'user' as const,
       },
     })
     authorId = newUser.id
