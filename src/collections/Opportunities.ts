@@ -43,9 +43,9 @@ export const Opportunities: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'richText',
+      type: 'textarea',
       admin: {
-        description: 'Full job/opportunity description with formatting',
+        description: 'Full job/opportunity description',
       },
     },
     {

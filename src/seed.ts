@@ -180,7 +180,7 @@ const seed = async () => {
     title: string
     company: string
     location: string
-    description: string
+    description?: string
     requirements: Array<{ requirement: string }>
     salary?: number
     salaryCurrency?: string

@@ -17,9 +17,9 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'richText',
+      type: 'textarea',
       admin: {
-        description: 'Event details with rich formatting',
+        description: 'Event details',
       },
     },
     {
