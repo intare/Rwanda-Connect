@@ -2,6 +2,10 @@ import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from './payload.config'
 
+type NewsCategory = 'Economy' | 'Investment' | 'Events' | 'Business' | 'Policy'
+type OpportunityType = 'job' | 'investment' | 'scholarship' | 'tender'
+type EventType = 'networking' | 'seminar' | 'workshop' | 'conference'
+
 const seed = async () => {
   const payload = await getPayload({ config })
 
@@ -12,7 +16,15 @@ const seed = async () => {
   // ============================================
   console.log('Creating news articles...')
 
-  const newsData = [
+  const newsData: Array<{
+    title: string
+    source: string
+    category: NewsCategory
+    summary: string
+    url: string
+    publishDate: string
+    isFeatured: boolean
+  }> = [
     {
       title: 'Diaspora Remittances Hit Record $500M in 2025',
       source: 'The New Times',
@@ -163,7 +175,21 @@ const seed = async () => {
   // ============================================
   console.log('Creating opportunities...')
 
-  const opportunitiesData = [
+  const opportunitiesData: Array<{
+    type: OpportunityType
+    title: string
+    company: string
+    location: string
+    description: string
+    requirements: Array<{ requirement: string }>
+    salary?: number
+    salaryCurrency?: string
+    deadline: string
+    applyUrl: string
+    verified: boolean
+    isFeatured: boolean
+    datePosted: string
+  }> = [
     // Jobs
     {
       type: 'job',
@@ -533,7 +559,22 @@ const seed = async () => {
   // ============================================
   console.log('Creating events...')
 
-  const eventsData = [
+  const eventsData: Array<{
+    title: string
+    description: string
+    type: EventType
+    organizer: string
+    location: string
+    venue: string
+    date: string
+    endDate?: string
+    capacity: number
+    price: number
+    currency: string
+    isVirtual: boolean
+    virtualLink?: string
+    isFeatured: boolean
+  }> = [
     // Networking Events
     {
       title: 'Rwanda Connect Toronto Networking Night',
