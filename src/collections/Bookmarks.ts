@@ -40,7 +40,6 @@ export const Bookmarks: CollectionConfig = {
   ],
   indexes: [
     {
-      name: 'unique_bookmark',
       fields: ['user', 'entityType', 'entityId'],
       unique: true,
     },
