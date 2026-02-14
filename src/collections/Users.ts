@@ -9,24 +9,37 @@ export const Users: CollectionConfig = {
   access: {
     // Allow public registration
     create: () => true,
-    // Users can read their own data
+    // Admins can read all, users can read their own
     read: ({ req: { user } }) => {
-      if (user) {
-        return { id: { equals: user.id } }
-      }
-      return false
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { id: { equals: user.id } }
     },
-    // Users can update their own data
+    // Admins can update all, users can update their own
     update: ({ req: { user } }) => {
-      if (user) {
-        return { id: { equals: user.id } }
-      }
-      return false
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { id: { equals: user.id } }
     },
     // Only admins can delete
-    delete: () => false,
+    delete: ({ req: { user } }) => user?.role === 'admin',
+    // Admin panel access
+    admin: ({ req: { user } }) => user?.role === 'admin',
   },
   fields: [
+    {
+      name: 'role',
+      type: 'select',
+      options: [
+        { label: 'User', value: 'user' },
+        { label: 'Admin', value: 'admin' },
+      ],
+      defaultValue: 'user',
+      required: true,
+      admin: {
+        description: 'User role for access control',
+      },
+    },
     {
       name: 'name',
       type: 'text',

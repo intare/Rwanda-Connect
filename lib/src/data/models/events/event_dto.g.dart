@@ -13,7 +13,7 @@ EventDto _$EventDtoFromJson(Map<String, dynamic> json) => EventDto(
   date: json['date'] as String,
   type: json['type'] as String,
   organizer: json['organizer'] as String,
-  description: json['description'] as String?,
+  description: json['description'],
   venue: json['venue'] as String?,
   endDate: json['endDate'] as String?,
   capacity: (json['capacity'] as num?)?.toInt(),

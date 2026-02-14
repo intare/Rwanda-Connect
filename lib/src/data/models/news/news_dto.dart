@@ -17,7 +17,7 @@ class NewsDto with _$NewsDto {
     dynamic image, // Can be object or ID
     List<dynamic>? tags,
     bool? isFeatured,
-    String? content,
+    dynamic content, // Rich text is a JSON object, not a String
     String? createdAt,
     String? updatedAt,
   }) = _NewsDto;

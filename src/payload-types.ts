@@ -136,6 +136,10 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  /**
+   * User role for access control
+   */
+  role: 'user' | 'admin';
   name?: string | null;
   location?: string | null;
   interests?:
@@ -182,6 +186,24 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -193,6 +215,9 @@ export interface News {
   source: string;
   category: 'Economy' | 'Investment' | 'Events' | 'Business' | 'Policy';
   summary: string;
+  /**
+   * Full article content with rich formatting
+   */
   content?: {
     root: {
       type: string;
@@ -235,6 +260,9 @@ export interface Opportunity {
   company: string;
   companyLogo?: (number | null) | Media;
   location: string;
+  /**
+   * Full job/opportunity description with formatting
+   */
   description?: {
     root: {
       type: string;
@@ -279,6 +307,9 @@ export interface Opportunity {
 export interface Event {
   id: number;
   title: string;
+  /**
+   * Event details with rich formatting
+   */
   description?: {
     root: {
       type: string;
@@ -526,6 +557,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  role?: T;
   name?: T;
   location?: T;
   interests?:
@@ -569,6 +601,30 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

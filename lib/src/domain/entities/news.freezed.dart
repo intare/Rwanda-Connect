@@ -24,6 +24,9 @@ mixin _$News {
   String get summary => throw _privateConstructorUsedError;
   DateTime get publishDate => throw _privateConstructorUsedError;
   String get url => throw _privateConstructorUsedError;
+  dynamic get content =>
+      throw _privateConstructorUsedError; // Rich text content from CMS (Lexical JSON)
+  String? get imageUrl => throw _privateConstructorUsedError;
 
   /// Create a copy of News
   /// with the given fields replaced by the non-null parameter values.
@@ -44,6 +47,8 @@ abstract class $NewsCopyWith<$Res> {
     String summary,
     DateTime publishDate,
     String url,
+    dynamic content,
+    String? imageUrl,
   });
 }
 
@@ -69,6 +74,8 @@ class _$NewsCopyWithImpl<$Res, $Val extends News>
     Object? summary = null,
     Object? publishDate = null,
     Object? url = null,
+    Object? content = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -100,6 +107,14 @@ class _$NewsCopyWithImpl<$Res, $Val extends News>
                 ? _value.url
                 : url // ignore: cast_nullable_to_non_nullable
                       as String,
+            content: freezed == content
+                ? _value.content
+                : content // ignore: cast_nullable_to_non_nullable
+                      as dynamic,
+            imageUrl: freezed == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -122,6 +137,8 @@ abstract class _$$NewsImplCopyWith<$Res> implements $NewsCopyWith<$Res> {
     String summary,
     DateTime publishDate,
     String url,
+    dynamic content,
+    String? imageUrl,
   });
 }
 
@@ -144,6 +161,8 @@ class __$$NewsImplCopyWithImpl<$Res>
     Object? summary = null,
     Object? publishDate = null,
     Object? url = null,
+    Object? content = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(
       _$NewsImpl(
@@ -175,6 +194,14 @@ class __$$NewsImplCopyWithImpl<$Res>
             ? _value.url
             : url // ignore: cast_nullable_to_non_nullable
                   as String,
+        content: freezed == content
+            ? _value.content
+            : content // ignore: cast_nullable_to_non_nullable
+                  as dynamic,
+        imageUrl: freezed == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -191,6 +218,8 @@ class _$NewsImpl implements _News {
     required this.summary,
     required this.publishDate,
     required this.url,
+    this.content,
+    this.imageUrl,
   });
 
   @override
@@ -207,10 +236,15 @@ class _$NewsImpl implements _News {
   final DateTime publishDate;
   @override
   final String url;
+  @override
+  final dynamic content;
+  // Rich text content from CMS (Lexical JSON)
+  @override
+  final String? imageUrl;
 
   @override
   String toString() {
-    return 'News(id: $id, title: $title, source: $source, category: $category, summary: $summary, publishDate: $publishDate, url: $url)';
+    return 'News(id: $id, title: $title, source: $source, category: $category, summary: $summary, publishDate: $publishDate, url: $url, content: $content, imageUrl: $imageUrl)';
   }
 
   @override
@@ -226,7 +260,10 @@ class _$NewsImpl implements _News {
             (identical(other.summary, summary) || other.summary == summary) &&
             (identical(other.publishDate, publishDate) ||
                 other.publishDate == publishDate) &&
-            (identical(other.url, url) || other.url == url));
+            (identical(other.url, url) || other.url == url) &&
+            const DeepCollectionEquality().equals(other.content, content) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl));
   }
 
   @override
@@ -239,6 +276,8 @@ class _$NewsImpl implements _News {
     summary,
     publishDate,
     url,
+    const DeepCollectionEquality().hash(content),
+    imageUrl,
   );
 
   /// Create a copy of News
@@ -259,6 +298,8 @@ abstract class _News implements News {
     required final String summary,
     required final DateTime publishDate,
     required final String url,
+    final dynamic content,
+    final String? imageUrl,
   }) = _$NewsImpl;
 
   @override
@@ -275,6 +316,10 @@ abstract class _News implements News {
   DateTime get publishDate;
   @override
   String get url;
+  @override
+  dynamic get content; // Rich text content from CMS (Lexical JSON)
+  @override
+  String? get imageUrl;
 
   /// Create a copy of News
   /// with the given fields replaced by the non-null parameter values.

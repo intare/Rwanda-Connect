@@ -18,7 +18,7 @@ _$NewsDtoImpl _$$NewsDtoImplFromJson(Map<String, dynamic> json) =>
       image: json['image'],
       tags: json['tags'] as List<dynamic>?,
       isFeatured: json['isFeatured'] as bool?,
-      content: json['content'] as String?,
+      content: json['content'],
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
     );

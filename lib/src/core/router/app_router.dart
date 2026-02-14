@@ -8,6 +8,8 @@ import '../../presentation/features/auth/screens/login_screen.dart';
 import '../../presentation/features/auth/screens/register_screen.dart';
 import '../../presentation/features/auth/screens/onboarding_screen.dart';
 import '../../presentation/features/home/screens/home_screen.dart';
+import '../../presentation/features/home/screens/news_detail_screen.dart';
+import '../../domain/entities/news.dart';
 import '../../presentation/features/opportunities/screens/opportunities_screen.dart';
 import '../../presentation/features/opportunities/screens/opportunity_detail_screen.dart';
 import '../../presentation/features/events/screens/events_screen.dart';
@@ -33,7 +35,8 @@ abstract final class AppRoutes {
   static const String community = '/community';
   static const String profile = '/profile';
 
-  // Detail routes (to be expanded)
+  // Detail routes
+  static const String newsDetail = '/news/:id';
   static const String opportunityDetail = '/opportunities/:id';
   static const String eventDetail = '/events/:id';
 
@@ -164,6 +167,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Detail routes (outside shell for proper back navigation)
+      GoRoute(
+        path: AppRoutes.newsDetail,
+        name: 'newsDetail',
+        builder: (context, state) {
+          final news = state.extra as News;
+          return NewsDetailScreen(news: news);
+        },
+      ),
       GoRoute(
         path: AppRoutes.opportunityDetail,
         name: 'opportunityDetail',

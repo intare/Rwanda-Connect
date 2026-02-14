@@ -1,3 +1,4 @@
+import '../../core/network/api_endpoints.dart';
 import '../../domain/entities/news.dart';
 import '../models/news/news_dto.dart';
 
@@ -5,6 +6,18 @@ import '../models/news/news_dto.dart';
 extension NewsMapper on NewsDto {
   /// Convert DTO to domain entity.
   News toEntity() {
+    // Extract image URL from populated image object
+    String? imgUrl;
+    if (image is Map<String, dynamic>) {
+      final relativeUrl = image['url'] as String?;
+      if (relativeUrl != null) {
+        // Prepend server URL if it's a relative path
+        imgUrl = relativeUrl.startsWith('http')
+            ? relativeUrl
+            : '${ApiEndpoints.serverUrl}$relativeUrl';
+      }
+    }
+
     return News(
       id: id.toString(),
       title: title,
@@ -15,6 +28,8 @@ extension NewsMapper on NewsDto {
           ? DateTime.tryParse(publishDate!) ?? DateTime.now()
           : DateTime.now(),
       url: url,
+      content: content,
+      imageUrl: imgUrl,
     );
   }
 }

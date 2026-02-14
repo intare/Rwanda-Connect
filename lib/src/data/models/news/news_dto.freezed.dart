@@ -33,7 +33,8 @@ mixin _$NewsDto {
       throw _privateConstructorUsedError; // Can be object or ID
   List<dynamic>? get tags => throw _privateConstructorUsedError;
   bool? get isFeatured => throw _privateConstructorUsedError;
-  String? get content => throw _privateConstructorUsedError;
+  dynamic get content =>
+      throw _privateConstructorUsedError; // Rich text is a JSON object, not a String
   String? get createdAt => throw _privateConstructorUsedError;
   String? get updatedAt => throw _privateConstructorUsedError;
 
@@ -62,7 +63,7 @@ abstract class $NewsDtoCopyWith<$Res> {
     dynamic image,
     List<dynamic>? tags,
     bool? isFeatured,
-    String? content,
+    dynamic content,
     String? createdAt,
     String? updatedAt,
   });
@@ -142,7 +143,7 @@ class _$NewsDtoCopyWithImpl<$Res, $Val extends NewsDto>
             content: freezed == content
                 ? _value.content
                 : content // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -176,7 +177,7 @@ abstract class _$$NewsDtoImplCopyWith<$Res> implements $NewsDtoCopyWith<$Res> {
     dynamic image,
     List<dynamic>? tags,
     bool? isFeatured,
-    String? content,
+    dynamic content,
     String? createdAt,
     String? updatedAt,
   });
@@ -255,7 +256,7 @@ class __$$NewsDtoImplCopyWithImpl<$Res>
         content: freezed == content
             ? _value.content
             : content // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -323,7 +324,8 @@ class _$NewsDtoImpl implements _NewsDto {
   @override
   final bool? isFeatured;
   @override
-  final String? content;
+  final dynamic content;
+  // Rich text is a JSON object, not a String
   @override
   final String? createdAt;
   @override
@@ -352,7 +354,7 @@ class _$NewsDtoImpl implements _NewsDto {
             const DeepCollectionEquality().equals(other._tags, _tags) &&
             (identical(other.isFeatured, isFeatured) ||
                 other.isFeatured == isFeatured) &&
-            (identical(other.content, content) || other.content == content) &&
+            const DeepCollectionEquality().equals(other.content, content) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -373,7 +375,7 @@ class _$NewsDtoImpl implements _NewsDto {
     const DeepCollectionEquality().hash(image),
     const DeepCollectionEquality().hash(_tags),
     isFeatured,
-    content,
+    const DeepCollectionEquality().hash(content),
     createdAt,
     updatedAt,
   );
@@ -404,7 +406,7 @@ abstract class _NewsDto implements NewsDto {
     final dynamic image,
     final List<dynamic>? tags,
     final bool? isFeatured,
-    final String? content,
+    final dynamic content,
     final String? createdAt,
     final String? updatedAt,
   }) = _$NewsDtoImpl;
@@ -432,7 +434,7 @@ abstract class _NewsDto implements NewsDto {
   @override
   bool? get isFeatured;
   @override
-  String? get content;
+  dynamic get content; // Rich text is a JSON object, not a String
   @override
   String? get createdAt;
   @override

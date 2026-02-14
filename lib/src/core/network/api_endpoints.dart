@@ -16,6 +16,15 @@ abstract final class ApiEndpoints {
     return kIsWeb ? 'http://localhost:3000/api' : 'http://10.0.2.2:3000/api';
   }
 
+  /// Server URL without /api suffix - used for media URLs
+  static String get serverUrl {
+    final base = baseUrl;
+    if (base.endsWith('/api')) {
+      return base.substring(0, base.length - 4);
+    }
+    return base;
+  }
+
   // Auth endpoints (Payload CMS)
   static const String login = '/users/login';
   static const String logout = '/users/logout';

@@ -18,7 +18,7 @@ class OpportunityDto with _$OpportunityDto {
     bool? isFeatured,
     int? salary,
     String? salaryCurrency,
-    String? description,
+    dynamic description, // Rich text is a JSON object, not a String
     dynamic companyLogo, // Can be object or ID
     List<dynamic>? requirements,
     String? datePosted,

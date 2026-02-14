@@ -40,6 +40,9 @@ export const News: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+      admin: {
+        description: 'Full article content with rich formatting',
+      },
     },
     {
       name: 'image',

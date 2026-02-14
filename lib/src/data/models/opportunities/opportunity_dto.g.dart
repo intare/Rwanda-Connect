@@ -19,7 +19,7 @@ _$OpportunityDtoImpl _$$OpportunityDtoImplFromJson(Map<String, dynamic> json) =>
       isFeatured: json['isFeatured'] as bool?,
       salary: (json['salary'] as num?)?.toInt(),
       salaryCurrency: json['salaryCurrency'] as String?,
-      description: json['description'] as String?,
+      description: json['description'],
       companyLogo: json['companyLogo'],
       requirements: json['requirements'] as List<dynamic>?,
       datePosted: json['datePosted'] as String?,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/news.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -162,7 +163,10 @@ class HomeScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: AppSpacing.md),
                         child: NewsCard(
                           news: news,
-                          onTap: () => _openNewsUrl(context, news),
+                          onTap: () => context.push(
+                            AppRoutes.newsDetail.replaceFirst(':id', news.id),
+                            extra: news,
+                          ),
                         ),
                       );
                     },
@@ -182,21 +186,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openNewsUrl(BuildContext context, News news) async {
-    final uri = Uri.parse(news.url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not open news article'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
 }
 
 class _ErrorState extends StatelessWidget {

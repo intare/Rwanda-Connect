@@ -33,7 +33,8 @@ mixin _$OpportunityDto {
   bool? get isFeatured => throw _privateConstructorUsedError;
   int? get salary => throw _privateConstructorUsedError;
   String? get salaryCurrency => throw _privateConstructorUsedError;
-  String? get description => throw _privateConstructorUsedError;
+  dynamic get description =>
+      throw _privateConstructorUsedError; // Rich text is a JSON object, not a String
   dynamic get companyLogo =>
       throw _privateConstructorUsedError; // Can be object or ID
   List<dynamic>? get requirements => throw _privateConstructorUsedError;
@@ -70,7 +71,7 @@ abstract class $OpportunityDtoCopyWith<$Res> {
     bool? isFeatured,
     int? salary,
     String? salaryCurrency,
-    String? description,
+    dynamic description,
     dynamic companyLogo,
     List<dynamic>? requirements,
     String? datePosted,
@@ -161,7 +162,7 @@ class _$OpportunityDtoCopyWithImpl<$Res, $Val extends OpportunityDto>
             description: freezed == description
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             companyLogo: freezed == companyLogo
                 ? _value.companyLogo
                 : companyLogo // ignore: cast_nullable_to_non_nullable
@@ -209,7 +210,7 @@ abstract class _$$OpportunityDtoImplCopyWith<$Res>
     bool? isFeatured,
     int? salary,
     String? salaryCurrency,
-    String? description,
+    dynamic description,
     dynamic companyLogo,
     List<dynamic>? requirements,
     String? datePosted,
@@ -299,7 +300,7 @@ class __$$OpportunityDtoImplCopyWithImpl<$Res>
         description: freezed == description
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         companyLogo: freezed == companyLogo
             ? _value.companyLogo
             : companyLogo // ignore: cast_nullable_to_non_nullable
@@ -375,7 +376,8 @@ class _$OpportunityDtoImpl implements _OpportunityDto {
   @override
   final String? salaryCurrency;
   @override
-  final String? description;
+  final dynamic description;
+  // Rich text is a JSON object, not a String
   @override
   final dynamic companyLogo;
   // Can be object or ID
@@ -424,8 +426,10 @@ class _$OpportunityDtoImpl implements _OpportunityDto {
             (identical(other.salary, salary) || other.salary == salary) &&
             (identical(other.salaryCurrency, salaryCurrency) ||
                 other.salaryCurrency == salaryCurrency) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            const DeepCollectionEquality().equals(
+              other.description,
+              description,
+            ) &&
             const DeepCollectionEquality().equals(
               other.companyLogo,
               companyLogo,
@@ -457,7 +461,7 @@ class _$OpportunityDtoImpl implements _OpportunityDto {
     isFeatured,
     salary,
     salaryCurrency,
-    description,
+    const DeepCollectionEquality().hash(description),
     const DeepCollectionEquality().hash(companyLogo),
     const DeepCollectionEquality().hash(_requirements),
     datePosted,
@@ -495,7 +499,7 @@ abstract class _OpportunityDto implements OpportunityDto {
     final bool? isFeatured,
     final int? salary,
     final String? salaryCurrency,
-    final String? description,
+    final dynamic description,
     final dynamic companyLogo,
     final List<dynamic>? requirements,
     final String? datePosted,
@@ -529,7 +533,7 @@ abstract class _OpportunityDto implements OpportunityDto {
   @override
   String? get salaryCurrency;
   @override
-  String? get description;
+  dynamic get description; // Rich text is a JSON object, not a String
   @override
   dynamic get companyLogo; // Can be object or ID
   @override

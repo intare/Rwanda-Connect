@@ -13,6 +13,8 @@ class News with _$News {
     required String summary,
     required DateTime publishDate,
     required String url,
+    dynamic content, // Rich text content from CMS (Lexical JSON)
+    String? imageUrl,
   }) = _News;
 }
 

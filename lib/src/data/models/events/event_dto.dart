@@ -32,7 +32,7 @@ class EventDto {
   final String date;
   final String type;
   final String organizer;
-  final String? description;
+  final dynamic description; // Rich text is a JSON object, not a String
   final String? venue;
   final String? endDate;
   final int? capacity;
