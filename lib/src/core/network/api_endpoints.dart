@@ -1,19 +1,19 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import '../config/env_config.dart';
 
 /// API endpoint constants for Rwanda Connect.
 /// Configured for Payload CMS backend.
 abstract final class ApiEndpoints {
-  // Base URL - override with --dart-define=RWANDA_CONNECT_API_BASE_URL=...
-  // For Android emulator use 10.0.2.2, for iOS simulator/web use localhost
+  // Base URL - configured in EnvConfig
+  // Override with --dart-define=RWANDA_CONNECT_API_BASE_URL=... if needed
   static const String _envBaseUrl = String.fromEnvironment(
     'RWANDA_CONNECT_API_BASE_URL',
     defaultValue: '',
   );
 
-  // Use localhost for web, 10.0.2.2 for Android emulator
+  // Use EnvConfig by default, allow override via dart-define
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
-    return kIsWeb ? 'http://localhost:3000/api' : 'http://10.0.2.2:3000/api';
+    return EnvConfig.apiBaseUrl;
   }
 
   /// Server URL without /api suffix - used for media URLs
