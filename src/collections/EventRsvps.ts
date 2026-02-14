@@ -35,7 +35,6 @@ export const EventRsvps: CollectionConfig = {
   ],
   indexes: [
     {
-      name: 'unique_event_rsvp',
       fields: ['event', 'user'],
       unique: true,
     },
