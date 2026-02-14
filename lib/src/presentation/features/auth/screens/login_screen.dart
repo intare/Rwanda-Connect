@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_assets.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/auth_state.dart';
@@ -75,7 +76,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: AppSpacing.xxxl * 2),
+                const SizedBox(height: AppSpacing.xxxl),
+                // Logo
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      AppAssets.logo,
+                      height: 120,
+                      width: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
                 Text(
                   'Rwanda Connect',
                   style: AppTypography.displayLarge,
@@ -87,7 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: AppTypography.bodyMediumSecondary,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppSpacing.xxxl * 2),
+                const SizedBox(height: AppSpacing.xxxl),
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
