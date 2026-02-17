@@ -6,7 +6,8 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   auth: {
-    verify: true,
+    // TODO: Re-enable email verification once SendGrid is properly configured
+    verify: false,
   },
   access: {
     // Allow public registration

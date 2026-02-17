@@ -21,15 +21,17 @@ import { EventRsvps } from './collections/EventRsvps'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// SendGrid email transport
-const sendGridTransport = nodemailer.createTransport({
-  host: 'smtp.sendgrid.net',
-  port: 587,
-  auth: {
-    user: 'apikey',
-    pass: process.env.SENDGRID_API_KEY,
-  },
-})
+// SendGrid email transport (only if API key is configured)
+const sendGridTransport = process.env.SENDGRID_API_KEY
+  ? nodemailer.createTransport({
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY,
+      },
+    })
+  : undefined
 
 export default buildConfig({
   admin: {
@@ -45,10 +47,13 @@ export default buildConfig({
     'http://localhost',
     'http://127.0.0.1',
   ],
-  email: nodemailerAdapter({
-    transport: sendGridTransport,
-    defaultFromAddress: process.env.EMAIL_FROM_ADDRESS || 'noreply@rwandaconnect.com',
-    defaultFromName: process.env.EMAIL_FROM_NAME || 'Rwanda Connect',
+  // Email disabled during testing - re-enable when SendGrid credits are available
+  ...(sendGridTransport && {
+    email: nodemailerAdapter({
+      transport: sendGridTransport,
+      defaultFromAddress: process.env.EMAIL_FROM_ADDRESS || 'noreply@rwandaconnect.com',
+      defaultFromName: process.env.EMAIL_FROM_NAME || 'Rwanda Connect',
+    }),
   }),
   collections: [
     Users,
