@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -44,11 +45,11 @@ export default buildConfig({
     'http://localhost',
     'http://127.0.0.1',
   ],
-  email: {
+  email: nodemailerAdapter({
     transport: sendGridTransport,
-    fromAddress: process.env.EMAIL_FROM_ADDRESS || 'noreply@rwandaconnect.com',
-    fromName: process.env.EMAIL_FROM_NAME || 'Rwanda Connect',
-  },
+    defaultFromAddress: process.env.EMAIL_FROM_ADDRESS || 'noreply@rwandaconnect.com',
+    defaultFromName: process.env.EMAIL_FROM_NAME || 'Rwanda Connect',
+  }),
   collections: [
     Users,
     Media,
