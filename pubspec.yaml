@@ -2,7 +2,7 @@ name: rwanda_connect
 description: "Rwanda Connect - Connecting the Rwandan diaspora to opportunities, community, events, and property listings."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.9.2
