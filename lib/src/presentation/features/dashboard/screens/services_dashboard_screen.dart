@@ -99,6 +99,12 @@ class ServicesDashboardScreen extends ConsumerWidget {
   }
 
   void _navigateToService(BuildContext context, ServiceItem service) {
-    context.push(service.route);
+    // Shell routes (bottom nav tabs) need go() to avoid duplicate GlobalKey issues
+    const shellRoutes = {'/home', '/opportunities', '/events', '/community', '/profile'};
+    if (shellRoutes.contains(service.route)) {
+      context.go(service.route);
+    } else {
+      context.push(service.route);
+    }
   }
 }
