@@ -117,20 +117,14 @@ abstract final class AppRoutes {
   }
 }
 
-/// Navigation shell key for bottom navigation
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
-
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-
   return GoRouter(
-    navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
     refreshListenable: GoRouterRefreshStream(ref, authProvider),
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
       final location = state.uri.path;
       final isAuthenticated = authState.isAuthenticated;
       final isInitial = authState is AuthStateInitial;
@@ -244,7 +238,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Main app shell with bottom navigation
       ShellRoute(
-        navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => AppShell(child: child),
         routes: [
           GoRoute(
