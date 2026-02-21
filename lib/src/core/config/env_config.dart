@@ -5,7 +5,7 @@ abstract final class EnvConfig {
   /// API base URL. Override via --dart-define=RWANDA_CONNECT_API_BASE_URL=...
   static const String _apiBaseUrl = String.fromEnvironment(
     'RWANDA_CONNECT_API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3000/api',
+    defaultValue: 'http://72.62.90.190:3000/api',
   );
 
   /// Current API base URL.
