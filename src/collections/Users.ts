@@ -1,8 +1,7 @@
 import type { Access, CollectionConfig } from 'payload'
 
 const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
-const enableEmailVerification =
-  process.env.PAYLOAD_ENABLE_EMAIL_VERIFICATION === 'true' || process.env.NODE_ENV === 'production'
+const enableEmailVerification = process.env.PAYLOAD_ENABLE_EMAIL_VERIFICATION === 'true'
 const trialDurationDays = 14
 
 const adminOrSelf: Access = ({ req: { user } }) => {
