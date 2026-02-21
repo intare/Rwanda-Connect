@@ -60,6 +60,62 @@ class EventRepositoryImpl implements EventRepository {
     }
   }
 
+  @override
+  Future<EventResult<RsvpStatus?>> getUserRsvpStatus(String eventId) async {
+    try {
+      final status = await _eventService.getUserRsvpStatus(eventId);
+      if (status == null) {
+        return const EventSuccess(null);
+      }
+      return EventSuccess(RsvpStatus.fromString(status));
+    } on DioException catch (e) {
+      return EventFailure(_handleDioError(e));
+    } catch (e) {
+      return EventFailure('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<EventResult<void>> cancelRsvp(String eventId) async {
+    try {
+      await _eventService.cancelRsvp(eventId);
+      return const EventSuccess(null);
+    } on DioException catch (e) {
+      return EventFailure(_handleDioError(e));
+    } catch (e) {
+      return EventFailure('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<EventResult<List<UserRsvp>>> getUserRsvps({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await _eventService.getUserRsvps(
+        page: page,
+        limit: limit,
+      );
+
+      final rsvps = response.rsvps
+          .where((dto) => dto.event != null)
+          .map((dto) => UserRsvp(
+                id: dto.idString,
+                event: dto.event!.toEntity(),
+                status: RsvpStatus.fromString(dto.status),
+                createdAt: dto.createdAtDateTime ?? DateTime.now(),
+              ))
+          .toList();
+
+      return EventSuccess(rsvps, hasMore: response.hasNext);
+    } on DioException catch (e) {
+      return EventFailure(_handleDioError(e));
+    } catch (e) {
+      return EventFailure('An unexpected error occurred: $e');
+    }
+  }
+
   /// Map legacy sort format to Payload format.
   String _mapSort(String sort) {
     final parts = sort.split(':');

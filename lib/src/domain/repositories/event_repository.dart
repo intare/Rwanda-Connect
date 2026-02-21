@@ -6,9 +6,10 @@ sealed class EventResult<T> {
 }
 
 class EventSuccess<T> extends EventResult<T> {
-  const EventSuccess(this.data, {this.hasMore = false});
+  const EventSuccess(this.data, {this.hasMore = false, this.isFromCache = false});
   final T data;
   final bool hasMore;
+  final bool isFromCache;
 }
 
 class EventFailure<T> extends EventResult<T> {
@@ -97,4 +98,28 @@ abstract class EventRepository {
 
   /// RSVP to an event.
   Future<EventResult<RsvpStatus>> rsvpToEvent(String eventId, RsvpStatus status);
+
+  /// Get user's RSVP status for an event.
+  Future<EventResult<RsvpStatus?>> getUserRsvpStatus(String eventId);
+
+  /// Cancel RSVP for an event.
+  Future<EventResult<void>> cancelRsvp(String eventId);
+
+  /// Get user's RSVPs (events they've RSVP'd to).
+  Future<EventResult<List<UserRsvp>>> getUserRsvps({int page = 1, int limit = 20});
+}
+
+/// Represents a user's RSVP with the associated event.
+class UserRsvp {
+  const UserRsvp({
+    required this.id,
+    required this.event,
+    required this.status,
+    required this.createdAt,
+  });
+
+  final String id;
+  final Event event;
+  final RsvpStatus status;
+  final DateTime createdAt;
 }

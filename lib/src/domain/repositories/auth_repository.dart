@@ -50,4 +50,39 @@ abstract class AuthRepository {
 
   /// Check if user is currently authenticated.
   Future<bool> isAuthenticated();
+
+  /// Update user profile.
+  Future<AuthResult<User>> updateProfile({
+    String? name,
+    String? location,
+    List<String>? interests,
+    bool? onboardingCompleted,
+  });
+
+  /// Request a password reset email.
+  Future<AuthResult<void>> forgotPassword(String email);
+
+  /// Reset password using token from email.
+  Future<AuthResult<void>> resetPassword({
+    required String token,
+    required String newPassword,
+  });
+
+  /// Verify email with token.
+  Future<AuthResult<void>> verifyEmail(String token);
+
+  /// Resend verification email.
+  Future<AuthResult<void>> resendVerificationEmail(String email);
+
+  /// Sign in with Google.
+  Future<AuthResult<AuthSession>> signInWithGoogle();
+
+  /// Sign in with Apple.
+  Future<AuthResult<AuthSession>> signInWithApple();
+
+  /// Check if Apple Sign-In is available.
+  Future<bool> isAppleSignInAvailable();
+
+  /// Sign out from social providers.
+  Future<void> signOutSocialProviders();
 }

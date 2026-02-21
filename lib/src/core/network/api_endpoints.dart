@@ -3,18 +3,8 @@ import '../config/env_config.dart';
 /// API endpoint constants for Rwanda Connect.
 /// Configured for Payload CMS backend.
 abstract final class ApiEndpoints {
-  // Base URL - configured in EnvConfig
-  // Override with --dart-define=RWANDA_CONNECT_API_BASE_URL=... if needed
-  static const String _envBaseUrl = String.fromEnvironment(
-    'RWANDA_CONNECT_API_BASE_URL',
-    defaultValue: '',
-  );
-
-  // Use EnvConfig by default, allow override via dart-define
-  static String get baseUrl {
-    if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
-    return EnvConfig.apiBaseUrl;
-  }
+  // Base URL configured in EnvConfig.
+  static String get baseUrl => EnvConfig.apiBaseUrl;
 
   /// Server URL without /api suffix - used for media URLs
   static String get serverUrl {
@@ -31,6 +21,12 @@ abstract final class ApiEndpoints {
   static const String register = '/users';
   static const String me = '/users/me';
   static const String refreshToken = '/users/refresh-token';
+  static const String forgotPassword = '/users/forgot-password';
+  static const String resetPassword = '/users/reset-password';
+  static String verifyEmail(String token) => '/users/verify/$token';
+  static const String resendVerification = '/users/resend-verification';
+  static const String googleAuth = '/users/oauth/google';
+  static const String appleAuth = '/users/oauth/apple';
 
   // News endpoints
   static const String news = '/news';
@@ -52,6 +48,10 @@ abstract final class ApiEndpoints {
   static const String posts = '/community-posts';
   static String postDetail(String id) => '/community-posts/$id';
 
+  // Comments endpoints
+  static const String comments = '/post-comments';
+  static String commentDetail(String id) => '/post-comments/$id';
+
   // Profiles endpoints
   static const String profiles = '/profiles';
   static String profileDetail(String id) => '/profiles/$id';
@@ -64,9 +64,46 @@ abstract final class ApiEndpoints {
   static const String bookmarks = '/bookmarks';
   static String bookmarkDetail(String id) => '/bookmarks/$id';
 
+  // Properties endpoints
+  static const String properties = '/properties';
+  static String propertyDetail(String id) => '/properties/$id';
+  static String propertyBids(String id) => '/properties/$id/bids';
+
+  // Bids endpoints
+  static const String bids = '/bids';
+  static String bidDetail(String id) => '/bids/$id';
+  static const String userBids = '/bids/me';
+
   // Media endpoints
   static const String media = '/media';
   static String mediaDetail(String id) => '/media/$id';
+
+  // Playbook endpoints
+  static const String playbookContent = '/playbook-content';
+  static String playbookContentDetail(String id) => '/playbook-content/$id';
+  static const String playbookCategories = '/playbook-categories';
+  static String playbookCategoryDetail(String id) => '/playbook-categories/$id';
+  static const String playbookLikes = '/playbook-likes';
+  static String playbookLikeDetail(String id) => '/playbook-likes/$id';
+  static const String playbookViews = '/playbook-views';
+
+  // Business Directory endpoints
+  static const String businessDirectory = '/business-directory';
+  static String businessDetail(String id) => '/business-directory/$id';
+
+  // Mentorship endpoints
+  static const String mentors = '/mentors';
+  static String mentorDetail(String id) => '/mentors/$id';
+  static const String myMentorProfile = '/mentors/me';
+  static const String mentorshipRequests = '/mentorship-requests';
+  static String mentorshipRequestDetail(String id) =>
+      '/mentorship-requests/$id';
+  static String mentorshipRequestAction(String id, String action) =>
+      '/mentorship-requests/$id/$action';
+  static const String mentorshipConnections = '/mentorship-connections';
+  static String mentorshipConnectionDetail(String id) =>
+      '/mentorship-connections/$id';
+  static const String mentorshipQuota = '/mentorship/quota';
 }
 
 /// Query parameter keys for pagination and filtering.

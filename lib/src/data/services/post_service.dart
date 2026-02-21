@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_endpoints.dart';
 import '../models/community/post_dto.dart';
+import '../models/community/comment_dto.dart';
 
 /// Response from posts list API.
 class PostListResponse {
@@ -149,6 +150,96 @@ class PostService {
       ),
     );
   }
+
+  /// Get comments for a post.
+  Future<CommentListResponse> getComments({
+    required String postId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      'sort': 'createdAt',
+      'depth': 1, // Populate author relationship
+      'where[post][equals]': postId,
+    };
+
+    final response = await _dio.get<Map<String, dynamic>>(
+      ApiEndpoints.comments,
+      queryParameters: queryParams,
+    );
+
+    final data = response.data!;
+    final docs = data['docs'] as List<dynamic>;
+
+    return CommentListResponse(
+      comments: docs
+          .map((item) => CommentDto.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      hasNext: data['hasNextPage'] as bool? ?? false,
+      total: data['totalDocs'] as int? ?? 0,
+      page: data['page'] as int? ?? 1,
+      totalPages: data['totalPages'] as int? ?? 1,
+    );
+  }
+
+  /// Create a new comment.
+  Future<CommentDto> createComment({
+    required String postId,
+    required String content,
+  }) async {
+    final token = await _secureStorage.read(key: _tokenKey);
+    if (token == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await _dio.post<Map<String, dynamic>>(
+      ApiEndpoints.comments,
+      data: {
+        'post': postId,
+        'content': content,
+      },
+      options: Options(
+        headers: {'Authorization': 'JWT $token'},
+      ),
+    );
+
+    final doc = response.data!['doc'] ?? response.data!;
+    return CommentDto.fromJson(doc as Map<String, dynamic>);
+  }
+
+  /// Delete a comment.
+  Future<void> deleteComment(String commentId) async {
+    final token = await _secureStorage.read(key: _tokenKey);
+    if (token == null) {
+      throw Exception('Not authenticated');
+    }
+
+    await _dio.delete(
+      ApiEndpoints.commentDetail(commentId),
+      options: Options(
+        headers: {'Authorization': 'JWT $token'},
+      ),
+    );
+  }
+}
+
+/// Response from comments list API.
+class CommentListResponse {
+  const CommentListResponse({
+    required this.comments,
+    required this.hasNext,
+    required this.total,
+    required this.page,
+    required this.totalPages,
+  });
+
+  final List<CommentDto> comments;
+  final bool hasNext;
+  final int total;
+  final int page;
+  final int totalPages;
 }
 
 /// Provider for PostService.

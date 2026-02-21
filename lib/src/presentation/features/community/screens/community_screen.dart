@@ -6,6 +6,7 @@ import '../providers/post_provider.dart';
 import '../widgets/post_card.dart';
 import '../widgets/post_shimmer.dart';
 import 'create_post_screen.dart';
+import 'post_detail_screen.dart';
 
 /// Community screen showing discussions and posts.
 class CommunityScreen extends ConsumerStatefulWidget {
@@ -164,7 +165,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                             ref.read(postsProvider.notifier).toggleLike(post.id);
                           },
                           onComment: () {
-                            // TODO: Open comments
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => PostDetailScreen(
+                                  postId: post.id,
+                                  initialPost: post,
+                                ),
+                              ),
+                            );
                           },
                           onShare: () {
                             // TODO: Share post

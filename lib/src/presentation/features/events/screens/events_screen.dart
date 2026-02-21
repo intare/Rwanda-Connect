@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/event.dart';
 import '../providers/event_provider.dart';
@@ -77,6 +78,11 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: _toggleSearch,
+          ),
+          IconButton(
+            icon: const Icon(Icons.event_available),
+            tooltip: 'My RSVPs',
+            onPressed: () => context.push(AppRoutes.myRsvps),
           ),
           Stack(
             children: [

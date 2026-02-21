@@ -6,9 +6,10 @@ sealed class NewsResult<T> {
 }
 
 class NewsSuccess<T> extends NewsResult<T> {
-  const NewsSuccess(this.data, {this.hasMore = false});
+  const NewsSuccess(this.data, {this.hasMore = false, this.isFromCache = false});
   final T data;
   final bool hasMore;
+  final bool isFromCache;
 }
 
 class NewsFailure<T> extends NewsResult<T> {
@@ -66,4 +67,7 @@ abstract class NewsRepository {
 
   /// Get a single news article by ID.
   Future<NewsResult<News>> getNewsById(String id);
+
+  /// Get featured news articles.
+  Future<NewsResult<List<News>>> getFeaturedNews({int limit = 5});
 }

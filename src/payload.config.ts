@@ -17,9 +17,24 @@ import { Profiles } from './collections/Profiles'
 import { Subscriptions } from './collections/Subscriptions'
 import { Bookmarks } from './collections/Bookmarks'
 import { EventRsvps } from './collections/EventRsvps'
+import { RealEstate } from './collections/RealEstate'
+import { BusinessDirectory } from './collections/BusinessDirectory'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const requiredEnv = (key: 'PAYLOAD_SECRET' | 'DATABASE_URL'): string => {
+  const value = process.env[key]
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`)
+  }
+  return value
+}
+
+const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean)
 
 // SendGrid email transport (only if API key is configured)
 const sendGridTransport = process.env.SENDGRID_API_KEY
@@ -34,19 +49,15 @@ const sendGridTransport = process.env.SENDGRID_API_KEY
   : undefined
 
 export default buildConfig({
+  cookiePrefix: 'rwandaconnect',
   admin: {
     user: Users.slug,
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  cors: '*',
-  csrf: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost',
-    'http://127.0.0.1',
-  ],
+  cors: corsOrigins,
+  csrf: corsOrigins,
   // Email disabled during testing - re-enable when SendGrid credits are available
   ...(sendGridTransport && {
     email: nodemailerAdapter({
@@ -66,15 +77,17 @@ export default buildConfig({
     Subscriptions,
     Bookmarks,
     EventRsvps,
+    RealEstate,
+    BusinessDirectory,
   ],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: requiredEnv('PAYLOAD_SECRET'),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: requiredEnv('DATABASE_URL'),
     },
   }),
   sharp,

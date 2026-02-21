@@ -25,7 +25,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Your 30-day free trial has started!'),
+          content: Text('Your 14-day free trial has started!'),
           backgroundColor: AppColors.success,
         ),
       );
@@ -201,7 +201,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Start 30-Day Free Trial'),
+                            : const Text('Start 14-Day Free Trial'),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),

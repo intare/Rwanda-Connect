@@ -1,3 +1,4 @@
+import '../../core/network/api_endpoints.dart';
 import '../../domain/entities/event.dart';
 import '../models/events/event_dto.dart';
 
@@ -20,7 +21,12 @@ extension EventDtoMapper on EventDto {
   String? _getImageUrl() {
     if (image == null) return null;
     if (image is Map<String, dynamic>) {
-      return image['url'] as String?;
+      final relativeUrl = image['url'] as String?;
+      if (relativeUrl != null) {
+        return relativeUrl.startsWith('http')
+            ? relativeUrl
+            : '${ApiEndpoints.serverUrl}$relativeUrl';
+      }
     }
     return null;
   }

@@ -19,17 +19,17 @@
     "seed": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/seed.ts"
   },
   "dependencies": {
-    "@payloadcms/db-postgres": "^3.0.0",
-    "@payloadcms/email-nodemailer": "^3.0.0",
-    "@payloadcms/next": "^3.0.0",
-    "@payloadcms/richtext-lexical": "^3.0.0",
-    "@payloadcms/ui": "^3.0.0",
+    "@payloadcms/db-postgres": "3.75.0",
+    "@payloadcms/email-nodemailer": "3.75.0",
+    "@payloadcms/next": "3.75.0",
+    "@payloadcms/richtext-lexical": "3.75.0",
+    "@payloadcms/ui": "3.75.0",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
     "next": "15.4.11",
     "nodemailer": "^8.0.1",
-    "payload": "^3.0.0",
+    "payload": "3.75.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "sharp": "0.34.2"

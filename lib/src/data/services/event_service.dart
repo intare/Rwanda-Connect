@@ -230,6 +230,104 @@ class EventService {
       return null;
     }
   }
+
+  /// Get all user's RSVPs with populated event data.
+  Future<UserRsvpListResponse> getUserRsvps({
+    int page = 1,
+    int limit = 20,
+    String? status,
+  }) async {
+    final token = await _secureStorage.read(key: _tokenKey);
+    if (token == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      'sort': '-createdAt',
+      'depth': 2, // Populate event relation
+    };
+
+    if (status != null && status.isNotEmpty) {
+      queryParams['where[status][equals]'] = status;
+    }
+
+    final response = await _dio.get<Map<String, dynamic>>(
+      ApiEndpoints.eventRsvps,
+      queryParameters: queryParams,
+      options: Options(
+        headers: {'Authorization': 'JWT $token'},
+      ),
+    );
+
+    final data = response.data!;
+    final docs = data['docs'] as List<dynamic>;
+
+    return UserRsvpListResponse(
+      rsvps: docs
+          .map((item) => UserRsvpDto.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      hasNext: data['hasNextPage'] as bool? ?? false,
+      total: data['totalDocs'] as int? ?? 0,
+      page: data['page'] as int? ?? 1,
+      totalPages: data['totalPages'] as int? ?? 1,
+    );
+  }
+}
+
+/// Response from user RSVPs list API.
+class UserRsvpListResponse {
+  const UserRsvpListResponse({
+    required this.rsvps,
+    required this.hasNext,
+    required this.total,
+    required this.page,
+    required this.totalPages,
+  });
+
+  final List<UserRsvpDto> rsvps;
+  final bool hasNext;
+  final int total;
+  final int page;
+  final int totalPages;
+}
+
+/// DTO for user RSVP with populated event.
+class UserRsvpDto {
+  const UserRsvpDto({
+    required this.id,
+    required this.event,
+    required this.status,
+    this.createdAt,
+  });
+
+  final dynamic id;
+  final EventDto? event;
+  final String status;
+  final String? createdAt;
+
+  factory UserRsvpDto.fromJson(Map<String, dynamic> json) {
+    EventDto? eventDto;
+    final eventData = json['event'];
+    if (eventData is Map<String, dynamic>) {
+      eventDto = EventDto.fromJson(eventData);
+    }
+
+    return UserRsvpDto(
+      id: json['id'],
+      event: eventDto,
+      status: json['status'] as String? ?? 'interested',
+      createdAt: json['createdAt'] as String?,
+    );
+  }
+
+  String get idString => id.toString();
+
+  DateTime? get createdAtDateTime {
+    if (createdAt == null) return null;
+    return DateTime.tryParse(createdAt!);
+  }
 }
 
 /// Provider for EventService.

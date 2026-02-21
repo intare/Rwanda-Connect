@@ -21,7 +21,10 @@ mixin _$User {
   String get name => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String? get location => throw _privateConstructorUsedError;
+  String? get profileImageUrl => throw _privateConstructorUsedError;
   List<String> get interests => throw _privateConstructorUsedError;
+  bool get onboardingCompleted => throw _privateConstructorUsedError;
+  bool get emailVerified => throw _privateConstructorUsedError;
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -39,7 +42,10 @@ abstract class $UserCopyWith<$Res> {
     String name,
     String email,
     String? location,
+    String? profileImageUrl,
     List<String> interests,
+    bool onboardingCompleted,
+    bool emailVerified,
   });
 }
 
@@ -62,7 +68,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? name = null,
     Object? email = null,
     Object? location = freezed,
+    Object? profileImageUrl = freezed,
     Object? interests = null,
+    Object? onboardingCompleted = null,
+    Object? emailVerified = null,
   }) {
     return _then(
       _value.copyWith(
@@ -82,10 +91,22 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.location
                 : location // ignore: cast_nullable_to_non_nullable
                       as String?,
+            profileImageUrl: freezed == profileImageUrl
+                ? _value.profileImageUrl
+                : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
             interests: null == interests
                 ? _value.interests
                 : interests // ignore: cast_nullable_to_non_nullable
                       as List<String>,
+            onboardingCompleted: null == onboardingCompleted
+                ? _value.onboardingCompleted
+                : onboardingCompleted // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            emailVerified: null == emailVerified
+                ? _value.emailVerified
+                : emailVerified // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -105,7 +126,10 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     String name,
     String email,
     String? location,
+    String? profileImageUrl,
     List<String> interests,
+    bool onboardingCompleted,
+    bool emailVerified,
   });
 }
 
@@ -125,7 +149,10 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? name = null,
     Object? email = null,
     Object? location = freezed,
+    Object? profileImageUrl = freezed,
     Object? interests = null,
+    Object? onboardingCompleted = null,
+    Object? emailVerified = null,
   }) {
     return _then(
       _$UserImpl(
@@ -145,10 +172,22 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.location
             : location // ignore: cast_nullable_to_non_nullable
                   as String?,
+        profileImageUrl: freezed == profileImageUrl
+            ? _value.profileImageUrl
+            : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
         interests: null == interests
             ? _value._interests
             : interests // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        onboardingCompleted: null == onboardingCompleted
+            ? _value.onboardingCompleted
+            : onboardingCompleted // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        emailVerified: null == emailVerified
+            ? _value.emailVerified
+            : emailVerified // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -162,7 +201,10 @@ class _$UserImpl implements _User {
     required this.name,
     required this.email,
     this.location,
+    this.profileImageUrl,
     final List<String> interests = const [],
+    this.onboardingCompleted = false,
+    this.emailVerified = false,
   }) : _interests = interests;
 
   @override
@@ -173,6 +215,8 @@ class _$UserImpl implements _User {
   final String email;
   @override
   final String? location;
+  @override
+  final String? profileImageUrl;
   final List<String> _interests;
   @override
   @JsonKey()
@@ -183,8 +227,15 @@ class _$UserImpl implements _User {
   }
 
   @override
+  @JsonKey()
+  final bool onboardingCompleted;
+  @override
+  @JsonKey()
+  final bool emailVerified;
+
+  @override
   String toString() {
-    return 'User(id: $id, name: $name, email: $email, location: $location, interests: $interests)';
+    return 'User(id: $id, name: $name, email: $email, location: $location, profileImageUrl: $profileImageUrl, interests: $interests, onboardingCompleted: $onboardingCompleted, emailVerified: $emailVerified)';
   }
 
   @override
@@ -197,10 +248,16 @@ class _$UserImpl implements _User {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.location, location) ||
                 other.location == location) &&
+            (identical(other.profileImageUrl, profileImageUrl) ||
+                other.profileImageUrl == profileImageUrl) &&
             const DeepCollectionEquality().equals(
               other._interests,
               _interests,
-            ));
+            ) &&
+            (identical(other.onboardingCompleted, onboardingCompleted) ||
+                other.onboardingCompleted == onboardingCompleted) &&
+            (identical(other.emailVerified, emailVerified) ||
+                other.emailVerified == emailVerified));
   }
 
   @override
@@ -210,7 +267,10 @@ class _$UserImpl implements _User {
     name,
     email,
     location,
+    profileImageUrl,
     const DeepCollectionEquality().hash(_interests),
+    onboardingCompleted,
+    emailVerified,
   );
 
   /// Create a copy of User
@@ -228,7 +288,10 @@ abstract class _User implements User {
     required final String name,
     required final String email,
     final String? location,
+    final String? profileImageUrl,
     final List<String> interests,
+    final bool onboardingCompleted,
+    final bool emailVerified,
   }) = _$UserImpl;
 
   @override
@@ -240,7 +303,13 @@ abstract class _User implements User {
   @override
   String? get location;
   @override
+  String? get profileImageUrl;
+  @override
   List<String> get interests;
+  @override
+  bool get onboardingCompleted;
+  @override
+  bool get emailVerified;
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.

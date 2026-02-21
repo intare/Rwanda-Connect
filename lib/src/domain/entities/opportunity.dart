@@ -18,6 +18,7 @@ class Opportunity with _$Opportunity {
     int? salary,
     String? applyUrl,
     String? description,
+    String? companyLogoUrl,
   }) = _Opportunity;
 
   /// Check if the opportunity deadline has passed.

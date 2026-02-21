@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:add_2_calendar/add_2_calendar.dart' as calendar;
 
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/event.dart';
-import '../../../../domain/repositories/event_repository.dart';
-import '../../../../data/repositories/event_repository_impl.dart';
 import '../providers/event_provider.dart';
 
 /// Detail screen for viewing a single event with RSVP functionality.
-class EventDetailScreen extends ConsumerStatefulWidget {
+class EventDetailScreen extends ConsumerWidget {
   const EventDetailScreen({
     super.key,
     required this.eventId,
@@ -18,53 +17,9 @@ class EventDetailScreen extends ConsumerStatefulWidget {
   final String eventId;
 
   @override
-  ConsumerState<EventDetailScreen> createState() => _EventDetailScreenState();
-}
-
-class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
-  RsvpStatus? _currentRsvpStatus;
-  bool _isSubmittingRsvp = false;
-
-  Future<void> _submitRsvp(RsvpStatus status) async {
-    if (_isSubmittingRsvp) return;
-
-    setState(() {
-      _isSubmittingRsvp = true;
-    });
-
-    final repository = ref.read(eventRepositoryProvider);
-    final result = await repository.rsvpToEvent(widget.eventId, status);
-
-    if (!mounted) return;
-
-    switch (result) {
-      case EventSuccess(:final data):
-        setState(() {
-          _currentRsvpStatus = data;
-          _isSubmittingRsvp = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('You are now ${status.label.toLowerCase()} this event'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      case EventFailure(:final message):
-        setState(() {
-          _isSubmittingRsvp = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppColors.danger,
-          ),
-        );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final eventAsync = ref.watch(eventDetailProvider(widget.eventId));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final eventAsync = ref.watch(eventDetailProvider(eventId));
+    final rsvpState = ref.watch(eventRsvpProvider(eventId));
 
     return Scaffold(
       appBar: AppBar(
@@ -85,33 +40,30 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
           }
           return _EventDetailContent(
             event: event,
-            currentRsvpStatus: _currentRsvpStatus,
-            isSubmittingRsvp: _isSubmittingRsvp,
-            onRsvp: _submitRsvp,
+            eventId: eventId,
+            rsvpState: rsvpState,
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => _ErrorState(
           message: error.toString(),
-          onRetry: () => ref.refresh(eventDetailProvider(widget.eventId)),
+          onRetry: () => ref.refresh(eventDetailProvider(eventId)),
         ),
       ),
     );
   }
 }
 
-class _EventDetailContent extends StatelessWidget {
+class _EventDetailContent extends ConsumerWidget {
   const _EventDetailContent({
     required this.event,
-    required this.currentRsvpStatus,
-    required this.isSubmittingRsvp,
-    required this.onRsvp,
+    required this.eventId,
+    required this.rsvpState,
   });
 
   final Event event;
-  final RsvpStatus? currentRsvpStatus;
-  final bool isSubmittingRsvp;
-  final Function(RsvpStatus) onRsvp;
+  final String eventId;
+  final EventRsvpState rsvpState;
 
   String _formatDateTime(DateTime date) {
     return DateFormat('EEEE, MMMM d, yyyy \'at\' h:mm a').format(date);
@@ -137,9 +89,86 @@ class _EventDetailContent extends StatelessWidget {
     }
   }
 
+  void _addToCalendar(BuildContext context) {
+    final calendarEvent = calendar.Event(
+      title: event.title,
+      description: event.description ?? '',
+      location: event.location,
+      startDate: event.date,
+      endDate: event.date.add(const Duration(hours: 2)),
+    );
+
+    calendar.Add2Calendar.addEvent2Cal(calendarEvent);
+  }
+
+  Future<void> _handleRsvp(
+    BuildContext context,
+    WidgetRef ref,
+    RsvpStatus status,
+  ) async {
+    final notifier = ref.read(eventRsvpProvider(eventId).notifier);
+    final success = await notifier.rsvp(status);
+
+    if (context.mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('You are now ${status.label.toLowerCase()} this event'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(rsvpState.error ?? 'Failed to update RSVP'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleCancelRsvp(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel RSVP'),
+        content: const Text('Are you sure you want to cancel your RSVP?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final notifier = ref.read(eventRsvpProvider(eventId).notifier);
+      final success = await notifier.cancel();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success ? 'RSVP cancelled' : (rsvpState.error ?? 'Failed to cancel RSVP'),
+            ),
+            backgroundColor: success ? AppColors.success : AppColors.danger,
+          ),
+        );
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isPast = event.isPast;
+    final currentRsvpStatus = rsvpState.status;
 
     return Column(
       children: [
@@ -215,6 +244,19 @@ class _EventDetailContent extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Add to Calendar button
+                if (!isPast)
+                  OutlinedButton.icon(
+                    onPressed: () => _addToCalendar(context),
+                    icon: const Icon(Icons.calendar_month),
+                    label: const Text('Add to Calendar'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                  ),
+
                 const SizedBox(height: AppSpacing.xxl),
 
                 // Description
@@ -251,11 +293,20 @@ class _EventDetailContent extends StatelessWidget {
                           size: AppSizes.iconMd,
                         ),
                         const SizedBox(width: AppSpacing.md),
-                        Text(
-                          'You are ${currentRsvpStatus!.label.toLowerCase()} to this event',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.success,
+                        Expanded(
+                          child: Text(
+                            'You are ${currentRsvpStatus.label.toLowerCase()} to this event',
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.success,
+                            ),
                           ),
+                        ),
+                        TextButton(
+                          onPressed: () => _handleCancelRsvp(context, ref),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.danger,
+                          ),
+                          child: const Text('Cancel'),
                         ),
                       ],
                     ),
@@ -270,9 +321,10 @@ class _EventDetailContent extends StatelessWidget {
         // Bottom action bar
         if (!isPast)
           _BottomActionBar(
+            eventId: eventId,
             currentStatus: currentRsvpStatus,
-            isSubmitting: isSubmittingRsvp,
-            onRsvp: onRsvp,
+            isSubmitting: rsvpState.isLoading,
+            onRsvp: (status) => _handleRsvp(context, ref, status),
           ),
       ],
     );
@@ -377,11 +429,13 @@ class _InfoRow extends StatelessWidget {
 
 class _BottomActionBar extends StatelessWidget {
   const _BottomActionBar({
+    required this.eventId,
     required this.currentStatus,
     required this.isSubmitting,
     required this.onRsvp,
   });
 
+  final String eventId;
   final RsvpStatus? currentStatus;
   final bool isSubmitting;
   final Function(RsvpStatus) onRsvp;

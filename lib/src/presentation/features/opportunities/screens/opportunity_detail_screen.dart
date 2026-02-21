@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/opportunity.dart';
+import '../../bookmarks/providers/bookmark_provider.dart';
 import '../../profile/providers/subscription_provider.dart';
 import '../../profile/screens/paywall_screen.dart';
 import '../providers/opportunity_provider.dart';
@@ -189,6 +190,7 @@ class _OpportunityDetailContent extends StatelessWidget {
 
         // Bottom action bar
         _BottomActionBar(
+          opportunityId: opportunity.id,
           isExpired: isExpired,
           hasApplyUrl: opportunity.applyUrl != null,
           onApply: () => _launchApplyUrl(context),
@@ -366,11 +368,13 @@ class _DeadlineWarning extends StatelessWidget {
 
 class _BottomActionBar extends ConsumerWidget {
   const _BottomActionBar({
+    required this.opportunityId,
     required this.isExpired,
     required this.hasApplyUrl,
     required this.onApply,
   });
 
+  final String opportunityId;
   final bool isExpired;
   final bool hasApplyUrl;
   final VoidCallback onApply;
@@ -392,15 +396,39 @@ class _BottomActionBar extends ConsumerWidget {
     onApply();
   }
 
-  void _handleBookmark(BuildContext context, bool canBookmark) {
+  Future<void> _handleBookmark(
+    BuildContext context,
+    WidgetRef ref,
+    bool canBookmark,
+    bool isCurrentlyBookmarked,
+  ) async {
     if (!canBookmark) {
       _openPaywall(context);
       return;
     }
-    // TODO: Implement bookmark functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bookmark feature coming soon')),
+
+    final notifier = ref.read(
+      opportunityBookmarkStatusProvider(opportunityId).notifier,
     );
+    final isNowBookmarked = await notifier.toggle();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isNowBookmarked
+                ? 'Opportunity saved to bookmarks'
+                : 'Removed from bookmarks',
+          ),
+          action: isNowBookmarked
+              ? null
+              : SnackBarAction(
+                  label: 'Undo',
+                  onPressed: () => notifier.toggle(),
+                ),
+        ),
+      );
+    }
   }
 
   @override
@@ -408,6 +436,9 @@ class _BottomActionBar extends ConsumerWidget {
     final subscriptionState = ref.watch(subscriptionProvider);
     final canApply = subscriptionState.canApply;
     final canBookmark = subscriptionState.canBookmark;
+    final bookmarkState = ref.watch(opportunityBookmarkStatusProvider(opportunityId));
+    final isBookmarked = bookmarkState.isBookmarked;
+    final isBookmarkLoading = bookmarkState.isLoading;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -426,10 +457,21 @@ class _BottomActionBar extends ConsumerWidget {
           children: [
             // Bookmark button
             IconButton.outlined(
-              onPressed: () => _handleBookmark(context, canBookmark),
-              icon: Icon(
-                canBookmark ? Icons.bookmark_border : Icons.lock_outline,
-              ),
+              onPressed: isBookmarkLoading
+                  ? null
+                  : () => _handleBookmark(context, ref, canBookmark, isBookmarked),
+              icon: isBookmarkLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(
+                      canBookmark
+                          ? (isBookmarked ? Icons.bookmark : Icons.bookmark_border)
+                          : Icons.lock_outline,
+                      color: isBookmarked ? AppColors.primary : null,
+                    ),
             ),
             const SizedBox(width: AppSpacing.md),
             // Apply button

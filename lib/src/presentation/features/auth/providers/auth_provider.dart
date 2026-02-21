@@ -68,10 +68,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
           user: data.user,
           token: data.token,
         );
-        // Send verification email after successful registration
-        if (!data.user.emailVerified) {
-          await _repository.resendVerificationEmail(email);
-        }
+        // TODO: Re-enable email verification once Firebase Auth is configured
+        // if (!data.user.emailVerified) {
+        //   await _repository.resendVerificationEmail(email);
+        // }
       case AuthFailure(:final message):
         state = AuthState.error(message);
     }

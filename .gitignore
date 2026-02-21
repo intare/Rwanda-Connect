@@ -70,5 +70,3 @@ node_modules/
 nul
 test.env
 *.log
-pubspec.lock
-pnpm-lock.yaml

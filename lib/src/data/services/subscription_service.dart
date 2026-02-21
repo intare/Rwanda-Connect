@@ -80,7 +80,7 @@ class SubscriptionService {
     // Check if user already has a subscription
     final existing = await getSubscription();
 
-    final trialEndsAt = DateTime.now().add(const Duration(days: 30));
+    final trialEndsAt = DateTime.now().add(const Duration(days: 14));
 
     if (existing != null) {
       // Update existing subscription to trial

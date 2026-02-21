@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -24,6 +26,7 @@ class AuthService {
 
   static const _tokenKey = 'auth_token';
   static const _userIdKey = 'user_id';
+  static const _userDataKey = 'user_data';
 
   /// Login with email and password.
   Future<AuthResponse> login(LoginRequest request) async {
@@ -48,9 +51,10 @@ class AuthService {
         throw const AuthException('Login failed. Invalid response from server.');
       }
 
-      // Store token securely
+      // Store token and user data securely for persistent login
       await _secureStorage.write(key: _tokenKey, value: token);
       await _secureStorage.write(key: _userIdKey, value: userData['id'].toString());
+      await _secureStorage.write(key: _userDataKey, value: jsonEncode(userData));
 
       return AuthResponse(
         token: token,
@@ -115,6 +119,7 @@ class AuthService {
     } finally {
       await _secureStorage.delete(key: _tokenKey);
       await _secureStorage.delete(key: _userIdKey);
+      await _secureStorage.delete(key: _userDataKey);
     }
   }
 
@@ -140,7 +145,12 @@ class AuthService {
 
       // Payload returns { user: {...} } for /users/me
       final userData = data['user'] as Map<String, dynamic>? ?? data;
-      return UserDto.fromJson(userData);
+      final user = UserDto.fromJson(userData);
+
+      // Cache user data for persistent login
+      await saveUser(user);
+
+      return user;
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         await _secureStorage.delete(key: _tokenKey);
@@ -187,7 +197,12 @@ class AuthService {
         throw const AuthException('Failed to update profile.');
       }
 
-      return UserDto.fromJson(data);
+      final user = UserDto.fromJson(data);
+
+      // Cache updated user data for persistent login
+      await saveUser(user);
+
+      return user;
     } on DioException catch (e) {
       throw AuthException(e.message ?? 'Failed to update profile.');
     }
@@ -196,6 +211,31 @@ class AuthService {
   /// Get stored auth token.
   Future<String?> getToken() async {
     return _secureStorage.read(key: _tokenKey);
+  }
+
+  /// Get stored user data (for offline/persistent login).
+  Future<UserDto?> getStoredUser() async {
+    final userJson = await _secureStorage.read(key: _userDataKey);
+    if (userJson == null) return null;
+
+    try {
+      final userData = jsonDecode(userJson) as Map<String, dynamic>;
+      return UserDto.fromJson(userData);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Save user data to secure storage.
+  Future<void> saveUser(UserDto user) async {
+    await _secureStorage.write(key: _userDataKey, value: jsonEncode(user.toJson()));
+  }
+
+  /// Save Firebase user data and token to secure storage.
+  Future<void> saveFirebaseUser(UserDto user, String token) async {
+    await _secureStorage.write(key: _tokenKey, value: token);
+    await _secureStorage.write(key: _userIdKey, value: user.id);
+    await _secureStorage.write(key: _userDataKey, value: jsonEncode(user.toJson()));
   }
 
   /// Check if user is authenticated (has valid token).
@@ -224,6 +264,83 @@ class AuthService {
       return newToken;
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Request a password reset email.
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.forgotPassword,
+        data: {'email': email},
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        throw const AuthException('Please enter a valid email address.');
+      }
+      if (e.response?.statusCode == 404) {
+        // Don't reveal if email exists - just succeed silently
+        return;
+      }
+      throw AuthException(e.message ?? 'Failed to send reset email. Please try again.');
+    }
+  }
+
+  /// Reset password using token from email.
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.resetPassword,
+        data: {
+          'token': token,
+          'password': newPassword,
+        },
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        final message = e.response?.data?['message'] as String?;
+        if (message != null && message.toLowerCase().contains('token')) {
+          throw const AuthException('Reset link has expired. Please request a new one.');
+        }
+        throw AuthException(message ?? 'Invalid reset request.');
+      }
+      throw AuthException(e.message ?? 'Failed to reset password. Please try again.');
+    }
+  }
+
+  /// Verify email with token.
+  Future<void> verifyEmail(String token) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.verifyEmail(token),
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400 || e.response?.statusCode == 404) {
+        throw const AuthException('Invalid or expired verification link.');
+      }
+      throw AuthException(e.message ?? 'Failed to verify email. Please try again.');
+    }
+  }
+
+  /// Resend verification email.
+  Future<void> resendVerificationEmail(String email) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.resendVerification,
+        data: {'email': email},
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        throw const AuthException('Please enter a valid email address.');
+      }
+      if (e.response?.statusCode == 404) {
+        // Don't reveal if email exists
+        return;
+      }
+      throw AuthException(e.message ?? 'Failed to send verification email. Please try again.');
     }
   }
 }

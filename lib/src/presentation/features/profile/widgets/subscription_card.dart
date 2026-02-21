@@ -98,7 +98,7 @@ class SubscriptionCard extends ConsumerWidget {
   String _getPlanTitle(Subscription subscription) {
     return switch (subscription.plan) {
       SubscriptionPlan.free => 'Free Plan',
-      SubscriptionPlan.trial => '30-Day Free Trial',
+      SubscriptionPlan.trial => '14-Day Free Trial',
       SubscriptionPlan.monthly => 'Monthly Premium',
       SubscriptionPlan.yearly => 'Yearly Premium',
     };

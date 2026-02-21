@@ -1,3 +1,4 @@
+import '../entities/comment.dart';
 import '../entities/post.dart';
 
 /// Result type for post operations.
@@ -6,9 +7,10 @@ sealed class PostResult<T> {
 }
 
 class PostSuccess<T> extends PostResult<T> {
-  const PostSuccess(this.data, {this.hasMore = false});
+  const PostSuccess(this.data, {this.hasMore = false, this.isFromCache = false});
   final T data;
   final bool hasMore;
+  final bool isFromCache;
 }
 
 class PostFailure<T> extends PostResult<T> {
@@ -63,12 +65,43 @@ abstract class PostRepository {
   /// Get paginated list of posts.
   Future<PostResult<List<Post>>> getPosts(GetPostsParams params);
 
+  /// Get a single post by ID.
+  Future<PostResult<Post>> getPostById(String id);
+
   /// Create a new post.
   Future<PostResult<Post>> createPost(String content);
+
+  /// Update a post.
+  Future<PostResult<Post>> updatePost(String postId, String content);
+
+  /// Delete a post.
+  Future<PostResult<void>> deletePost(String postId);
 
   /// Like a post.
   Future<PostResult<bool>> likePost(String postId);
 
   /// Unlike a post.
   Future<PostResult<bool>> unlikePost(String postId);
+
+  /// Get comments for a post.
+  Future<PostResult<List<Comment>>> getComments(GetCommentsParams params);
+
+  /// Create a comment on a post.
+  Future<PostResult<Comment>> createComment(String postId, String content);
+
+  /// Delete a comment.
+  Future<PostResult<void>> deleteComment(String commentId);
+}
+
+/// Parameters for fetching comments.
+class GetCommentsParams {
+  const GetCommentsParams({
+    required this.postId,
+    this.page = 1,
+    this.limit = 20,
+  });
+
+  final String postId;
+  final int page;
+  final int limit;
 }

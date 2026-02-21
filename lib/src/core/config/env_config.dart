@@ -1,17 +1,19 @@
+import 'package:flutter/foundation.dart';
+
 /// Environment configuration for the app.
-/// Change these values based on your deployment environment.
 abstract final class EnvConfig {
-  /// Production API base URL
-  static const String productionApiUrl = 'http://72.62.90.190:8080/api';
+  /// API base URL. Override via --dart-define=RWANDA_CONNECT_API_BASE_URL=...
+  static const String _apiBaseUrl = String.fromEnvironment(
+    'RWANDA_CONNECT_API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:3000/api',
+  );
 
-  /// Development API base URL (for local development)
-  /// - Android emulator: http://10.0.2.2:3000/api
-  /// - iOS simulator/web: http://localhost:3000/api
-  static const String developmentApiUrl = 'http://10.0.2.2:3000/api';
-
-  /// Set to true for production, false for local development
-  static const bool isProduction = true;
-
-  /// Get the current API base URL based on environment
-  static String get apiBaseUrl => isProduction ? productionApiUrl : developmentApiUrl;
+  /// Current API base URL.
+  static String get apiBaseUrl {
+    final uri = Uri.parse(_apiBaseUrl);
+    if (kReleaseMode && uri.scheme != 'https') {
+      throw StateError('Release builds must use HTTPS API URL.');
+    }
+    return _apiBaseUrl;
+  }
 }

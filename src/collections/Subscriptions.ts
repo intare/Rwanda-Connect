@@ -1,4 +1,10 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
+
+const ownerOrAdmin: Access = ({ req: { user } }) => {
+  if (!user) return false
+  if (user.role === 'admin') return true
+  return { user: { equals: user.id } }
+}
 
 export const Subscriptions: CollectionConfig = {
   slug: 'subscriptions',
@@ -7,10 +13,21 @@ export const Subscriptions: CollectionConfig = {
     defaultColumns: ['user', 'plan', 'status', 'startDate', 'endDate'],
   },
   access: {
-    read: ({ req: { user } }) => {
-      if (user) return true
-      return false
-    },
+    read: ownerOrAdmin,
+    create: ({ req: { user } }) => Boolean(user),
+    update: ownerOrAdmin,
+    delete: ownerOrAdmin,
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, req, operation }) => {
+        if (!data) return data
+        if (operation === 'create' && req.user && req.user.role !== 'admin') {
+          data.user = req.user?.id
+        }
+        return data
+      },
+    ],
   },
   fields: [
     {

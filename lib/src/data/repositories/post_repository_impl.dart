@@ -2,8 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/api_interceptors.dart';
+import '../../domain/entities/comment.dart';
 import '../../domain/entities/post.dart';
 import '../../domain/repositories/post_repository.dart';
+import '../mappers/comment_mapper.dart';
 import '../mappers/post_mapper.dart';
 import '../services/post_service.dart';
 
@@ -32,10 +34,46 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
+  Future<PostResult<Post>> getPostById(String id) async {
+    try {
+      final response = await _postService.getPostById(id);
+      return PostSuccess(response.toEntity());
+    } on DioException catch (e) {
+      return PostFailure(_handleDioError(e));
+    } catch (e) {
+      return PostFailure('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
   Future<PostResult<Post>> createPost(String content) async {
     try {
       final response = await _postService.createPost(content);
       return PostSuccess(response.toEntity());
+    } on DioException catch (e) {
+      return PostFailure(_handleDioError(e));
+    } catch (e) {
+      return PostFailure('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<PostResult<Post>> updatePost(String postId, String content) async {
+    try {
+      final response = await _postService.updatePost(postId, content);
+      return PostSuccess(response.toEntity());
+    } on DioException catch (e) {
+      return PostFailure(_handleDioError(e));
+    } catch (e) {
+      return PostFailure('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<PostResult<void>> deletePost(String postId) async {
+    try {
+      await _postService.deletePost(postId);
+      return const PostSuccess(null);
     } on DioException catch (e) {
       return PostFailure(_handleDioError(e));
     } catch (e) {
@@ -53,6 +91,50 @@ class PostRepositoryImpl implements PostRepository {
   Future<PostResult<bool>> unlikePost(String postId) async {
     // TODO: Implement likes in Payload CMS
     return const PostSuccess(true);
+  }
+
+  @override
+  Future<PostResult<List<Comment>>> getComments(GetCommentsParams params) async {
+    try {
+      final response = await _postService.getComments(
+        postId: params.postId,
+        page: params.page,
+        limit: params.limit,
+      );
+      final comments = response.comments.toEntities();
+      return PostSuccess(comments, hasMore: response.hasNext);
+    } on DioException catch (e) {
+      return PostFailure(_handleDioError(e));
+    } catch (e) {
+      return PostFailure('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<PostResult<Comment>> createComment(String postId, String content) async {
+    try {
+      final response = await _postService.createComment(
+        postId: postId,
+        content: content,
+      );
+      return PostSuccess(response.toEntity());
+    } on DioException catch (e) {
+      return PostFailure(_handleDioError(e));
+    } catch (e) {
+      return PostFailure('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<PostResult<void>> deleteComment(String commentId) async {
+    try {
+      await _postService.deleteComment(commentId);
+      return const PostSuccess(null);
+    } on DioException catch (e) {
+      return PostFailure(_handleDioError(e));
+    } catch (e) {
+      return PostFailure('An unexpected error occurred: $e');
+    }
   }
 
   /// Map legacy sort format to Payload format.

@@ -41,3 +41,11 @@ extension NewsDtoListMapper on List<NewsDto> {
     return map((dto) => dto.toEntity()).toList();
   }
 }
+
+/// Helper class for creating NewsDto from various sources.
+class NewsDtoMapper {
+  /// Create NewsDto from JSON map.
+  static NewsDto fromJson(Map<String, dynamic> json) {
+    return NewsDto.fromJson(json);
+  }
+}

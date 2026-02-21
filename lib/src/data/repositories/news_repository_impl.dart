@@ -2,46 +2,156 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/api_interceptors.dart';
+import '../../core/network/connectivity_service.dart';
 import '../../domain/entities/news.dart';
 import '../../domain/repositories/news_repository.dart';
+import '../cache/cache_service.dart';
 import '../mappers/news_mapper.dart';
 import '../services/news_service.dart';
 
-/// Implementation of NewsRepository using Payload CMS.
+/// Implementation of NewsRepository using Payload CMS with offline caching.
 class NewsRepositoryImpl implements NewsRepository {
-  NewsRepositoryImpl(this._newsService);
+  NewsRepositoryImpl(this._newsService, this._cacheService, this._connectivityService);
 
   final NewsService _newsService;
+  final CacheService _cacheService;
+  final ConnectivityService _connectivityService;
 
   @override
   Future<NewsResult<List<News>>> getNews(GetNewsParams params) async {
-    try {
-      final response = await _newsService.getNews(
-        page: params.page,
-        limit: params.limit,
-        category: params.category,
-        search: params.search,
-        sort: _mapSort(params.sort),
-      );
-      final news = response.news.toEntities();
-      return NewsSuccess(news, hasMore: response.hasNext);
-    } on DioException catch (e) {
-      return NewsFailure(_handleDioError(e));
-    } catch (e) {
-      return NewsFailure('An unexpected error occurred: $e');
+    // Try network first if online
+    if (_connectivityService.isOnline) {
+      try {
+        final response = await _newsService.getNews(
+          page: params.page,
+          limit: params.limit,
+          category: params.category,
+          search: params.search,
+          sort: _mapSort(params.sort),
+        );
+
+        // Cache the response
+        await _cacheService.cacheNewsList(
+          response.news.map((n) => n.toJson()).toList(),
+          category: params.category,
+          search: params.search,
+          page: params.page,
+        );
+
+        final news = response.news.toEntities();
+        return NewsSuccess(news, hasMore: response.hasNext);
+      } on DioException catch (e) {
+        // Try cache on network error
+        return _getNewsFromCache(params, e);
+      } catch (e) {
+        return NewsFailure('An unexpected error occurred: $e');
+      }
+    } else {
+      // Offline - try cache
+      return _getNewsFromCache(params, null);
     }
+  }
+
+  Future<NewsResult<List<News>>> _getNewsFromCache(
+    GetNewsParams params,
+    DioException? networkError,
+  ) async {
+    final cached = await _cacheService.getNewsList(
+      category: params.category,
+      search: params.search,
+      page: params.page,
+    );
+
+    if (cached != null && cached.isNotEmpty) {
+      final news = cached.map((json) => NewsDtoMapper.fromJson(json)).toList();
+      return NewsSuccess(
+        news.toEntities(),
+        hasMore: false, // Can't know if more exists when offline
+        isFromCache: true,
+      );
+    }
+
+    // No cache available
+    if (networkError != null) {
+      return NewsFailure(_handleDioError(networkError));
+    }
+    return const NewsFailure('No internet connection and no cached data available.');
   }
 
   @override
   Future<NewsResult<News>> getNewsById(String id) async {
-    try {
-      final response = await _newsService.getNewsById(id);
-      return NewsSuccess(response.toEntity());
-    } on DioException catch (e) {
-      return NewsFailure(_handleDioError(e));
-    } catch (e) {
-      return NewsFailure('An unexpected error occurred: $e');
+    if (_connectivityService.isOnline) {
+      try {
+        final response = await _newsService.getNewsById(id);
+
+        // Cache the detail
+        await _cacheService.cacheNewsDetail(id, response.toJson());
+
+        return NewsSuccess(response.toEntity());
+      } on DioException catch (e) {
+        return _getNewsDetailFromCache(id, e);
+      } catch (e) {
+        return NewsFailure('An unexpected error occurred: $e');
+      }
+    } else {
+      return _getNewsDetailFromCache(id, null);
     }
+  }
+
+  Future<NewsResult<News>> _getNewsDetailFromCache(
+    String id,
+    DioException? networkError,
+  ) async {
+    final cached = await _cacheService.getNewsById(id);
+
+    if (cached != null) {
+      final newsDto = NewsDtoMapper.fromJson(cached);
+      return NewsSuccess(newsDto.toEntity(), isFromCache: true);
+    }
+
+    if (networkError != null) {
+      return NewsFailure(_handleDioError(networkError));
+    }
+    return const NewsFailure('No internet connection and article not cached.');
+  }
+
+  @override
+  Future<NewsResult<List<News>>> getFeaturedNews({int limit = 5}) async {
+    if (_connectivityService.isOnline) {
+      try {
+        final response = await _newsService.getFeaturedNews(limit: limit);
+
+        // Cache featured news
+        await _cacheService.cacheFeaturedNews(
+          response.news.map((n) => n.toJson()).toList(),
+        );
+
+        final news = response.news.toEntities();
+        return NewsSuccess(news);
+      } on DioException catch (e) {
+        return _getFeaturedFromCache(e);
+      } catch (e) {
+        return NewsFailure('An unexpected error occurred: $e');
+      }
+    } else {
+      return _getFeaturedFromCache(null);
+    }
+  }
+
+  Future<NewsResult<List<News>>> _getFeaturedFromCache(
+    DioException? networkError,
+  ) async {
+    final cached = await _cacheService.getFeaturedNews();
+
+    if (cached != null && cached.isNotEmpty) {
+      final news = cached.map((json) => NewsDtoMapper.fromJson(json)).toList();
+      return NewsSuccess(news.toEntities(), isFromCache: true);
+    }
+
+    if (networkError != null) {
+      return NewsFailure(_handleDioError(networkError));
+    }
+    return const NewsFailure('No internet connection and no cached data available.');
   }
 
   /// Map legacy sort format to Payload format.
@@ -84,5 +194,7 @@ class NewsRepositoryImpl implements NewsRepository {
 /// Provider for NewsRepository.
 final newsRepositoryProvider = Provider<NewsRepository>((ref) {
   final newsService = ref.watch(newsServiceProvider);
-  return NewsRepositoryImpl(newsService);
+  final cacheService = ref.watch(cacheServiceProvider);
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  return NewsRepositoryImpl(newsService, cacheService, connectivityService);
 });

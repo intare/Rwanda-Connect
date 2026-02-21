@@ -1,3 +1,4 @@
+import '../../core/network/api_endpoints.dart';
 import '../../domain/entities/user.dart';
 import '../models/auth/user_dto.dart';
 
@@ -12,12 +13,26 @@ extension UserMapper on UserDto {
             .toList() ??
         [];
 
+    // Extract profile image URL
+    String? imageUrl;
+    if (profileImage is Map<String, dynamic>) {
+      final relativeUrl = profileImage['url'] as String?;
+      if (relativeUrl != null) {
+        imageUrl = relativeUrl.startsWith('http')
+            ? relativeUrl
+            : '${ApiEndpoints.serverUrl}$relativeUrl';
+      }
+    }
+
     return User(
       id: idString,
       name: name ?? 'User',
       email: email,
       location: location,
+      profileImageUrl: imageUrl,
       interests: interestsList,
+      onboardingCompleted: onboardingCompleted ?? false,
+      emailVerified: emailVerified ?? false,
     );
   }
 }

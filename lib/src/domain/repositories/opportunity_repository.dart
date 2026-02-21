@@ -6,9 +6,10 @@ sealed class OpportunityResult<T> {
 }
 
 class OpportunitySuccess<T> extends OpportunityResult<T> {
-  const OpportunitySuccess(this.data, {this.hasMore = false});
+  const OpportunitySuccess(this.data, {this.hasMore = false, this.isFromCache = false});
   final T data;
   final bool hasMore;
+  final bool isFromCache;
 }
 
 class OpportunityFailure<T> extends OpportunityResult<T> {

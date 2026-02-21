@@ -318,3 +318,237 @@ final rsvpProvider = FutureProvider.family<RsvpStatus?, ({String eventId, RsvpSt
     };
   },
 );
+
+/// State for user's RSVP status on an event.
+class EventRsvpState {
+  const EventRsvpState({
+    this.status,
+    this.isLoading = false,
+    this.error,
+  });
+
+  final RsvpStatus? status;
+  final bool isLoading;
+  final String? error;
+
+  EventRsvpState copyWith({
+    RsvpStatus? status,
+    bool? isLoading,
+    String? error,
+    bool clearStatus = false,
+  }) {
+    return EventRsvpState(
+      status: clearStatus ? null : (status ?? this.status),
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+/// Notifier for managing user's RSVP status for a specific event.
+class EventRsvpNotifier extends StateNotifier<EventRsvpState> {
+  EventRsvpNotifier(this._repository, this._eventId)
+      : super(const EventRsvpState()) {
+    _loadStatus();
+  }
+
+  final EventRepository _repository;
+  final String _eventId;
+
+  /// Load current RSVP status.
+  Future<void> _loadStatus() async {
+    state = state.copyWith(isLoading: true);
+
+    final result = await _repository.getUserRsvpStatus(_eventId);
+
+    switch (result) {
+      case EventSuccess(:final data):
+        state = state.copyWith(
+          status: data,
+          isLoading: false,
+        );
+      case EventFailure(:final message):
+        state = state.copyWith(
+          isLoading: false,
+          error: message,
+        );
+    }
+  }
+
+  /// Submit RSVP.
+  Future<bool> rsvp(RsvpStatus status) async {
+    if (state.isLoading) return false;
+
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await _repository.rsvpToEvent(_eventId, status);
+
+    switch (result) {
+      case EventSuccess(:final data):
+        state = state.copyWith(
+          status: data,
+          isLoading: false,
+        );
+        return true;
+      case EventFailure(:final message):
+        state = state.copyWith(
+          isLoading: false,
+          error: message,
+        );
+        return false;
+    }
+  }
+
+  /// Cancel RSVP.
+  Future<bool> cancel() async {
+    if (state.isLoading) return false;
+
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await _repository.cancelRsvp(_eventId);
+
+    switch (result) {
+      case EventSuccess():
+        state = state.copyWith(
+          clearStatus: true,
+          isLoading: false,
+        );
+        return true;
+      case EventFailure(:final message):
+        state = state.copyWith(
+          isLoading: false,
+          error: message,
+        );
+        return false;
+    }
+  }
+}
+
+/// Provider for user's RSVP status on a specific event.
+final eventRsvpProvider =
+    StateNotifierProvider.family<EventRsvpNotifier, EventRsvpState, String>(
+  (ref, eventId) {
+    final repository = ref.watch(eventRepositoryProvider);
+    return EventRsvpNotifier(repository, eventId);
+  },
+);
+
+/// State for user's RSVPs list (My RSVPs).
+class MyRsvpsState {
+  const MyRsvpsState({
+    this.rsvps = const [],
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.error,
+    this.hasMore = true,
+    this.currentPage = 1,
+  });
+
+  final List<UserRsvp> rsvps;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final String? error;
+  final bool hasMore;
+  final int currentPage;
+
+  MyRsvpsState copyWith({
+    List<UserRsvp>? rsvps,
+    bool? isLoading,
+    bool? isLoadingMore,
+    String? error,
+    bool? hasMore,
+    int? currentPage,
+  }) {
+    return MyRsvpsState(
+      rsvps: rsvps ?? this.rsvps,
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      error: error,
+      hasMore: hasMore ?? this.hasMore,
+      currentPage: currentPage ?? this.currentPage,
+    );
+  }
+}
+
+/// Notifier for managing user's RSVPs list.
+class MyRsvpsNotifier extends StateNotifier<MyRsvpsState> {
+  MyRsvpsNotifier(this._repository) : super(const MyRsvpsState()) {
+    loadRsvps();
+  }
+
+  final EventRepository _repository;
+  static const int _pageSize = 20;
+
+  /// Load initial RSVPs or refresh.
+  Future<void> loadRsvps({bool refresh = false}) async {
+    if (state.isLoading && !refresh) return;
+
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      currentPage: 1,
+      rsvps: refresh ? [] : state.rsvps,
+    );
+
+    final result = await _repository.getUserRsvps(page: 1, limit: _pageSize);
+
+    switch (result) {
+      case EventSuccess(:final data, :final hasMore):
+        state = state.copyWith(
+          rsvps: data,
+          isLoading: false,
+          hasMore: hasMore,
+          currentPage: 1,
+        );
+      case EventFailure(:final message):
+        state = state.copyWith(
+          isLoading: false,
+          error: message,
+        );
+    }
+  }
+
+  /// Load more RSVPs (pagination).
+  Future<void> loadMore() async {
+    if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
+
+    state = state.copyWith(isLoadingMore: true);
+
+    final nextPage = state.currentPage + 1;
+    final result = await _repository.getUserRsvps(page: nextPage, limit: _pageSize);
+
+    switch (result) {
+      case EventSuccess(:final data, :final hasMore):
+        state = state.copyWith(
+          rsvps: [...state.rsvps, ...data],
+          isLoadingMore: false,
+          hasMore: hasMore,
+          currentPage: nextPage,
+        );
+      case EventFailure(:final message):
+        state = state.copyWith(
+          isLoadingMore: false,
+          error: message,
+        );
+    }
+  }
+
+  /// Remove an RSVP from the list (after canceling).
+  void removeRsvp(String rsvpId) {
+    state = state.copyWith(
+      rsvps: state.rsvps.where((r) => r.id != rsvpId).toList(),
+    );
+  }
+
+  /// Refresh the RSVPs list.
+  Future<void> refresh() async {
+    await loadRsvps(refresh: true);
+  }
+}
+
+/// Provider for user's RSVPs list.
+final myRsvpsProvider =
+    StateNotifierProvider<MyRsvpsNotifier, MyRsvpsState>((ref) {
+  final repository = ref.watch(eventRepositoryProvider);
+  return MyRsvpsNotifier(repository);
+});

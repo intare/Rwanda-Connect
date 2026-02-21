@@ -5,6 +5,15 @@ import config from './payload.config'
 type NewsCategory = 'Economy' | 'Investment' | 'Events' | 'Business' | 'Policy'
 type OpportunityType = 'job' | 'investment' | 'scholarship' | 'tender'
 type EventType = 'networking' | 'seminar' | 'workshop' | 'conference'
+type RealEstateCategory = 'house' | 'apartment' | 'land'
+type RealEstateListingType = 'sale' | 'rent'
+type BusinessDirectoryCategory =
+  | 'real_estate'
+  | 'hospitality'
+  | 'retail'
+  | 'professional_services'
+  | 'technology'
+  | 'health'
 
 const seed = async () => {
   const payload = await getPayload({ config })
@@ -555,6 +564,205 @@ const seed = async () => {
   console.log(`Created ${opportunitiesData.length} opportunities`)
 
   // ============================================
+  // REAL ESTATE (Kigali launch listings)
+  // ============================================
+  console.log('Creating real estate listings...')
+
+  const realEstateData: Array<{
+    title: string
+    category: RealEstateCategory
+    listingType: RealEstateListingType
+    description: string
+    price: number
+    currency: string
+    location: string
+    areaSqm: number
+    bedrooms?: number
+    bathrooms?: number
+    contactPhone: string
+    contactEmail: string
+    isFeatured: boolean
+    isAvailable: boolean
+    datePosted: string
+  }> = [
+    {
+      title: 'Modern 4-Bedroom House in Nyarutarama',
+      category: 'house',
+      listingType: 'sale',
+      description:
+        'Contemporary family home with garden, secure parking, and easy access to schools and shopping in Nyarutarama.',
+      price: 420000,
+      currency: 'USD',
+      location: 'Nyarutarama, Kigali',
+      areaSqm: 320,
+      bedrooms: 4,
+      bathrooms: 3,
+      contactPhone: '+250788200101',
+      contactEmail: 'sales@kigaliprime.rw',
+      isFeatured: true,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      title: 'Furnished 2-Bedroom Apartment in Kiyovu',
+      category: 'apartment',
+      listingType: 'rent',
+      description:
+        'Move-in ready apartment with city views, backup power, and high-speed internet near Kigali CBD.',
+      price: 1800,
+      currency: 'USD',
+      location: 'Kiyovu, Kigali',
+      areaSqm: 120,
+      bedrooms: 2,
+      bathrooms: 2,
+      contactPhone: '+250788200102',
+      contactEmail: 'rentals@kigaliprime.rw',
+      isFeatured: true,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      title: 'Prime Residential Land Plot - Rebero',
+      category: 'land',
+      listingType: 'sale',
+      description:
+        'Serviced residential plot with strong road access and panoramic city views, ideal for premium home development.',
+      price: 135000,
+      currency: 'USD',
+      location: 'Rebero, Kigali',
+      areaSqm: 850,
+      contactPhone: '+250788200103',
+      contactEmail: 'land@kigaliprime.rw',
+      isFeatured: false,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      title: '3-Bedroom Family House in Kibagabaga',
+      category: 'house',
+      listingType: 'rent',
+      description:
+        'Spacious house in a quiet neighborhood with private compound and quick access to major roads.',
+      price: 2200,
+      currency: 'USD',
+      location: 'Kibagabaga, Kigali',
+      areaSqm: 260,
+      bedrooms: 3,
+      bathrooms: 2,
+      contactPhone: '+250788200104',
+      contactEmail: 'homes@kigaliprime.rw',
+      isFeatured: false,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      title: 'Luxury Penthouse Apartment - Kimihurura',
+      category: 'apartment',
+      listingType: 'sale',
+      description:
+        'High-end penthouse with rooftop terrace, smart-home setup, and premium finishing in central Kigali.',
+      price: 560000,
+      currency: 'USD',
+      location: 'Kimihurura, Kigali',
+      areaSqm: 280,
+      bedrooms: 3,
+      bathrooms: 3,
+      contactPhone: '+250788200105',
+      contactEmail: 'premium@kigaliprime.rw',
+      isFeatured: true,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      title: 'Commercial Development Land - Kicukiro',
+      category: 'land',
+      listingType: 'sale',
+      description:
+        'Strategic commercial plot near key transport routes, suitable for mixed-use development.',
+      price: 295000,
+      currency: 'USD',
+      location: 'Kicukiro, Kigali',
+      areaSqm: 1400,
+      contactPhone: '+250788200106',
+      contactEmail: 'investment@kigaliprime.rw',
+      isFeatured: false,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      title: 'Executive 1-Bedroom Apartment - Gacuriro',
+      category: 'apartment',
+      listingType: 'rent',
+      description:
+        'Secure serviced apartment for professionals, including parking, concierge, and gym access.',
+      price: 1200,
+      currency: 'USD',
+      location: 'Gacuriro, Kigali',
+      areaSqm: 78,
+      bedrooms: 1,
+      bathrooms: 1,
+      contactPhone: '+250788200107',
+      contactEmail: 'leasing@kigaliprime.rw',
+      isFeatured: false,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      title: 'New Build 5-Bedroom Villa - Rusororo',
+      category: 'house',
+      listingType: 'sale',
+      description:
+        'Newly built villa with modern architecture, staff quarters, and large compound close to the airport corridor.',
+      price: 680000,
+      currency: 'USD',
+      location: 'Rusororo, Kigali',
+      areaSqm: 520,
+      bedrooms: 5,
+      bathrooms: 4,
+      contactPhone: '+250788200108',
+      contactEmail: 'villas@kigaliprime.rw',
+      isFeatured: true,
+      isAvailable: true,
+      datePosted: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+  ]
+
+  let createdRealEstate = 0
+  let updatedRealEstate = 0
+
+  for (const listing of realEstateData) {
+    const existing = await payload.find({
+      collection: 'real-estate',
+      where: {
+        and: [
+          { title: { equals: listing.title } },
+          { category: { equals: listing.category } },
+          { listingType: { equals: listing.listingType } },
+          { location: { equals: listing.location } },
+        ],
+      },
+      limit: 1,
+    })
+
+    if (existing.totalDocs > 0) {
+      await payload.update({
+        collection: 'real-estate',
+        id: existing.docs[0].id,
+        data: listing,
+      })
+      updatedRealEstate += 1
+    } else {
+      await payload.create({
+        collection: 'real-estate',
+        data: listing,
+      })
+      createdRealEstate += 1
+    }
+  }
+  console.log(`Created ${createdRealEstate} real estate listings`)
+  console.log(`Updated ${updatedRealEstate} existing real estate listings`)
+
+  // ============================================
   // EVENTS (15 events)
   // ============================================
   console.log('Creating events...')
@@ -818,20 +1026,22 @@ const seed = async () => {
     limit: 1,
   })
 
-  let authorId: number | string
+  let authorId: number
 
   if (existingUsers.docs.length > 0) {
-    authorId = existingUsers.docs[0].id
+    authorId = existingUsers.docs[0].id as number
   } else {
     const newUser = await payload.create({
       collection: 'users',
+      draft: false,
       data: {
         email: 'community@rwandaconnect.com',
         password: 'community123',
         role: 'user' as const,
+        contributorStatus: 'pending' as const,
       },
     })
-    authorId = newUser.id
+    authorId = newUser.id as number
   }
 
   const postsData = [
@@ -915,12 +1125,311 @@ const seed = async () => {
   }
   console.log(`Created ${postsData.length} community posts`)
 
-  console.log('\n✅ Seeding complete!')
+  // ============================================
+  // BUSINESS DIRECTORY (Kigali launch)
+  // ============================================
+  console.log('Creating business directory launch data...')
+
+  const kigaliLaunchDirectoryCategories: BusinessDirectoryCategory[] = [
+    'real_estate',
+    'hospitality',
+    'retail',
+    'professional_services',
+    'technology',
+    'health',
+  ]
+
+  const businessDirectoryData: Array<{
+    owner: number
+    name: string
+    slug: string
+    category: BusinessDirectoryCategory
+    subcategory: string
+    description: string
+    phone: string
+    email: string
+    website: string
+    address: string
+    city: string
+    district: string
+    country: string
+    geo: {
+      latitude: number
+      longitude: number
+    }
+    services: Array<{ service: string }>
+    tags: Array<{ tag: string }>
+    businessHours: Array<{
+      day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
+      openTime?: string
+      closeTime?: string
+      isClosed: boolean
+    }>
+    status: 'approved'
+    isFeatured: boolean
+    isActive: boolean
+    dateListed: string
+  }> = [
+    {
+      owner: authorId,
+      name: 'Kigali Prime Properties',
+      slug: 'kigali-prime-properties',
+      category: 'real_estate',
+      subcategory: 'Residential & Commercial',
+      description:
+        'Property brokerage focused on Kigali residential homes, serviced apartments, and office spaces for diaspora clients.',
+      phone: '+250788100101',
+      email: 'hello@kigaliprime.rw',
+      website: 'https://kigaliprime.rw',
+      address: 'KG 7 Ave, Nyarutarama',
+      city: 'Kigali',
+      district: 'Gasabo',
+      country: 'Rwanda',
+      geo: { latitude: -1.9441, longitude: 30.0937 },
+      services: [
+        { service: 'Property Sales' },
+        { service: 'Property Rentals' },
+        { service: 'Investment Advisory' },
+      ],
+      tags: [{ tag: 'real-estate' }, { tag: 'diaspora' }, { tag: 'kigali' }],
+      businessHours: [
+        { day: 'monday', openTime: '08:00', closeTime: '18:00', isClosed: false },
+        { day: 'tuesday', openTime: '08:00', closeTime: '18:00', isClosed: false },
+        { day: 'wednesday', openTime: '08:00', closeTime: '18:00', isClosed: false },
+        { day: 'thursday', openTime: '08:00', closeTime: '18:00', isClosed: false },
+        { day: 'friday', openTime: '08:00', closeTime: '18:00', isClosed: false },
+        { day: 'saturday', openTime: '09:00', closeTime: '14:00', isClosed: false },
+        { day: 'sunday', isClosed: true },
+      ],
+      status: 'approved',
+      isFeatured: true,
+      isActive: true,
+      dateListed: new Date().toISOString(),
+    },
+    {
+      owner: authorId,
+      name: 'Inzora Hospitality Group',
+      slug: 'inzora-hospitality-group',
+      category: 'hospitality',
+      subcategory: 'Boutique Hotel & Events',
+      description:
+        'Boutique accommodation and event hosting services for business travelers and diaspora family visits in Kigali.',
+      phone: '+250788100102',
+      email: 'bookings@inzorahospitality.rw',
+      website: 'https://inzorahospitality.rw',
+      address: 'KN 41 St, Kiyovu',
+      city: 'Kigali',
+      district: 'Nyarugenge',
+      country: 'Rwanda',
+      geo: { latitude: -1.9512, longitude: 30.0619 },
+      services: [
+        { service: 'Hotel Booking' },
+        { service: 'Airport Transfer' },
+        { service: 'Conference Hosting' },
+      ],
+      tags: [{ tag: 'hospitality' }, { tag: 'travel' }, { tag: 'events' }],
+      businessHours: [
+        { day: 'monday', openTime: '00:00', closeTime: '23:59', isClosed: false },
+        { day: 'tuesday', openTime: '00:00', closeTime: '23:59', isClosed: false },
+        { day: 'wednesday', openTime: '00:00', closeTime: '23:59', isClosed: false },
+        { day: 'thursday', openTime: '00:00', closeTime: '23:59', isClosed: false },
+        { day: 'friday', openTime: '00:00', closeTime: '23:59', isClosed: false },
+        { day: 'saturday', openTime: '00:00', closeTime: '23:59', isClosed: false },
+        { day: 'sunday', openTime: '00:00', closeTime: '23:59', isClosed: false },
+      ],
+      status: 'approved',
+      isFeatured: true,
+      isActive: true,
+      dateListed: new Date().toISOString(),
+    },
+    {
+      owner: authorId,
+      name: 'Kimironko Retail Hub',
+      slug: 'kimironko-retail-hub',
+      category: 'retail',
+      subcategory: 'Home & Lifestyle',
+      description:
+        'Modern retail collective connecting curated local products with reliable fulfillment and delivery in Kigali.',
+      phone: '+250788100103',
+      email: 'support@kimironkohub.rw',
+      website: 'https://kimironkohub.rw',
+      address: 'KG 11 Ave, Kimironko',
+      city: 'Kigali',
+      district: 'Gasabo',
+      country: 'Rwanda',
+      geo: { latitude: -1.9367, longitude: 30.1239 },
+      services: [
+        { service: 'Home Goods' },
+        { service: 'Gift Items' },
+        { service: 'Local Delivery' },
+      ],
+      tags: [{ tag: 'retail' }, { tag: 'ecommerce' }, { tag: 'local-products' }],
+      businessHours: [
+        { day: 'monday', openTime: '09:00', closeTime: '20:00', isClosed: false },
+        { day: 'tuesday', openTime: '09:00', closeTime: '20:00', isClosed: false },
+        { day: 'wednesday', openTime: '09:00', closeTime: '20:00', isClosed: false },
+        { day: 'thursday', openTime: '09:00', closeTime: '20:00', isClosed: false },
+        { day: 'friday', openTime: '09:00', closeTime: '20:00', isClosed: false },
+        { day: 'saturday', openTime: '09:00', closeTime: '20:00', isClosed: false },
+        { day: 'sunday', openTime: '10:00', closeTime: '17:00', isClosed: false },
+      ],
+      status: 'approved',
+      isFeatured: false,
+      isActive: true,
+      dateListed: new Date().toISOString(),
+    },
+    {
+      owner: authorId,
+      name: 'Kigali Legal Advisory',
+      slug: 'kigali-legal-advisory',
+      category: 'professional_services',
+      subcategory: 'Legal & Compliance',
+      description:
+        'Legal advisory for company setup, contracts, and compliance support tailored to diaspora founders and investors.',
+      phone: '+250788100104',
+      email: 'info@kigalilegal.rw',
+      website: 'https://kigalilegal.rw',
+      address: 'KN 5 Rd, City Centre',
+      city: 'Kigali',
+      district: 'Nyarugenge',
+      country: 'Rwanda',
+      geo: { latitude: -1.9499, longitude: 30.0588 },
+      services: [
+        { service: 'Business Registration Support' },
+        { service: 'Contract Drafting' },
+        { service: 'Regulatory Compliance' },
+      ],
+      tags: [{ tag: 'legal' }, { tag: 'compliance' }, { tag: 'business' }],
+      businessHours: [
+        { day: 'monday', openTime: '08:30', closeTime: '17:30', isClosed: false },
+        { day: 'tuesday', openTime: '08:30', closeTime: '17:30', isClosed: false },
+        { day: 'wednesday', openTime: '08:30', closeTime: '17:30', isClosed: false },
+        { day: 'thursday', openTime: '08:30', closeTime: '17:30', isClosed: false },
+        { day: 'friday', openTime: '08:30', closeTime: '17:30', isClosed: false },
+        { day: 'saturday', isClosed: true },
+        { day: 'sunday', isClosed: true },
+      ],
+      status: 'approved',
+      isFeatured: false,
+      isActive: true,
+      dateListed: new Date().toISOString(),
+    },
+    {
+      owner: authorId,
+      name: 'Norrsken Growth Studio Kigali',
+      slug: 'norrsken-growth-studio-kigali',
+      category: 'technology',
+      subcategory: 'Startup Studio',
+      description:
+        'Technology studio and coworking ecosystem supporting founders with product strategy, engineering support, and fundraising.',
+      phone: '+250788100105',
+      email: 'hello@norrskenkigali.rw',
+      website: 'https://norrskenkigali.rw',
+      address: 'KG 9 Ave, Kacyiru',
+      city: 'Kigali',
+      district: 'Gasabo',
+      country: 'Rwanda',
+      geo: { latitude: -1.9448, longitude: 30.0875 },
+      services: [
+        { service: 'Coworking Space' },
+        { service: 'Startup Advisory' },
+        { service: 'Tech Talent Network' },
+      ],
+      tags: [{ tag: 'technology' }, { tag: 'startup' }, { tag: 'innovation' }],
+      businessHours: [
+        { day: 'monday', openTime: '08:00', closeTime: '20:00', isClosed: false },
+        { day: 'tuesday', openTime: '08:00', closeTime: '20:00', isClosed: false },
+        { day: 'wednesday', openTime: '08:00', closeTime: '20:00', isClosed: false },
+        { day: 'thursday', openTime: '08:00', closeTime: '20:00', isClosed: false },
+        { day: 'friday', openTime: '08:00', closeTime: '20:00', isClosed: false },
+        { day: 'saturday', openTime: '09:00', closeTime: '17:00', isClosed: false },
+        { day: 'sunday', isClosed: true },
+      ],
+      status: 'approved',
+      isFeatured: true,
+      isActive: true,
+      dateListed: new Date().toISOString(),
+    },
+    {
+      owner: authorId,
+      name: 'Kigali Family Health Center',
+      slug: 'kigali-family-health-center',
+      category: 'health',
+      subcategory: 'Primary Care',
+      description:
+        'Community-focused clinic delivering primary healthcare, preventive screenings, and telemedicine consultations.',
+      phone: '+250788100106',
+      email: 'care@kigalifamilyhealth.rw',
+      website: 'https://kigalifamilyhealth.rw',
+      address: 'KK 15 Rd, Kicukiro',
+      city: 'Kigali',
+      district: 'Kicukiro',
+      country: 'Rwanda',
+      geo: { latitude: -1.969, longitude: 30.1022 },
+      services: [
+        { service: 'General Consultation' },
+        { service: 'Preventive Screening' },
+        { service: 'Telemedicine' },
+      ],
+      tags: [{ tag: 'health' }, { tag: 'clinic' }, { tag: 'wellness' }],
+      businessHours: [
+        { day: 'monday', openTime: '07:30', closeTime: '19:00', isClosed: false },
+        { day: 'tuesday', openTime: '07:30', closeTime: '19:00', isClosed: false },
+        { day: 'wednesday', openTime: '07:30', closeTime: '19:00', isClosed: false },
+        { day: 'thursday', openTime: '07:30', closeTime: '19:00', isClosed: false },
+        { day: 'friday', openTime: '07:30', closeTime: '19:00', isClosed: false },
+        { day: 'saturday', openTime: '08:00', closeTime: '14:00', isClosed: false },
+        { day: 'sunday', isClosed: true },
+      ],
+      status: 'approved',
+      isFeatured: false,
+      isActive: true,
+      dateListed: new Date().toISOString(),
+    },
+  ]
+
+  let createdBusinesses = 0
+  let updatedBusinesses = 0
+
+  for (const business of businessDirectoryData) {
+    const existing = await payload.find({
+      collection: 'business-directory',
+      where: {
+        slug: { equals: business.slug },
+      },
+      limit: 1,
+    })
+
+    if (existing.totalDocs > 0) {
+      await payload.update({
+        collection: 'business-directory',
+        id: existing.docs[0].id,
+        data: business,
+      })
+      updatedBusinesses += 1
+    } else {
+      await payload.create({
+        collection: 'business-directory',
+        data: business,
+      })
+      createdBusinesses += 1
+    }
+  }
+
+  console.log(
+    `Business directory categories for Kigali launch: ${kigaliLaunchDirectoryCategories.join(', ')}`,
+  )
+  console.log(`Created ${createdBusinesses} business directory listings`)
+  console.log(`Updated ${updatedBusinesses} existing business directory listings`)
+
+  console.log('\nSeeding complete!')
   console.log('Summary:')
   console.log(`  - ${newsData.length} news articles`)
   console.log(`  - ${opportunitiesData.length} opportunities`)
+  console.log(`  - ${realEstateData.length} real estate listings (created + updated)`)
   console.log(`  - ${eventsData.length} events`)
   console.log(`  - ${postsData.length} community posts`)
+  console.log(`  - ${businessDirectoryData.length} business directory listings (created + updated)`)
 
   process.exit(0)
 }

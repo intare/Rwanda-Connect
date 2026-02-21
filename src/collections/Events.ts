@@ -1,5 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
+import {
+  canManageOwnContentAsPaidContributor,
+  canPostAsPaidContributor,
+  isAdminUser,
+} from '../access/publishingAccess'
+
+const manageEventAccess = canManageOwnContentAsPaidContributor('organizerId')
+
 export const Events: CollectionConfig = {
   slug: 'events',
   admin: {
@@ -8,6 +16,26 @@ export const Events: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: canPostAsPaidContributor,
+    update: manageEventAccess,
+    delete: manageEventAccess,
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, req, operation }) => {
+        if (!data) return data
+
+        if (operation === 'create' && req.user && !isAdminUser(req.user)) {
+          data.organizerId = req.user.id
+        }
+
+        if (operation === 'update' && req.user && !isAdminUser(req.user) && 'organizerId' in data) {
+          delete (data as Record<string, unknown>).organizerId
+        }
+
+        return data
+      },
+    ],
   },
   fields: [
     {
@@ -42,6 +70,10 @@ export const Events: CollectionConfig = {
       name: 'organizerId',
       type: 'relationship',
       relationTo: 'users',
+      access: {
+        create: ({ req: { user } }) => isAdminUser(user),
+        update: ({ req: { user } }) => isAdminUser(user),
+      },
       admin: {
         description: 'User who created this event',
       },
@@ -131,6 +163,9 @@ export const Events: CollectionConfig = {
       name: 'isFeatured',
       type: 'checkbox',
       defaultValue: false,
+      access: {
+        update: ({ req: { user } }) => isAdminUser(user),
+      },
     },
   ],
 }

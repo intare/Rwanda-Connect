@@ -1,4 +1,15 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
+
+const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
+const enableEmailVerification =
+  process.env.PAYLOAD_ENABLE_EMAIL_VERIFICATION === 'true' || process.env.NODE_ENV === 'production'
+const trialDurationDays = 14
+
+const adminOrSelf: Access = ({ req: { user } }) => {
+  if (!user) return false
+  if (isAdmin(user)) return true
+  return { id: { equals: user.id } }
+}
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -6,28 +17,70 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   auth: {
-    // TODO: Re-enable email verification once SendGrid is properly configured
-    verify: false,
+    verify: enableEmailVerification,
+    maxLoginAttempts: 5,
+    lockTime: 10 * 60 * 1000,
   },
   access: {
-    // Allow public registration
     create: () => true,
-    // Admins can read all, users can read their own
-    read: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { id: { equals: user.id } }
-    },
-    // Admins can update all, users can update their own
-    update: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { id: { equals: user.id } }
-    },
-    // Only admins can delete
-    delete: ({ req: { user } }) => user?.role === 'admin',
-    // Admin panel access
-    admin: ({ req: { user } }) => user?.role === 'admin',
+    read: adminOrSelf,
+    update: adminOrSelf,
+    delete: ({ req: { user } }) => isAdmin(user),
+    admin: ({ req: { user } }) => isAdmin(user),
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, req, operation }) => {
+        if (!data) return data
+        if (operation === 'create' && !isAdmin(req.user)) {
+          data.role = 'user'
+          data.contributorStatus = 'pending'
+        }
+        if (operation === 'update' && !isAdmin(req.user) && 'role' in data) {
+          delete (data as Record<string, unknown>).role
+        }
+        if (operation === 'update' && !isAdmin(req.user) && 'contributorStatus' in data) {
+          delete (data as Record<string, unknown>).contributorStatus
+        }
+        return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return doc
+
+        const startDate = new Date()
+        const trialEndsAt = new Date(startDate)
+        trialEndsAt.setDate(trialEndsAt.getDate() + trialDurationDays)
+
+        try {
+          await req.payload.create({
+            collection: 'subscriptions',
+            req,
+            data: {
+              user: doc.id,
+              plan: 'trial',
+              status: 'active',
+              startDate: startDate.toISOString(),
+              endDate: trialEndsAt.toISOString(),
+              trialEndsAt: trialEndsAt.toISOString(),
+            },
+          })
+        } catch (error) {
+          const message = error instanceof Error ? error.message : ''
+          const isDuplicateUserSubscription =
+            message.includes('duplicate key value') &&
+            message.includes('subscriptions') &&
+            message.includes('user')
+
+          if (!isDuplicateUserSubscription) {
+            throw error
+          }
+        }
+
+        return doc
+      },
+    ],
   },
   fields: [
     {
@@ -39,6 +92,12 @@ export const Users: CollectionConfig = {
       ],
       defaultValue: 'user',
       required: true,
+      saveToJWT: true,
+      access: {
+        create: ({ req: { user } }) => isAdmin(user),
+        update: ({ req: { user } }) => isAdmin(user),
+        read: ({ req: { user }, doc }) => isAdmin(user) || user?.id === doc?.id,
+      },
       admin: {
         description: 'User role for access control',
       },
@@ -46,6 +105,26 @@ export const Users: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+    },
+    {
+      name: 'contributorStatus',
+      type: 'select',
+      options: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
+      defaultValue: 'pending',
+      required: true,
+      saveToJWT: true,
+      access: {
+        create: ({ req: { user } }) => isAdmin(user),
+        update: ({ req: { user } }) => isAdmin(user),
+        read: ({ req: { user }, doc }) => isAdmin(user) || user?.id === doc?.id,
+      },
+      admin: {
+        description: 'Contributor approval required for posting events, real estate, and business listings',
+      },
     },
     {
       name: 'location',

@@ -156,3 +156,72 @@ final newsFeedProvider =
 final newsCategoriesProvider = Provider<List<String>>((ref) {
   return ['All', 'Economy', 'Investment', 'Events', 'Business', 'Policy'];
 });
+
+/// State for featured news.
+class FeaturedNewsState {
+  const FeaturedNewsState({
+    this.news = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  final List<News> news;
+  final bool isLoading;
+  final String? error;
+
+  FeaturedNewsState copyWith({
+    List<News>? news,
+    bool? isLoading,
+    String? error,
+  }) {
+    return FeaturedNewsState(
+      news: news ?? this.news,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+/// Notifier for managing featured news state.
+class FeaturedNewsNotifier extends StateNotifier<FeaturedNewsState> {
+  FeaturedNewsNotifier(this._repository) : super(const FeaturedNewsState()) {
+    loadFeaturedNews();
+  }
+
+  final NewsRepository _repository;
+
+  /// Load featured news.
+  Future<void> loadFeaturedNews() async {
+    if (state.isLoading) return;
+
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await _repository.getFeaturedNews(limit: 5);
+
+    switch (result) {
+      case NewsSuccess(:final data):
+        state = state.copyWith(
+          news: data,
+          isLoading: false,
+        );
+      case NewsFailure(:final message):
+        state = state.copyWith(
+          isLoading: false,
+          error: message,
+        );
+    }
+  }
+
+  /// Refresh featured news.
+  Future<void> refresh() async {
+    state = state.copyWith(news: []);
+    await loadFeaturedNews();
+  }
+}
+
+/// Provider for FeaturedNewsNotifier.
+final featuredNewsProvider =
+    StateNotifierProvider<FeaturedNewsNotifier, FeaturedNewsState>((ref) {
+  final repository = ref.watch(newsRepositoryProvider);
+  return FeaturedNewsNotifier(repository);
+});

@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// Key for storing the auth token in secure storage.
 const String _tokenKey = 'auth_token';
 
-/// Interceptor that adds Bearer token to requests.
+/// Interceptor that adds JWT token to requests.
 class AuthInterceptor extends Interceptor {
   AuthInterceptor(this._secureStorage);
 
@@ -18,7 +18,7 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final token = await _secureStorage.read(key: _tokenKey);
     if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
+      options.headers['Authorization'] = 'JWT $token';
     }
     handler.next(options);
   }
@@ -87,7 +87,10 @@ class ErrorInterceptor extends Interceptor {
             requestOptions: err.requestOptions,
             response: err.response,
             type: err.type,
-            error: ApiError(code: code ?? 'unknown', message: message ?? 'An error occurred'),
+            error: ApiError(
+              code: code ?? 'unknown',
+              message: message ?? 'An error occurred',
+            ),
           ),
         );
         return;
@@ -99,10 +102,7 @@ class ErrorInterceptor extends Interceptor {
 
 /// Represents an API error response.
 class ApiError implements Exception {
-  const ApiError({
-    required this.code,
-    required this.message,
-  });
+  const ApiError({required this.code, required this.message});
 
   final String code;
   final String message;

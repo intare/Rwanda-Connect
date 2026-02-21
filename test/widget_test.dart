@@ -3,14 +3,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:rwanda_connect/main.dart';
 import 'package:rwanda_connect/src/domain/entities/auth_state.dart';
+import 'package:rwanda_connect/src/domain/entities/user.dart';
 import 'package:rwanda_connect/src/domain/repositories/auth_repository.dart';
 import 'package:rwanda_connect/src/presentation/features/auth/providers/auth_provider.dart';
 
 void main() {
-  testWidgets('App renders splash screen initially', (WidgetTester tester) async {
+  testWidgets('App renders splash screen initially', (
+    WidgetTester tester,
+  ) async {
     // Build the app with ProviderScope
     await tester.pumpWidget(
-      const ProviderScope(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith((ref) => MockInitialAuthNotifier()),
+        ],
         child: RwandaConnectApp(),
       ),
     );
@@ -19,7 +25,9 @@ void main() {
     expect(find.text('Rwanda Connect'), findsOneWidget);
   });
 
-  testWidgets('App shows login when unauthenticated', (WidgetTester tester) async {
+  testWidgets('App shows login when unauthenticated', (
+    WidgetTester tester,
+  ) async {
     // Build the app with overridden auth state
     await tester.pumpWidget(
       ProviderScope(
@@ -51,6 +59,14 @@ class MockAuthNotifier extends AuthNotifier {
   AuthState get state => const AuthState.unauthenticated();
 }
 
+/// Mock auth notifier that keeps the initial splash state.
+class MockInitialAuthNotifier extends AuthNotifier {
+  MockInitialAuthNotifier() : super(_MockAuthRepository());
+
+  @override
+  AuthState get state => const AuthState.initial();
+}
+
 /// Mock auth repository for testing.
 class _MockAuthRepository implements AuthRepository {
   @override
@@ -80,4 +96,53 @@ class _MockAuthRepository implements AuthRepository {
 
   @override
   Future<bool> isAuthenticated() async => false;
+
+  @override
+  Future<AuthResult<User>> updateProfile({
+    String? name,
+    String? location,
+    List<String>? interests,
+    bool? onboardingCompleted,
+  }) async {
+    return const AuthFailure('Mock');
+  }
+
+  @override
+  Future<AuthResult<void>> forgotPassword(String email) async {
+    return const AuthFailure('Mock');
+  }
+
+  @override
+  Future<AuthResult<void>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    return const AuthFailure('Mock');
+  }
+
+  @override
+  Future<AuthResult<void>> verifyEmail(String token) async {
+    return const AuthFailure('Mock');
+  }
+
+  @override
+  Future<AuthResult<void>> resendVerificationEmail(String email) async {
+    return const AuthFailure('Mock');
+  }
+
+  @override
+  Future<AuthResult<AuthSession>> signInWithGoogle() async {
+    return const AuthFailure('Mock');
+  }
+
+  @override
+  Future<AuthResult<AuthSession>> signInWithApple() async {
+    return const AuthFailure('Mock');
+  }
+
+  @override
+  Future<bool> isAppleSignInAvailable() async => false;
+
+  @override
+  Future<void> signOutSocialProviders() async {}
 }

@@ -27,6 +27,7 @@ mixin _$Opportunity {
   int? get salary => throw _privateConstructorUsedError;
   String? get applyUrl => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
+  String? get companyLogoUrl => throw _privateConstructorUsedError;
 
   /// Create a copy of Opportunity
   /// with the given fields replaced by the non-null parameter values.
@@ -53,6 +54,7 @@ abstract class $OpportunityCopyWith<$Res> {
     int? salary,
     String? applyUrl,
     String? description,
+    String? companyLogoUrl,
   });
 }
 
@@ -81,6 +83,7 @@ class _$OpportunityCopyWithImpl<$Res, $Val extends Opportunity>
     Object? salary = freezed,
     Object? applyUrl = freezed,
     Object? description = freezed,
+    Object? companyLogoUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -124,6 +127,10 @@ class _$OpportunityCopyWithImpl<$Res, $Val extends Opportunity>
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
                       as String?,
+            companyLogoUrl: freezed == companyLogoUrl
+                ? _value.companyLogoUrl
+                : companyLogoUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -150,6 +157,7 @@ abstract class _$$OpportunityImplCopyWith<$Res>
     int? salary,
     String? applyUrl,
     String? description,
+    String? companyLogoUrl,
   });
 }
 
@@ -177,6 +185,7 @@ class __$$OpportunityImplCopyWithImpl<$Res>
     Object? salary = freezed,
     Object? applyUrl = freezed,
     Object? description = freezed,
+    Object? companyLogoUrl = freezed,
   }) {
     return _then(
       _$OpportunityImpl(
@@ -220,6 +229,10 @@ class __$$OpportunityImplCopyWithImpl<$Res>
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
                   as String?,
+        companyLogoUrl: freezed == companyLogoUrl
+            ? _value.companyLogoUrl
+            : companyLogoUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -239,6 +252,7 @@ class _$OpportunityImpl extends _Opportunity {
     this.salary,
     this.applyUrl,
     this.description,
+    this.companyLogoUrl,
   }) : super._();
 
   @override
@@ -261,10 +275,12 @@ class _$OpportunityImpl extends _Opportunity {
   final String? applyUrl;
   @override
   final String? description;
+  @override
+  final String? companyLogoUrl;
 
   @override
   String toString() {
-    return 'Opportunity(id: $id, type: $type, title: $title, company: $company, location: $location, deadline: $deadline, verified: $verified, salary: $salary, applyUrl: $applyUrl, description: $description)';
+    return 'Opportunity(id: $id, type: $type, title: $title, company: $company, location: $location, deadline: $deadline, verified: $verified, salary: $salary, applyUrl: $applyUrl, description: $description, companyLogoUrl: $companyLogoUrl)';
   }
 
   @override
@@ -286,7 +302,9 @@ class _$OpportunityImpl extends _Opportunity {
             (identical(other.applyUrl, applyUrl) ||
                 other.applyUrl == applyUrl) &&
             (identical(other.description, description) ||
-                other.description == description));
+                other.description == description) &&
+            (identical(other.companyLogoUrl, companyLogoUrl) ||
+                other.companyLogoUrl == companyLogoUrl));
   }
 
   @override
@@ -302,6 +320,7 @@ class _$OpportunityImpl extends _Opportunity {
     salary,
     applyUrl,
     description,
+    companyLogoUrl,
   );
 
   /// Create a copy of Opportunity
@@ -325,6 +344,7 @@ abstract class _Opportunity extends Opportunity {
     final int? salary,
     final String? applyUrl,
     final String? description,
+    final String? companyLogoUrl,
   }) = _$OpportunityImpl;
   const _Opportunity._() : super._();
 
@@ -348,6 +368,8 @@ abstract class _Opportunity extends Opportunity {
   String? get applyUrl;
   @override
   String? get description;
+  @override
+  String? get companyLogoUrl;
 
   /// Create a copy of Opportunity
   /// with the given fields replaced by the non-null parameter values.

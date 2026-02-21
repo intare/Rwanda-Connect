@@ -29,6 +29,16 @@ abstract final class AppColors {
   static const Color black = Color(0xFF000000);
   static const Color transparent = Colors.transparent;
 
+  // Dashboard gradient (trust & growth theme)
+  static const Color gradientStart = Color(0xFF1D4ED8);  // Blue
+  static const Color gradientEnd = Color(0xFF10B981);    // Emerald
+
+  // Dashboard category accent colors
+  static const Color categoryDiscover = Color(0xFF1D4ED8);  // Blue - information
+  static const Color categoryOpportunity = Color(0xFFB54708);  // Amber - action
+  static const Color categoryLearn = Color(0xFF0891B2);  // Cyan - knowledge
+  static const Color categoryPersonal = Color(0xFF5A5A5A);  // Gray - neutral
+
   // Disabled state (40% opacity as per spec)
   static Color get disabled => primary.withValues(alpha: 0.4);
 }

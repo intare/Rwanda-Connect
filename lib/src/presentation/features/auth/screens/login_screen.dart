@@ -7,6 +7,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/auth_state.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/social_auth_buttons.dart';
 
 /// Login screen for user authentication.
 class LoginScreen extends ConsumerStatefulWidget {
@@ -48,7 +49,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         initial: () {},
         loading: () {},
         authenticated: (user, token) {
-          context.go(AppRoutes.home);
+          // Navigate based on user state
+          // TODO: Re-enable email verification once Firebase Auth is configured
+          // if (!user.emailVerified) {
+          //   context.go(AppRoutes.verifyEmail);
+          // } else
+          if (!user.onboardingCompleted) {
+            context.go(AppRoutes.onboarding);
+          } else {
+            context.go(AppRoutes.home);
+          }
         },
         unauthenticated: () {},
         error: (message) {
@@ -162,9 +172,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: isLoading ? null : () {
-                      // TODO: Implement forgot password
-                    },
+                    onPressed: isLoading
+                        ? null
+                        : () => context.go(AppRoutes.forgotPassword),
                     child: const Text('Forgot Password?'),
                   ),
                 ),
@@ -189,6 +199,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       : () => context.go(AppRoutes.register),
                   child: const Text('Create Account'),
                 ),
+                const SizedBox(height: AppSpacing.xl),
+                const OrDivider(),
+                const SizedBox(height: AppSpacing.xl),
+                const SocialAuthButtons(),
                 const SizedBox(height: AppSpacing.xxxl),
               ],
             ),

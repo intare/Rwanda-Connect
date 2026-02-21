@@ -77,6 +77,8 @@ export interface Config {
     subscriptions: Subscription;
     bookmarks: Bookmark;
     'event-rsvps': EventRsvp;
+    'real-estate': RealEstate;
+    'business-directory': BusinessDirectory;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +96,8 @@ export interface Config {
     subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
     bookmarks: BookmarksSelect<false> | BookmarksSelect<true>;
     'event-rsvps': EventRsvpsSelect<false> | EventRsvpsSelect<true>;
+    'real-estate': RealEstateSelect<false> | RealEstateSelect<true>;
+    'business-directory': BusinessDirectorySelect<false> | BusinessDirectorySelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -141,6 +145,10 @@ export interface User {
    */
   role: 'user' | 'admin';
   name?: string | null;
+  /**
+   * Contributor approval required for posting events, real estate, and business listings
+   */
+  contributorStatus: 'pending' | 'approved' | 'rejected';
   location?: string | null;
   interests?:
     | {
@@ -261,23 +269,9 @@ export interface Opportunity {
   companyLogo?: (number | null) | Media;
   location: string;
   /**
-   * Full job/opportunity description with formatting
+   * Full job/opportunity description
    */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  description?: string | null;
   requirements?:
     | {
         requirement?: string | null;
@@ -308,23 +302,9 @@ export interface Event {
   id: number;
   title: string;
   /**
-   * Event details with rich formatting
+   * Event details
    */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  description?: string | null;
   type: 'networking' | 'seminar' | 'workshop' | 'conference';
   organizer: string;
   /**
@@ -448,6 +428,114 @@ export interface EventRsvp {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "real-estate".
+ */
+export interface RealEstate {
+  id: number;
+  owner?: (number | null) | User;
+  title: string;
+  category: 'house' | 'apartment' | 'land';
+  listingType: 'sale' | 'rent';
+  description?: string | null;
+  price: number;
+  currency?: string | null;
+  location: string;
+  /**
+   * Total area in square meters
+   */
+  areaSqm?: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  images?: (number | Media)[] | null;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
+  isFeatured?: boolean | null;
+  isAvailable?: boolean | null;
+  datePosted?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "business-directory".
+ */
+export interface BusinessDirectory {
+  id: number;
+  owner: number | User;
+  name: string;
+  /**
+   * URL-friendly unique identifier
+   */
+  slug: string;
+  category:
+    | 'real_estate'
+    | 'hospitality'
+    | 'retail'
+    | 'professional_services'
+    | 'technology'
+    | 'finance'
+    | 'health'
+    | 'education'
+    | 'construction'
+    | 'agriculture'
+    | 'other';
+  subcategory?: string | null;
+  description: string;
+  logo?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  phone: string;
+  email?: string | null;
+  website?: string | null;
+  address: string;
+  city: string;
+  district?: string | null;
+  country?: string | null;
+  geo?: {
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  social?: {
+    facebook?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    x?: string | null;
+    whatsapp?: string | null;
+  };
+  businessHours?:
+    | {
+        day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+        openTime?: string | null;
+        closeTime?: string | null;
+        isClosed?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  services?:
+    | {
+        service?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'pending' | 'approved' | 'rejected';
+  isFeatured?: boolean | null;
+  isActive?: boolean | null;
+  /**
+   * Internal moderation notes
+   */
+  verificationNotes?: string | null;
+  viewCount?: number | null;
+  dateListed?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -509,6 +597,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'event-rsvps';
         value: number | EventRsvp;
+      } | null)
+    | ({
+        relationTo: 'real-estate';
+        value: number | RealEstate;
+      } | null)
+    | ({
+        relationTo: 'business-directory';
+        value: number | BusinessDirectory;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -559,6 +655,7 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   role?: T;
   name?: T;
+  contributorStatus?: T;
   location?: T;
   interests?:
     | T
@@ -775,6 +872,96 @@ export interface EventRsvpsSelect<T extends boolean = true> {
   event?: T;
   user?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "real-estate_select".
+ */
+export interface RealEstateSelect<T extends boolean = true> {
+  owner?: T;
+  title?: T;
+  category?: T;
+  listingType?: T;
+  description?: T;
+  price?: T;
+  currency?: T;
+  location?: T;
+  areaSqm?: T;
+  bedrooms?: T;
+  bathrooms?: T;
+  images?: T;
+  contactPhone?: T;
+  contactEmail?: T;
+  isFeatured?: T;
+  isAvailable?: T;
+  datePosted?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "business-directory_select".
+ */
+export interface BusinessDirectorySelect<T extends boolean = true> {
+  owner?: T;
+  name?: T;
+  slug?: T;
+  category?: T;
+  subcategory?: T;
+  description?: T;
+  logo?: T;
+  gallery?: T;
+  phone?: T;
+  email?: T;
+  website?: T;
+  address?: T;
+  city?: T;
+  district?: T;
+  country?: T;
+  geo?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+      };
+  social?:
+    | T
+    | {
+        facebook?: T;
+        instagram?: T;
+        linkedin?: T;
+        x?: T;
+        whatsapp?: T;
+      };
+  businessHours?:
+    | T
+    | {
+        day?: T;
+        openTime?: T;
+        closeTime?: T;
+        isClosed?: T;
+        id?: T;
+      };
+  services?:
+    | T
+    | {
+        service?: T;
+        id?: T;
+      };
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  status?: T;
+  isFeatured?: T;
+  isActive?: T;
+  verificationNotes?: T;
+  viewCount?: T;
+  dateListed?: T;
   updatedAt?: T;
   createdAt?: T;
 }

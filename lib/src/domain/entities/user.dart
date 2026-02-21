@@ -10,6 +10,9 @@ class User with _$User {
     required String name,
     required String email,
     String? location,
+    String? profileImageUrl,
     @Default([]) List<String> interests,
+    @Default(false) bool onboardingCompleted,
+    @Default(false) bool emailVerified,
   }) = _User;
 }

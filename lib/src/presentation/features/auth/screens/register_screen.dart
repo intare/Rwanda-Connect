@@ -7,6 +7,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/auth_state.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/social_auth_buttons.dart';
 
 /// Registration screen for new users.
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -54,8 +55,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         initial: () {},
         loading: () {},
         authenticated: (user, token) {
-          // Navigate to onboarding after successful registration
-          context.go(AppRoutes.onboarding);
+          // Navigate based on user state
+          // TODO: Re-enable email verification once Firebase Auth is configured
+          // if (!user.emailVerified) {
+          //   context.go(AppRoutes.verifyEmail);
+          // } else
+          if (!user.onboardingCompleted) {
+            context.go(AppRoutes.onboarding);
+          } else {
+            context.go(AppRoutes.home);
+          }
         },
         unauthenticated: () {},
         error: (message) {
@@ -247,6 +256,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       isLoading ? null : () => context.go(AppRoutes.login),
                   child: const Text('Already have an account? Sign In'),
                 ),
+                const SizedBox(height: AppSpacing.xl),
+                const OrDivider(),
+                const SizedBox(height: AppSpacing.xl),
+                const SocialAuthButtons(),
                 const SizedBox(height: AppSpacing.xxxl),
               ],
             ),

@@ -31,6 +31,9 @@ import '../../presentation/features/playbook/screens/liked_content_screen.dart';
 import '../../presentation/features/mentorship/screens/mentors_screen.dart';
 import '../../presentation/features/mentorship/screens/mentor_detail_screen.dart';
 import '../../presentation/features/mentorship/screens/my_mentorships_screen.dart';
+import '../../presentation/features/dashboard/screens/services_dashboard_screen.dart';
+import '../../presentation/features/directory/screens/directory_screen.dart';
+import '../../presentation/features/directory/screens/business_detail_screen.dart';
 import '../theme/theme.dart';
 import 'app_shell.dart';
 import 'splash_screen.dart';
@@ -82,6 +85,13 @@ abstract final class AppRoutes {
   static const String mentorDetail = '/mentorship/mentor/:id';
   static const String myMentorships = '/mentorship/my';
 
+  // Dashboard
+  static const String dashboard = '/dashboard';
+
+  // Business Directory
+  static const String directory = '/directory';
+  static const String businessDetail = '/directory/:id';
+
   /// Routes that don't require authentication.
   static const List<String> publicRoutes = [
     splash,
@@ -98,7 +108,12 @@ abstract final class AppRoutes {
 
   /// Check if a route requires authentication.
   static bool requiresAuth(String location) {
-    return !publicRoutes.any((route) => location.startsWith(route));
+    return !publicRoutes.any((route) {
+      if (route == splash) {
+        return location == splash;
+      }
+      return location.startsWith(route);
+    });
   }
 }
 
@@ -235,36 +250,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.home,
             name: 'home',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: HomeScreen(),
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const HomeScreen(),
             ),
           ),
           GoRoute(
             path: AppRoutes.opportunities,
             name: 'opportunities',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: OpportunitiesScreen(),
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const OpportunitiesScreen(),
             ),
           ),
           GoRoute(
             path: AppRoutes.events,
             name: 'events',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: EventsScreen(),
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const EventsScreen(),
             ),
           ),
           GoRoute(
             path: AppRoutes.community,
             name: 'community',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: CommunityScreen(),
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const CommunityScreen(),
             ),
           ),
           GoRoute(
             path: AppRoutes.profile,
             name: 'profile',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ProfileScreen(),
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const ProfileScreen(),
             ),
           ),
         ],
@@ -370,6 +390,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.myMentorships,
         name: 'myMentorships',
         builder: (context, state) => const MyMentorshipsScreen(),
+      ),
+
+      // Dashboard route
+      GoRoute(
+        path: AppRoutes.dashboard,
+        name: 'dashboard',
+        builder: (context, state) => const ServicesDashboardScreen(),
+      ),
+
+      // Business Directory routes
+      GoRoute(
+        path: AppRoutes.directory,
+        name: 'directory',
+        builder: (context, state) => const DirectoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.businessDetail,
+        name: 'businessDetail',
+        builder: (context, state) => BusinessDetailScreen(
+          businessId: state.pathParameters['id']!,
+        ),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/user.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/subscription_card.dart';
+import 'about_screen.dart';
+import 'edit_profile_screen.dart';
+import 'help_screen.dart';
 import 'paywall_screen.dart';
+import 'privacy_policy_screen.dart';
+import 'settings_screen.dart';
 
 /// Profile screen showing user information and settings.
 class ProfileScreen extends ConsumerWidget {
@@ -80,7 +87,9 @@ class ProfileScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              // TODO: Open settings
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
             },
           ),
         ],
@@ -126,7 +135,9 @@ class ProfileScreen extends ConsumerWidget {
               icon: Icons.person_outline,
               title: 'Edit Profile',
               onTap: () {
-                // TODO: Open edit profile
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                );
               },
             ),
             _ProfileMenuItem(
@@ -137,36 +148,42 @@ class ProfileScreen extends ConsumerWidget {
                 if (!subscriptionState.canBookmark) {
                   _openPaywall(context);
                 } else {
-                  // TODO: Open saved items
+                  context.push(AppRoutes.bookmarks);
                 }
               },
             ),
             _ProfileMenuItem(
-              icon: Icons.notifications_outlined,
-              title: 'Notifications',
+              icon: Icons.calendar_today_outlined,
+              title: 'My RSVPs',
               onTap: () {
-                // TODO: Open notifications settings
+                context.push(AppRoutes.myRsvps);
               },
             ),
             _ProfileMenuItem(
               icon: Icons.help_outline,
               title: 'Help & Support',
               onTap: () {
-                // TODO: Open help
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const HelpScreen()),
+                );
               },
             ),
             _ProfileMenuItem(
               icon: Icons.privacy_tip_outlined,
               title: 'Privacy Policy',
               onTap: () {
-                // TODO: Open privacy policy
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                );
               },
             ),
             _ProfileMenuItem(
               icon: Icons.info_outline,
               title: 'About',
               onTap: () {
-                // TODO: Open about
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AboutScreen()),
+                );
               },
             ),
             const SizedBox(height: AppSpacing.xxl),

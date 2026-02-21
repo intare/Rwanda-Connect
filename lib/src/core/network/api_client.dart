@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -20,7 +21,7 @@ final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: ApiEndpoints.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
+      connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 30),
       headers: {
@@ -33,12 +34,75 @@ final dioProvider = Provider<Dio>((ref) {
   // Add interceptors in order
   dio.interceptors.addAll([
     AuthInterceptor(secureStorage),
+    LocalDevHostFallbackInterceptor(dio),
     ErrorInterceptor(),
     LoggingInterceptor(),
   ]);
 
   return dio;
 });
+
+/// Retries requests against localhost in local Android development when
+/// 10.0.2.2 is unreachable (e.g., running on a physical device with adb reverse).
+class LocalDevHostFallbackInterceptor extends Interceptor {
+  LocalDevHostFallbackInterceptor(this._dio);
+
+  final Dio _dio;
+  static const String _retriedKey = 'localhost_fallback_retried';
+
+  @override
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    final options = err.requestOptions;
+    final uri = options.uri;
+    final hasRetried = options.extra[_retriedKey] == true;
+    final isConnectFailure =
+        err.type == DioExceptionType.connectionTimeout ||
+        err.type == DioExceptionType.connectionError;
+    final shouldRetryWithLocalhost =
+        kDebugMode && !hasRetried && isConnectFailure && uri.host == '10.0.2.2';
+
+    if (!shouldRetryWithLocalhost) {
+      handler.next(err);
+      return;
+    }
+
+    try {
+      final fallbackUri = uri.replace(host: '127.0.0.1');
+      debugPrint(
+        '[API] 10.0.2.2 unreachable, retrying on $fallbackUri (requires adb reverse)',
+      );
+      final response = await _dio.requestUri<dynamic>(
+        fallbackUri,
+        data: options.data,
+        options: Options(
+          method: options.method,
+          headers: options.headers,
+          contentType: options.contentType,
+          responseType: options.responseType,
+          followRedirects: options.followRedirects,
+          receiveDataWhenStatusError: options.receiveDataWhenStatusError,
+          validateStatus: options.validateStatus,
+          receiveTimeout: options.receiveTimeout,
+          sendTimeout: options.sendTimeout,
+          persistentConnection: options.persistentConnection,
+          extra: {
+            ...options.extra,
+            _retriedKey: true,
+          },
+        ),
+        cancelToken: options.cancelToken,
+        onReceiveProgress: options.onReceiveProgress,
+        onSendProgress: options.onSendProgress,
+      );
+      handler.resolve(response);
+    } on DioException catch (fallbackError) {
+      handler.next(fallbackError);
+    }
+  }
+}
 
 /// API client wrapper for making HTTP requests.
 /// Provides typed methods and standardized error handling.

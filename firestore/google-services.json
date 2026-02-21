@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "481567131894",
+    "firebase_url": "https://rwanda-connect-dcf48-default-rtdb.firebaseio.com",
+    "project_id": "rwanda-connect-dcf48",
+    "storage_bucket": "rwanda-connect-dcf48.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481567131894:android:a34d6af92ed76c075c84d7",
+        "android_client_info": {
+          "package_name": "com.newtimes.rwandaconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLGBjCbB1mGz_SIYK3MqjIZCgP_rDa7Bs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

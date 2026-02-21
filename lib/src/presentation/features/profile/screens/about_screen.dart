@@ -1,0 +1,210 @@
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../core/theme/theme.dart';
+
+/// About screen showing app information.
+class AboutScreen extends StatelessWidget {
+  const AboutScreen({super.key});
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('About'),
+      ),
+      body: ListView(
+        padding: AppSpacing.screenPadding,
+        children: [
+          const SizedBox(height: AppSpacing.xxl),
+
+          // App logo and name
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Icon(
+                    Icons.public,
+                    size: 56,
+                    color: AppColors.white,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'Rwanda Connect',
+                  style: AppTypography.headlineMedium,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Version 1.0.0',
+                  style: AppTypography.bodyMediumSecondary,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxxl),
+
+          // Description
+          Text(
+            'Connecting the Rwandan diaspora to opportunities, community, and home.',
+            style: AppTypography.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xxxl),
+
+          // Links
+          const Divider(),
+          _AboutLink(
+            icon: Icons.language,
+            title: 'Visit Website',
+            onTap: () => _launchUrl('https://rwandaconnect.com'),
+          ),
+          _AboutLink(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Privacy Policy',
+            onTap: () => _launchUrl('https://rwandaconnect.com/privacy'),
+          ),
+          _AboutLink(
+            icon: Icons.description_outlined,
+            title: 'Terms of Service',
+            onTap: () => _launchUrl('https://rwandaconnect.com/terms'),
+          ),
+          _AboutLink(
+            icon: Icons.email_outlined,
+            title: 'Contact Us',
+            subtitle: 'support@rwandaconnect.com',
+            onTap: () => _launchUrl('mailto:support@rwandaconnect.com'),
+          ),
+          const Divider(),
+          const SizedBox(height: AppSpacing.xxl),
+
+          // Social links
+          Text(
+            'Follow Us',
+            style: AppTypography.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _SocialButton(
+                icon: Icons.facebook,
+                onTap: () => _launchUrl('https://facebook.com/rwandaconnect'),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              _SocialButton(
+                icon: Icons.camera_alt_outlined, // Instagram-like
+                onTap: () => _launchUrl('https://instagram.com/rwandaconnect'),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              _SocialButton(
+                icon: Icons.alternate_email, // Twitter/X-like
+                onTap: () => _launchUrl('https://twitter.com/rwandaconnect'),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              _SocialButton(
+                icon: Icons.work_outline, // LinkedIn-like
+                onTap: () =>
+                    _launchUrl('https://linkedin.com/company/rwandaconnect'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xxxl),
+
+          // Credits
+          Center(
+            child: Text(
+              'Made with love for the Rwandan diaspora',
+              style: AppTypography.bodySmallSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Center(
+            child: Text(
+              '\u00a9 2024 Rwanda Connect. All rights reserved.',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.secondaryText,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxxl),
+        ],
+      ),
+    );
+  }
+}
+
+class _AboutLink extends StatelessWidget {
+  const _AboutLink({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primary),
+      title: Text(title, style: AppTypography.bodyLarge),
+      subtitle: subtitle != null
+          ? Text(subtitle!, style: AppTypography.bodySmallSecondary)
+          : null,
+      trailing: const Icon(
+        Icons.open_in_new,
+        size: AppSizes.iconSm,
+        color: AppColors.secondaryText,
+      ),
+      onTap: onTap,
+    );
+  }
+}
+
+class _SocialButton extends StatelessWidget {
+  const _SocialButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          icon,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+}

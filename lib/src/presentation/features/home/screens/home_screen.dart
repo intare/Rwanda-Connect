@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
-import '../../../../domain/entities/news.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../notifications/providers/notification_provider.dart';
+import '../../notifications/screens/notifications_screen.dart';
 import '../providers/news_provider.dart';
+import '../widgets/featured_news_carousel.dart';
 import '../widgets/news_card.dart';
 import '../widgets/news_shimmer.dart';
 
@@ -41,21 +43,32 @@ class HomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Implement search
-            },
+            icon: const Icon(Icons.grid_view_rounded),
+            tooltip: 'All Services',
+            onPressed: () => context.push(AppRoutes.dashboard),
           ),
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push(AppRoutes.newsSearch),
+          ),
+          _NotificationButton(
             onPressed: () {
-              // TODO: Implement notifications
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              );
             },
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(newsFeedProvider.notifier).refresh(),
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(newsFeedProvider.notifier).refresh(),
+            ref.read(featuredNewsProvider.notifier).refresh(),
+          ]);
+        },
         child: CustomScrollView(
           slivers: [
             // Welcome header
@@ -75,10 +88,21 @@ class HomeScreen extends ConsumerWidget {
                       'Stay updated with the latest news',
                       style: AppTypography.bodyMediumSecondary,
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
                   ],
                 ),
               ),
+            ),
+
+            // Featured news carousel
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: AppSpacing.xl),
+                child: FeaturedNewsCarousel(),
+              ),
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: AppSpacing.xl),
             ),
 
             // Category filter chips
@@ -278,6 +302,29 @@ class _EmptyState extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _NotificationButton extends ConsumerWidget {
+  const _NotificationButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
+    return IconButton(
+      icon: Badge(
+        isLabelVisible: unreadCount > 0,
+        label: Text(
+          unreadCount > 9 ? '9+' : unreadCount.toString(),
+          style: const TextStyle(fontSize: 10),
+        ),
+        child: const Icon(Icons.notifications_outlined),
+      ),
+      onPressed: onPressed,
     );
   }
 }
