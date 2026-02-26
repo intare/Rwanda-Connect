@@ -1,6 +1,8 @@
 import 'dotenv/config'
-import { getPayload } from 'payload'
+import { getPayload, Payload } from 'payload'
 import config from './payload.config'
+import fs from 'fs'
+import path from 'path'
 
 type NewsCategory = 'Economy' | 'Investment' | 'Events' | 'Business' | 'Policy'
 type OpportunityType = 'job' | 'investment' | 'scholarship' | 'tender'
@@ -15,10 +17,203 @@ type BusinessDirectoryCategory =
   | 'technology'
   | 'health'
 
+// Sample image URLs from Lorem Picsum (free, reliable image service)
+const sampleImages = {
+  news: [
+    { url: 'https://picsum.photos/seed/rw-news-1/800/600', alt: 'Rwanda economy growth' },
+    { url: 'https://picsum.photos/seed/rw-news-2/800/600', alt: 'Rwanda investment' },
+    { url: 'https://picsum.photos/seed/rw-news-3/800/600', alt: 'Rwanda business' },
+    { url: 'https://picsum.photos/seed/rw-news-4/800/600', alt: 'Kigali skyline' },
+    { url: 'https://picsum.photos/seed/rw-news-5/800/600', alt: 'Rwanda technology' },
+    { url: 'https://picsum.photos/seed/rw-news-6/800/600', alt: 'Rwanda agriculture' },
+    { url: 'https://picsum.photos/seed/rw-news-7/800/600', alt: 'Rwanda conference' },
+    { url: 'https://picsum.photos/seed/rw-news-8/800/600', alt: 'Rwanda event' },
+    { url: 'https://picsum.photos/seed/rw-news-9/800/600', alt: 'Rwanda banking' },
+    { url: 'https://picsum.photos/seed/rw-news-10/800/600', alt: 'Rwanda mobile payments' },
+    { url: 'https://picsum.photos/seed/rw-news-11/800/600', alt: 'Rwanda healthcare' },
+    { url: 'https://picsum.photos/seed/rw-news-12/800/600', alt: 'Rwanda policy' },
+    { url: 'https://picsum.photos/seed/rw-news-13/800/600', alt: 'Rwanda real estate' },
+    { url: 'https://picsum.photos/seed/rw-news-14/800/600', alt: 'Rwanda citizenship' },
+    { url: 'https://picsum.photos/seed/rw-news-15/800/600', alt: 'Rwanda diaspora' },
+  ],
+  events: [
+    { url: 'https://picsum.photos/seed/rw-event-1/800/600', alt: 'Networking event' },
+    { url: 'https://picsum.photos/seed/rw-event-2/800/600', alt: 'Professional mixer' },
+    { url: 'https://picsum.photos/seed/rw-event-3/800/600', alt: 'Tech meetup' },
+    { url: 'https://picsum.photos/seed/rw-event-4/800/600', alt: 'Women in business' },
+    { url: 'https://picsum.photos/seed/rw-event-5/800/600', alt: 'Real estate webinar' },
+    { url: 'https://picsum.photos/seed/rw-event-6/800/600', alt: 'Tax seminar' },
+    { url: 'https://picsum.photos/seed/rw-event-7/800/600', alt: 'Business registration' },
+    { url: 'https://picsum.photos/seed/rw-event-8/800/600', alt: 'Investment workshop' },
+    { url: 'https://picsum.photos/seed/rw-event-9/800/600', alt: 'Tech bootcamp' },
+    { url: 'https://picsum.photos/seed/rw-event-10/800/600', alt: 'Grant writing' },
+    { url: 'https://picsum.photos/seed/rw-event-11/800/600', alt: 'Tech summit' },
+    { url: 'https://picsum.photos/seed/rw-event-12/800/600', alt: 'Diaspora convention' },
+    { url: 'https://picsum.photos/seed/rw-event-13/800/600', alt: 'Investment forum' },
+    { url: 'https://picsum.photos/seed/rw-event-14/800/600', alt: 'Healthcare summit' },
+    { url: 'https://picsum.photos/seed/rw-event-15/800/600', alt: 'Rwanda Day celebration' },
+  ],
+  businesses: [
+    { url: 'https://picsum.photos/seed/rw-biz-1/400/400', alt: 'Kigali Prime Properties logo' },
+    { url: 'https://picsum.photos/seed/rw-biz-2/400/400', alt: 'Inzora Hospitality logo' },
+    { url: 'https://picsum.photos/seed/rw-biz-3/400/400', alt: 'Kimironko Retail Hub logo' },
+    { url: 'https://picsum.photos/seed/rw-biz-4/400/400', alt: 'Kigali Legal Advisory logo' },
+    { url: 'https://picsum.photos/seed/rw-biz-5/400/400', alt: 'Norrsken Kigali logo' },
+    { url: 'https://picsum.photos/seed/rw-biz-6/400/400', alt: 'Kigali Family Health logo' },
+  ],
+  realEstate: [
+    { url: 'https://picsum.photos/seed/rw-re-1/800/600', alt: 'Modern house Nyarutarama' },
+    { url: 'https://picsum.photos/seed/rw-re-2/800/600', alt: 'Apartment Kiyovu' },
+    { url: 'https://picsum.photos/seed/rw-re-3/800/600', alt: 'Land plot Rebero' },
+    { url: 'https://picsum.photos/seed/rw-re-4/800/600', alt: 'Family house Kibagabaga' },
+    { url: 'https://picsum.photos/seed/rw-re-5/800/600', alt: 'Penthouse Kimihurura' },
+    { url: 'https://picsum.photos/seed/rw-re-6/800/600', alt: 'Commercial land Kicukiro' },
+    { url: 'https://picsum.photos/seed/rw-re-7/800/600', alt: 'Executive apartment Gacuriro' },
+    { url: 'https://picsum.photos/seed/rw-re-8/800/600', alt: 'Villa Rusororo' },
+  ],
+  opportunities: [
+    { url: 'https://picsum.photos/seed/rw-opp-1/400/400', alt: 'PayRwanda logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-2/400/400', alt: 'Irembo logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-3/400/400', alt: 'Bank of Kigali logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-4/400/400', alt: 'Visit Rwanda logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-5/400/400', alt: 'Andela logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-6/400/400', alt: 'King Faisal Hospital logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-7/400/400', alt: 'AC Group logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-8/400/400', alt: 'AgriTech Hub logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-9/400/400', alt: 'Prime Real Estate logo' },
+    { url: 'https://picsum.photos/seed/rw-opp-10/400/400', alt: 'Green Energy logo' },
+  ],
+}
+
+// Helper function to download and upload an image to Payload
+async function uploadImageFromUrl(
+  payload: Payload,
+  imageUrl: string,
+  altText: string,
+  filename: string
+): Promise<number | null> {
+  try {
+    console.log(`  Downloading: ${filename}...`)
+    const response = await fetch(imageUrl, {
+      headers: {
+        'User-Agent': 'RwandaConnect-Seed/1.0',
+      },
+    })
+
+    if (!response.ok) {
+      console.warn(`  Failed to download ${filename}: ${response.status}`)
+      return null
+    }
+
+    const arrayBuffer = await response.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    // Ensure media directory exists
+    const mediaDir = path.resolve(process.cwd(), 'media')
+    if (!fs.existsSync(mediaDir)) {
+      fs.mkdirSync(mediaDir, { recursive: true })
+    }
+
+    // Save temporarily to disk (Payload requires file path for upload)
+    const tempPath = path.join(mediaDir, `temp-${filename}`)
+    fs.writeFileSync(tempPath, buffer)
+
+    // Upload to Payload (bypass access control for seeding)
+    const media = await payload.create({
+      collection: 'media',
+      data: {
+        alt: altText,
+      },
+      filePath: tempPath,
+      overrideAccess: true,
+    })
+
+    // Clean up temp file (Payload copies it)
+    try {
+      fs.unlinkSync(tempPath)
+    } catch {
+      // Ignore cleanup errors
+    }
+
+    console.log(`  Uploaded: ${filename} (ID: ${media.id})`)
+    return media.id as number
+  } catch (error) {
+    console.warn(`  Error uploading ${filename}:`, error)
+    return null
+  }
+}
+
+// Cache for uploaded media IDs
+const mediaCache: Record<string, number> = {}
+
+async function getOrUploadImage(
+  payload: Payload,
+  category: keyof typeof sampleImages,
+  index: number
+): Promise<number | null> {
+  const cacheKey = `${category}-${index}`
+  if (mediaCache[cacheKey]) {
+    return mediaCache[cacheKey]
+  }
+
+  const images = sampleImages[category]
+  const imageInfo = images[index % images.length]
+  const filename = `${category}-${index}.jpg`
+
+  const mediaId = await uploadImageFromUrl(payload, imageInfo.url, imageInfo.alt, filename)
+  if (mediaId) {
+    mediaCache[cacheKey] = mediaId
+  }
+  return mediaId
+}
+
 const seed = async () => {
   const payload = await getPayload({ config })
 
   console.log('Seeding database...')
+
+  // ============================================
+  // ADMIN USER (ensure admin exists)
+  // ============================================
+  console.log('Ensuring admin user exists...')
+
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@rwandaconnect.com'
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456'
+
+  const existingAdmin = await payload.find({
+    collection: 'users',
+    where: {
+      email: { equals: adminEmail },
+    },
+    limit: 1,
+  })
+
+  if (existingAdmin.docs.length === 0) {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+        contributorStatus: 'approved',
+        name: 'Admin User',
+      },
+      overrideAccess: true,
+    })
+    console.log(`Created admin user: ${adminEmail}`)
+  } else {
+    // Ensure existing user is admin
+    await payload.update({
+      collection: 'users',
+      id: existingAdmin.docs[0].id,
+      data: {
+        role: 'admin',
+        contributorStatus: 'approved',
+      },
+      overrideAccess: true,
+    })
+    console.log(`Admin user already exists: ${adminEmail}`)
+  }
 
   // ============================================
   // NEWS (15 articles)
@@ -92,7 +287,7 @@ const seed = async () => {
       title: 'Annual Diaspora Conference Set for December 2025',
       source: 'The New Times',
       category: 'Events',
-      summary: 'The government announces the Rwanda Diaspora Global Convention 2025, bringing together Rwandans from over 50 countries to discuss investment and development.',
+      summary: 'Organizers announced the Rwanda Diaspora Global Convention 2025, bringing together Rwandans from over 50 countries to discuss investment and development.',
       url: 'https://newtimes.co.rw/events/diaspora-conference',
       publishDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
       isFeatured: true,
@@ -161,23 +356,33 @@ const seed = async () => {
       isFeatured: false,
     },
     {
-      title: 'Government Launches One-Stop Diaspora Services Portal',
+      title: 'Diaspora Services Portal Expansion Announced',
       source: 'The New Times',
       category: 'Policy',
-      summary: 'New online portal provides diaspora with single access point for all government services including business registration and document authentication.',
+      summary: 'A new online portal provides diaspora users with one place to find public-service information, business registration resources, and document guidance links.',
       url: 'https://newtimes.co.rw/policy/diaspora-portal',
       publishDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
       isFeatured: true,
     },
   ]
 
-  for (const news of newsData) {
+  console.log('Uploading news images...')
+  const newsMediaIds: (number | null)[] = []
+  for (let i = 0; i < newsData.length; i++) {
+    const mediaId = await getOrUploadImage(payload, 'news', i)
+    newsMediaIds.push(mediaId)
+  }
+
+  for (let i = 0; i < newsData.length; i++) {
     await payload.create({
       collection: 'news',
-      data: news,
+      data: {
+        ...newsData[i],
+        image: newsMediaIds[i] ?? undefined,
+      },
     })
   }
-  console.log(`Created ${newsData.length} news articles`)
+  console.log(`Created ${newsData.length} news articles with images`)
 
   // ============================================
   // OPPORTUNITIES (20 listings)
@@ -225,7 +430,7 @@ const seed = async () => {
       title: 'Product Manager - Mobile Apps',
       company: 'Irembo',
       location: 'Kigali, Rwanda',
-      description: "Lead product strategy for Rwanda's largest e-government platform. Drive user experience improvements serving millions of citizens.",
+      description: "Lead product strategy for one of Rwanda's largest digital public-service platforms. Drive user experience improvements serving millions of users.",
       requirements: [
         { requirement: '3+ years product management experience' },
         { requirement: 'Experience with mobile applications' },
@@ -380,10 +585,10 @@ const seed = async () => {
       title: 'Solar Energy Fund',
       company: 'Rwanda Green Energy',
       location: 'Nationwide, Rwanda',
-      description: 'Join the renewable energy revolution. Fund supports solar installations across rural Rwanda with guaranteed government contracts.',
+      description: 'Join the renewable energy revolution. Fund supports solar installations across rural Rwanda with long-term commercial offtake agreements.',
       requirements: [
         { requirement: 'Minimum investment: $25,000' },
-        { requirement: 'Government-backed power purchase agreements' },
+        { requirement: 'Long-term power purchase agreements' },
         { requirement: '10-year investment horizon' },
       ],
       applyUrl: 'https://greenenergy.rw/solar-fund',
@@ -430,10 +635,10 @@ const seed = async () => {
     },
     {
       type: 'scholarship',
-      title: 'Rwanda Government STEM Scholarship',
+      title: 'Rwanda STEM Scholarship',
       company: 'Ministry of Education',
       location: 'Various, Rwanda',
-      description: 'Government-funded scholarship for diaspora youth to study STEM subjects at Rwandan universities.',
+      description: 'Scholarship program for diaspora youth to study STEM subjects at Rwandan universities.',
       requirements: [
         { requirement: 'Age 18-25' },
         { requirement: 'Rwandan heritage' },
@@ -555,13 +760,23 @@ const seed = async () => {
     },
   ]
 
-  for (const opportunity of opportunitiesData) {
+  console.log('Uploading opportunity company logos...')
+  const opportunityMediaIds: (number | null)[] = []
+  for (let i = 0; i < opportunitiesData.length; i++) {
+    const mediaId = await getOrUploadImage(payload, 'opportunities', i)
+    opportunityMediaIds.push(mediaId)
+  }
+
+  for (let i = 0; i < opportunitiesData.length; i++) {
     await payload.create({
       collection: 'opportunities',
-      data: opportunity,
+      data: {
+        ...opportunitiesData[i],
+        companyLogo: opportunityMediaIds[i] ?? undefined,
+      },
     })
   }
-  console.log(`Created ${opportunitiesData.length} opportunities`)
+  console.log(`Created ${opportunitiesData.length} opportunities with logos`)
 
   // ============================================
   // REAL ESTATE (Kigali launch listings)
@@ -727,10 +942,20 @@ const seed = async () => {
     },
   ]
 
+  console.log('Uploading real estate images...')
+  const realEstateMediaIds: (number | null)[] = []
+  for (let i = 0; i < realEstateData.length; i++) {
+    const mediaId = await getOrUploadImage(payload, 'realEstate', i)
+    realEstateMediaIds.push(mediaId)
+  }
+
   let createdRealEstate = 0
   let updatedRealEstate = 0
 
-  for (const listing of realEstateData) {
+  for (let i = 0; i < realEstateData.length; i++) {
+    const listing = realEstateData[i]
+    const imageId = realEstateMediaIds[i]
+
     const existing = await payload.find({
       collection: 'real-estate',
       where: {
@@ -744,22 +969,27 @@ const seed = async () => {
       limit: 1,
     })
 
+    const dataWithImage = {
+      ...listing,
+      images: imageId ? [imageId] : undefined,
+    }
+
     if (existing.totalDocs > 0) {
       await payload.update({
         collection: 'real-estate',
         id: existing.docs[0].id,
-        data: listing,
+        data: dataWithImage,
       })
       updatedRealEstate += 1
     } else {
       await payload.create({
         collection: 'real-estate',
-        data: listing,
+        data: dataWithImage,
       })
       createdRealEstate += 1
     }
   }
-  console.log(`Created ${createdRealEstate} real estate listings`)
+  console.log(`Created ${createdRealEstate} real estate listings with images`)
   console.log(`Updated ${updatedRealEstate} existing real estate listings`)
 
   // ============================================
@@ -845,7 +1075,7 @@ const seed = async () => {
       title: 'Investing in Rwanda Real Estate - Webinar',
       description: 'Comprehensive guide to property investment in Rwanda for diaspora. Topics include legal framework, financing options, and market trends.',
       type: 'seminar',
-      organizer: 'RDB Diaspora Desk',
+      organizer: 'Diaspora Investment Desk',
       location: 'Virtual',
       venue: 'Zoom',
       date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -860,7 +1090,7 @@ const seed = async () => {
       title: 'Tax Planning for Diaspora Investors',
       description: 'Learn about tax implications and benefits for diaspora investing in Rwanda. Presented by RRA and PwC Rwanda.',
       type: 'seminar',
-      organizer: 'Rwanda Revenue Authority',
+      organizer: 'Tax Advisory Forum',
       location: 'Virtual',
       venue: 'Microsoft Teams',
       date: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString(),
@@ -875,7 +1105,7 @@ const seed = async () => {
       title: 'Starting a Business in Rwanda',
       description: 'Step-by-step guide to company registration, licensing, and compliance. Interactive session with RDB business registration team.',
       type: 'seminar',
-      organizer: 'Rwanda Development Board',
+      organizer: 'Business Support Hub Rwanda',
       location: 'Kigali, Rwanda',
       venue: 'RDB Headquarters',
       date: new Date(Date.now() + 18 * 24 * 60 * 60 * 1000).toISOString(),
@@ -890,7 +1120,7 @@ const seed = async () => {
       title: 'Diaspora Investment Workshop',
       description: 'Hands-on workshop covering investment opportunities in agriculture, real estate, and technology. Includes site visits.',
       type: 'workshop',
-      organizer: 'RDB Diaspora Office',
+      organizer: 'Diaspora Investment Office',
       location: 'Kigali, Rwanda',
       venue: 'Kigali Convention Centre',
       date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -948,9 +1178,9 @@ const seed = async () => {
     },
     {
       title: 'Rwanda Diaspora Global Convention',
-      description: 'The flagship annual gathering of Rwandans from around the world. Government ministers, business leaders, and community discussions.',
+      description: 'The flagship annual gathering of Rwandans from around the world, featuring policy discussions, business leaders, and community sessions.',
       type: 'conference',
-      organizer: 'MINAFFET',
+      organizer: 'Diaspora Affairs Forum',
       location: 'Kigali, Rwanda',
       venue: 'Kigali Convention Centre',
       date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
@@ -995,7 +1225,7 @@ const seed = async () => {
       title: 'Rwanda Day Brussels 2026',
       description: 'Cultural celebration and community gathering for Rwandans in Belgium and Europe. Music, food, and networking.',
       type: 'conference',
-      organizer: 'Rwanda Embassy Belgium',
+      organizer: 'Rwanda Community Belgium',
       location: 'Brussels, Belgium',
       venue: 'Brussels Expo',
       date: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString(),
@@ -1007,13 +1237,23 @@ const seed = async () => {
     },
   ]
 
-  for (const event of eventsData) {
+  console.log('Uploading event images...')
+  const eventMediaIds: (number | null)[] = []
+  for (let i = 0; i < eventsData.length; i++) {
+    const mediaId = await getOrUploadImage(payload, 'events', i)
+    eventMediaIds.push(mediaId)
+  }
+
+  for (let i = 0; i < eventsData.length; i++) {
     await payload.create({
       collection: 'events',
-      data: event,
+      data: {
+        ...eventsData[i],
+        image: eventMediaIds[i] ?? undefined,
+      },
     })
   }
-  console.log(`Created ${eventsData.length} events`)
+  console.log(`Created ${eventsData.length} events with images`)
 
   // ============================================
   // COMMUNITY POSTS (10 sample posts)
@@ -1388,10 +1628,20 @@ const seed = async () => {
     },
   ]
 
+  console.log('Uploading business logos...')
+  const businessMediaIds: (number | null)[] = []
+  for (let i = 0; i < businessDirectoryData.length; i++) {
+    const mediaId = await getOrUploadImage(payload, 'businesses', i)
+    businessMediaIds.push(mediaId)
+  }
+
   let createdBusinesses = 0
   let updatedBusinesses = 0
 
-  for (const business of businessDirectoryData) {
+  for (let i = 0; i < businessDirectoryData.length; i++) {
+    const business = businessDirectoryData[i]
+    const logoId = businessMediaIds[i]
+
     const existing = await payload.find({
       collection: 'business-directory',
       where: {
@@ -1400,17 +1650,22 @@ const seed = async () => {
       limit: 1,
     })
 
+    const dataWithLogo = {
+      ...business,
+      logo: logoId ?? undefined,
+    }
+
     if (existing.totalDocs > 0) {
       await payload.update({
         collection: 'business-directory',
         id: existing.docs[0].id,
-        data: business,
+        data: dataWithLogo,
       })
       updatedBusinesses += 1
     } else {
       await payload.create({
         collection: 'business-directory',
-        data: business,
+        data: dataWithLogo,
       })
       createdBusinesses += 1
     }
