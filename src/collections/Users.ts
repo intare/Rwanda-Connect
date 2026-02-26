@@ -11,7 +11,7 @@ const adminOrSelf: Access = ({ req: { user } }) => {
 }
 
 // Temporary: Check admin by querying database since JWT may be stale
-const isAdminByEmail: Access = async ({ req }) => {
+const isAdminByEmail = async ({ req }: { req: { user?: { id: string; role?: string } | null; payload: any } }): Promise<boolean> => {
   const user = req.user
   if (!user) return false
   // Allow if JWT says admin
