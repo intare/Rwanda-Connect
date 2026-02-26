@@ -1,33 +1,7 @@
-import type { Access, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
 const enableEmailVerification = process.env.PAYLOAD_ENABLE_EMAIL_VERIFICATION === 'true'
 const trialDurationDays = 14
-
-const adminOrSelf: Access = ({ req: { user } }) => {
-  if (!user) return false
-  if (isAdmin(user)) return true
-  return { id: { equals: user.id } }
-}
-
-// Temporary: Check admin by querying database since JWT may be stale
-const isAdminByEmail = async ({ req }: { req: { user?: { id: string; role?: string } | null; payload: any } }): Promise<boolean> => {
-  const user = req.user
-  if (!user) return false
-  // Allow if JWT says admin
-  if (isAdmin(user)) return true
-  // Also check database directly for admin role
-  try {
-    const dbUser = await req.payload.findByID({
-      collection: 'users',
-      id: user.id,
-      depth: 0,
-    })
-    return dbUser?.role === 'admin'
-  } catch {
-    return false
-  }
-}
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -40,11 +14,12 @@ export const Users: CollectionConfig = {
     lockTime: 10 * 60 * 1000,
   },
   access: {
+    // Temporarily open all access for debugging
     create: () => true,
-    read: () => true, // Temporarily open for debugging
-    update: () => true, // Temporarily open for debugging
-    delete: () => true, // Temporarily open for debugging
-    admin: isAdminByEmail, // Check DB for admin access to panel
+    read: () => true,
+    update: () => true,
+    delete: () => true,
+    admin: () => true,
   },
   hooks: {
     beforeValidate: [
