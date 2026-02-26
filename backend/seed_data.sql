@@ -25,7 +25,7 @@ INSERT INTO news (title, source, category, summary, url, publish_date, is_featur
 ('AgriTech Sector Attracts $50M in New Investments', 'Rwanda Today', 'Investment', 'Rwanda''s agricultural technology sector sees surge in investment as startups revolutionize farming practices across the country.', 'https://rwandatoday.rw/investment/agritech', NOW() - INTERVAL '7 days', false),
 
 -- Events
-('Annual Diaspora Conference Set for December 2025', 'The New Times', 'Events', 'The government announces the Rwanda Diaspora Global Convention 2025, bringing together Rwandans from over 50 countries to discuss investment and development.', 'https://newtimes.co.rw/events/diaspora-conference', NOW() - INTERVAL '1 day', true),
+('Annual Diaspora Conference Set for December 2025', 'The New Times', 'Events', 'Organizers announced the Rwanda Diaspora Global Convention 2025, bringing together Rwandans from over 50 countries to discuss investment and development.', 'https://newtimes.co.rw/events/diaspora-conference', NOW() - INTERVAL '1 day', true),
 
 ('Rwanda Day Boston Announced for March 2026', 'Igihe', 'Events', 'Rwanda Day returns to Boston in March 2026, featuring cultural celebrations, business networking, and community building activities.', 'https://igihe.com/events/rwanda-day-boston', NOW() - INTERVAL '6 days', false),
 
@@ -43,7 +43,7 @@ INSERT INTO news (title, source, category, summary, url, publish_date, is_featur
 
 ('Dual Citizenship Application Process Streamlined', 'Rwanda Today', 'Policy', 'Immigration announces simplified online process for diaspora dual citizenship applications with 30-day processing guarantee.', 'https://rwandatoday.rw/policy/dual-citizenship', NOW() - INTERVAL '12 days', false),
 
-('Government Launches One-Stop Diaspora Services Portal', 'The New Times', 'Policy', 'New online portal provides diaspora with single access point for all government services including business registration and document authentication.', 'https://newtimes.co.rw/policy/diaspora-portal', NOW() - INTERVAL '15 days', true);
+('Diaspora Services Portal Expansion Announced', 'The New Times', 'Policy', 'A new online portal provides diaspora users with one place to find public-service information, business registration resources, and document guidance links.', 'https://newtimes.co.rw/policy/diaspora-portal', NOW() - INTERVAL '15 days', true);
 
 -- ============================================
 -- OPPORTUNITIES (20 listings)
@@ -58,7 +58,7 @@ ARRAY['5+ years software development experience', 'Strong in Python, Node.js, or
 55000, 'USD', NOW() + INTERVAL '30 days', 'https://payrwanda.com/careers/senior-engineer', true, true, NOW() - INTERVAL '5 days'),
 
 ('job', 'Product Manager - Mobile Apps', 'Irembo', 'Kigali, Rwanda',
-'Lead product strategy for Rwanda''s largest e-government platform. Drive user experience improvements serving millions of citizens.',
+'Lead product strategy for one of Rwanda''s largest digital public-service platforms. Drive user experience improvements serving millions of users.',
 ARRAY['3+ years product management experience', 'Experience with mobile applications', 'Strong analytical and communication skills', 'French or Kinyarwanda is a plus'],
 48000, 'USD', NOW() + INTERVAL '21 days', 'https://irembo.gov.rw/careers/pm', true, true, NOW() - INTERVAL '3 days'),
 
@@ -99,8 +99,8 @@ ARRAY['Minimum investment: $100,000', 'Expected rental yield: 12% annually', 'Fl
 NULL, 'USD', NOW() + INTERVAL '120 days', 'https://primerealestate.rw/kigali-heights', true, true, NOW() - INTERVAL '15 days'),
 
 ('investment', 'Solar Energy Fund', 'Rwanda Green Energy', 'Nationwide, Rwanda',
-'Join the renewable energy revolution. Fund supports solar installations across rural Rwanda with guaranteed government contracts.',
-ARRAY['Minimum investment: $25,000', 'Government-backed power purchase agreements', '10-year investment horizon'],
+'Join the renewable energy revolution. Fund supports solar installations across rural Rwanda with long-term commercial offtake agreements.',
+ARRAY['Minimum investment: $25,000', 'Long-term power purchase agreements', '10-year investment horizon'],
 NULL, 'USD', NOW() + INTERVAL '60 days', 'https://greenenergy.rw/solar-fund', true, false, NOW() - INTERVAL '20 days'),
 
 ('investment', 'Tourism Lodge Development', 'Akagera Ventures', 'Akagera National Park, Rwanda',
@@ -114,8 +114,8 @@ NULL, 'USD', NOW() + INTERVAL '75 days', 'https://akageraventures.rw/lodge-inves
 ARRAY['Bachelor''s degree in relevant field', 'Minimum GPA: 3.0', 'Strong quantitative background', 'Diaspora applicants encouraged'],
 NULL, 'USD', NOW() + INTERVAL '45 days', 'https://cmu.africa/scholarship', true, true, NOW() - INTERVAL '5 days'),
 
-('scholarship', 'Rwanda Government STEM Scholarship', 'Ministry of Education', 'Various, Rwanda',
-'Government-funded scholarship for diaspora youth to study STEM subjects at Rwandan universities.',
+('scholarship', 'Rwanda STEM Scholarship', 'Ministry of Education', 'Various, Rwanda',
+'Scholarship program for diaspora youth to study STEM subjects at Rwandan universities.',
 ARRAY['Age 18-25', 'Rwandan heritage', 'High school diploma with strong math/science grades', 'Commitment to work in Rwanda for 3 years'],
 NULL, 'USD', NOW() + INTERVAL '60 days', 'https://mineduc.gov.rw/diaspora-scholarship', true, false, NOW() - INTERVAL '8 days'),
 
@@ -180,23 +180,23 @@ NOW() + INTERVAL '10 days', NULL, 60, 15000, 'RWF', false, true),
 -- Seminars
 ('Investing in Rwanda Real Estate - Webinar',
 'Comprehensive guide to property investment in Rwanda for diaspora. Topics include legal framework, financing options, and market trends.',
-'seminar', 'RDB Diaspora Desk', 'Virtual', 'Zoom',
+'seminar', 'Diaspora Investment Desk', 'Virtual', 'Zoom',
 NOW() + INTERVAL '7 days', NULL, 500, 0, 'USD', true, true),
 
 ('Tax Planning for Diaspora Investors',
 'Learn about tax implications and benefits for diaspora investing in Rwanda. Presented by RRA and PwC Rwanda.',
-'seminar', 'Rwanda Revenue Authority', 'Virtual', 'Microsoft Teams',
+'seminar', 'Tax Advisory Forum', 'Virtual', 'Microsoft Teams',
 NOW() + INTERVAL '12 days', NULL, 300, 0, 'USD', true, false),
 
 ('Starting a Business in Rwanda',
 'Step-by-step guide to company registration, licensing, and compliance. Interactive session with RDB business registration team.',
-'seminar', 'Rwanda Development Board', 'Kigali, Rwanda', 'RDB Headquarters',
+'seminar', 'Business Support Hub Rwanda', 'Kigali, Rwanda', 'Business Hub Kigali',
 NOW() + INTERVAL '18 days', NULL, 100, 0, 'USD', false, false),
 
 -- Workshops
 ('Diaspora Investment Workshop',
 'Hands-on workshop covering investment opportunities in agriculture, real estate, and technology. Includes site visits.',
-'workshop', 'RDB Diaspora Office', 'Kigali, Rwanda', 'Kigali Convention Centre',
+'workshop', 'Diaspora Investment Office', 'Kigali, Rwanda', 'Kigali Convention Centre',
 NOW() + INTERVAL '30 days', NOW() + INTERVAL '31 days', 150, 50.00, 'USD', false, true),
 
 ('Tech Entrepreneurship Bootcamp',
@@ -216,8 +216,8 @@ NOW() + INTERVAL '20 days', NULL, 35, 25000, 'RWF', false, false),
 NOW() + INTERVAL '60 days', NOW() + INTERVAL '62 days', 1000, 150.00, 'USD', false, true),
 
 ('Rwanda Diaspora Global Convention',
-'The flagship annual gathering of Rwandans from around the world. Government ministers, business leaders, and community discussions.',
-'conference', 'MINAFFET', 'Kigali, Rwanda', 'Kigali Convention Centre',
+'The flagship annual gathering of Rwandans from around the world, featuring policy discussions, business leaders, and community sessions.',
+'conference', 'Diaspora Affairs Forum', 'Kigali, Rwanda', 'Kigali Convention Centre',
 NOW() + INTERVAL '90 days', NOW() + INTERVAL '92 days', 2000, 0, 'USD', false, true),
 
 ('East Africa Investment Forum',
@@ -232,7 +232,7 @@ NOW() + INTERVAL '75 days', NOW() + INTERVAL '76 days', 400, 175.00, 'USD', fals
 
 ('Rwanda Day Brussels 2026',
 'Cultural celebration and community gathering for Rwandans in Belgium and Europe. Music, food, and networking.',
-'conference', 'Rwanda Embassy Belgium', 'Brussels, Belgium', 'Brussels Expo',
+'conference', 'Rwanda Community Belgium', 'Brussels, Belgium', 'Brussels Expo',
 NOW() + INTERVAL '120 days', NULL, 3000, 20.00, 'EUR', false, true);
 
 -- ============================================

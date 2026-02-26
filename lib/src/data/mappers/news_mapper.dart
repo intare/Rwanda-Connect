@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../../core/network/api_endpoints.dart';
 import '../../domain/entities/news.dart';
 import '../models/news/news_dto.dart';
@@ -19,9 +17,6 @@ extension NewsMapper on NewsDto {
             : '${ApiEndpoints.serverUrl}$relativeUrl';
       }
     }
-
-    // Debug logging
-    debugPrint('NewsMapper: title=$title, image type=${image.runtimeType}, imgUrl=$imgUrl');
 
     return News(
       id: id.toString(),

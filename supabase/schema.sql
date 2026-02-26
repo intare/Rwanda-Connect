@@ -578,7 +578,7 @@ JOIN profiles p ON cp.author_id = p.id;
 INSERT INTO news (title, source, category, summary, url, publish_date, is_featured) VALUES
 ('Diaspora Remittances Hit Record High in 2025', 'The New Times', 'Economy', 'Rwanda received a record $500 million in diaspora remittances in 2025, marking a 15% increase from the previous year.', 'https://newtimes.co.rw/article/123', NOW() - INTERVAL '1 day', true),
 ('New Investment Opportunities in Kigali Innovation City', 'The New Times', 'Investment', 'Kigali Innovation City announces new investment packages targeting diaspora entrepreneurs.', 'https://rwandatoday.rw/article/456', NOW() - INTERVAL '2 days', false),
-('Annual Diaspora Conference Announced for December', 'The New Times', 'Events', 'The government announces the 2025 Rwanda Diaspora Conference to be held in Kigali.', 'https://igihe.com/article/789', NOW() - INTERVAL '3 days', true);
+('Annual Diaspora Conference Announced for December', 'The New Times', 'Events', 'Organizers announced the 2025 Rwanda Diaspora Conference to be held in Kigali.', 'https://igihe.com/article/789', NOW() - INTERVAL '3 days', true);
 
 -- Sample opportunities
 INSERT INTO opportunities (type, title, company, location, description, salary, deadline, apply_url, verified, is_featured) VALUES
@@ -589,7 +589,7 @@ INSERT INTO opportunities (type, title, company, location, description, salary, 
 -- Sample events
 INSERT INTO events (title, description, type, organizer, location, date, capacity, is_featured) VALUES
 ('Rwanda Connect Toronto Networking Night', 'Join fellow Rwandan professionals in Toronto for an evening of networking and knowledge sharing.', 'networking', 'Rwanda Connect', 'Toronto, Canada', NOW() + INTERVAL '14 days', 100, true),
-('Diaspora Investment Workshop', 'Learn about investment opportunities in Rwanda real estate and startups.', 'workshop', 'RDB Diaspora Office', 'Virtual', NOW() + INTERVAL '7 days', 500, true),
+('Diaspora Investment Workshop', 'Learn about investment opportunities in Rwanda real estate and startups.', 'workshop', 'Diaspora Investment Office', 'Virtual', NOW() + INTERVAL '7 days', 500, true),
 ('Kigali Tech Summit 2025', 'Annual technology conference bringing together innovators from Africa and the diaspora.', 'conference', 'Rwanda ICT Chamber', 'Kigali, Rwanda', NOW() + INTERVAL '60 days', 1000, false);
 */
 

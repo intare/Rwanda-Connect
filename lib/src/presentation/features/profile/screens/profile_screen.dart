@@ -15,6 +15,7 @@ import 'help_screen.dart';
 import 'paywall_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'settings_screen.dart';
+import 'terms_of_service_screen.dart';
 
 /// Profile screen showing user information and settings.
 class ProfileScreen extends ConsumerWidget {
@@ -174,6 +175,15 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                );
+              },
+            ),
+            _ProfileMenuItem(
+              icon: Icons.description_outlined,
+              title: 'Terms of Service',
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TermsOfServiceScreen()),
                 );
               },
             ),

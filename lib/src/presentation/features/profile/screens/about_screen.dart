@@ -7,6 +7,16 @@ import '../../../../core/theme/theme.dart';
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
+  static const _officialSources = <Map<String, String>>[
+    {'name': 'Government of Rwanda', 'url': 'https://www.gov.rw'},
+    {'name': 'MINAFFET', 'url': 'https://www.minaffet.gov.rw'},
+    {'name': 'RDB', 'url': 'https://rdb.rw'},
+    {'name': 'RRA', 'url': 'https://www.rra.gov.rw'},
+    {'name': 'RPPA', 'url': 'https://www.rppa.gov.rw'},
+    {'name': 'Irembo', 'url': 'https://www.irembo.gov.rw'},
+    {'name': 'Immigration', 'url': 'https://www.migration.gov.rw'},
+  ];
+
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -59,9 +69,57 @@ class AboutScreen extends StatelessWidget {
 
           // Description
           Text(
-            'Connecting the Rwandan diaspora to opportunities, community, and home.',
+            'An independent community platform connecting the Rwandan diaspora to opportunities, resources, and each other.',
             style: AppTypography.bodyLarge,
             textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+
+          // Disclaimer Card
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: AppColors.warning,
+                      size: AppSizes.iconMd,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'Important Disclaimer',
+                      style: AppTypography.titleSmall.copyWith(
+                        color: AppColors.warning,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Rwanda Connect is an independent, privately-owned platform. '
+                  'We are NOT affiliated with, endorsed by, or connected to any government entity, '
+                  'embassy, or official institution.',
+                  style: AppTypography.bodySmall.copyWith(height: 1.5),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'All information, news, and opportunities shared on this platform are aggregated '
+                  'from publicly available third-party sources. Users should independently verify '
+                  'any official information directly with the relevant authorities before taking action.',
+                  style: AppTypography.bodySmall.copyWith(height: 1.5),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.xxxl),
 
@@ -87,6 +145,25 @@ class AboutScreen extends StatelessWidget {
             title: 'Contact Us',
             subtitle: 'support@rwandaconnect.com',
             onTap: () => _launchUrl('mailto:support@rwandaconnect.com'),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Official Sources',
+            style: AppTypography.titleSmall,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'For government-related information, verify directly with official websites:',
+            style: AppTypography.bodySmallSecondary,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ..._officialSources.map(
+            (source) => _AboutLink(
+              icon: Icons.verified_outlined,
+              title: source['name']!,
+              subtitle: source['url']!,
+              onTap: () => _launchUrl(source['url']!),
+            ),
           ),
           const Divider(),
           const SizedBox(height: AppSpacing.xxl),

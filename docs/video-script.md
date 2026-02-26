@@ -3,7 +3,7 @@
 ## Opening Sequence (0:00 - 0:30)
 
 **[Voice Over]**
-"Rwanda Connect is a one-stop mobile platform designed to bring Rwandans abroad closer to home. It connects the diaspora with news, culture, opportunities, and community, while fostering meaningful engagement with Rwanda. Through curated content, networking spaces, and resource hubs, the app empowers Rwandans worldwide to stay informed, celebrate identity, and contribute to national development."
+"Rwanda Connect is a mobile platform designed to bring Rwandans abroad closer to home. It connects the diaspora with news, culture, opportunities, and community, while fostering meaningful engagement with Rwanda. Through curated content, networking spaces, and resource hubs, the app empowers Rwandans worldwide to stay informed, celebrate identity, and contribute to national development."
 
 **[Visual Directions]**
 - Open with Rwanda Connect logo animation
@@ -24,7 +24,7 @@
   - Jobs available
   - Investment opportunities
   - Scholarship programs
-  - Government tenders
+  - Public tenders from source links
 
 **[Voice Over continues]**
 "Stay updated with the latest news from Rwanda, featuring curated content from trusted sources with easy-to-read summaries and reading time estimates."

@@ -32,10 +32,69 @@ class PrivacyPolicyScreen extends StatelessWidget {
         children: [
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Last updated: January 2024',
+            'Last updated: February 23, 2026',
             style: AppTypography.bodySmallSecondary,
           ),
           const SizedBox(height: AppSpacing.xxl),
+
+          // Independent Platform Disclaimer
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Independence Notice',
+                  style: AppTypography.titleSmall.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Rwanda Connect is an independent, privately operated platform.',
+                  style: AppTypography.bodySmall.copyWith(height: 1.5),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+
+          _PolicySection(
+            title: 'Independence and Non-Government Affiliation',
+            content:
+                'Rwanda Connect is an independent, privately operated platform.\n\n'
+                'Rwanda Connect does not represent, is not affiliated with, and is not endorsed by '
+                'the Government of Rwanda, any embassy, any consulate, or any other government entity.\n\n'
+                'Rwanda Connect does not provide official government services, does not process '
+                'government applications on behalf of users, and does not act as an authorized '
+                'government intermediary.',
+          ),
+
+          _PolicySection(
+            title: 'Government-Related Information and Source Verification',
+            content:
+                'Some content in the App may discuss public policies, procedures, tenders, visas, '
+                'taxation, education, business registration, or other public-service topics.\n\n'
+                'This information is provided for general informational purposes only and may come '
+                'from third-party publishers or public sources. Users are responsible for independently '
+                'verifying official requirements, deadlines, and decisions directly with official sources.\n\n'
+                'Official public source examples:\n'
+                '- Government of Rwanda: https://www.gov.rw\n'
+                '- MINAFFET: https://www.minaffet.gov.rw\n'
+                '- RDB: https://rdb.rw\n'
+                '- RRA: https://www.rra.gov.rw\n'
+                '- RPPA: https://www.rppa.gov.rw\n'
+                '- Irembo: https://www.irembo.gov.rw\n'
+                '- Rwanda Immigration: https://www.migration.gov.rw\n\n'
+                'If information in the App differs from an official source, the official source takes precedence.',
+          ),
 
           _PolicySection(
             title: 'Information We Collect',

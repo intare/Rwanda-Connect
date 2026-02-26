@@ -74,8 +74,14 @@ class DirectoryService {
 
     final businessesResponse = BusinessesListResponse.fromJson(response.data!);
     final cities = businessesResponse.docs
-        .where((b) => b.city != null && b.city!.isNotEmpty)
-        .map((b) => b.city!)
+        .where((b) => b.city != null)
+        .map((b) {
+          final city = b.city;
+          if (city is String) return city;
+          if (city is Map) return city['name']?.toString() ?? '';
+          return city?.toString() ?? '';
+        })
+        .where((c) => c.isNotEmpty)
         .toSet()
         .toList();
     cities.sort();

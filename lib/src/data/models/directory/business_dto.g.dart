@@ -6,42 +6,29 @@ part of 'business_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$BusinessDtoImpl _$$BusinessDtoImplFromJson(
-  Map<String, dynamic> json,
-) => _$BusinessDtoImpl(
-  id: json['id'],
-  name: json['name'] as String,
-  slug: json['slug'] as String,
-  category: json['category'] as String,
-  description: json['description'] as String? ?? '',
-  logo: json['logo'],
-  phone: json['phone'] as String?,
-  email: json['email'] as String?,
-  website: json['website'] as String?,
-  address: json['address'] as String?,
-  city: json['city'] as String?,
-  district: json['district'] as String?,
-  geo: json['geo'] == null
-      ? null
-      : GeoLocationDto.fromJson(json['geo'] as Map<String, dynamic>),
-  socialLinks: json['socialLinks'] == null
-      ? null
-      : SocialLinksDto.fromJson(json['socialLinks'] as Map<String, dynamic>),
-  businessHours:
-      (json['businessHours'] as List<dynamic>?)
-          ?.map((e) => BusinessHoursDto.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  services:
-      (json['services'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const [],
-  tags:
-      (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const [],
-  isFeatured: json['isFeatured'] as bool? ?? false,
-  viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
-  createdAt: json['createdAt'] as String?,
-);
+_$BusinessDtoImpl _$$BusinessDtoImplFromJson(Map<String, dynamic> json) =>
+    _$BusinessDtoImpl(
+      id: json['id'],
+      name: json['name'],
+      slug: json['slug'],
+      category: json['category'],
+      description: json['description'],
+      logo: json['logo'],
+      phone: json['phone'],
+      email: json['email'],
+      website: json['website'],
+      address: json['address'],
+      city: json['city'],
+      district: json['district'],
+      geo: json['geo'],
+      socialLinks: json['social'],
+      businessHours: json['businessHours'] as List<dynamic>? ?? const [],
+      services: json['services'] as List<dynamic>? ?? const [],
+      tags: json['tags'] as List<dynamic>? ?? const [],
+      isFeatured: json['isFeatured'] as bool? ?? false,
+      viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
+      createdAt: json['createdAt'],
+    );
 
 Map<String, dynamic> _$$BusinessDtoImplToJson(_$BusinessDtoImpl instance) =>
     <String, dynamic>{
@@ -58,7 +45,7 @@ Map<String, dynamic> _$$BusinessDtoImplToJson(_$BusinessDtoImpl instance) =>
       'city': instance.city,
       'district': instance.district,
       'geo': instance.geo,
-      'socialLinks': instance.socialLinks,
+      'social': instance.socialLinks,
       'businessHours': instance.businessHours,
       'services': instance.services,
       'tags': instance.tags,
@@ -101,8 +88,8 @@ _$BusinessHoursDtoImpl _$$BusinessHoursDtoImplFromJson(
   Map<String, dynamic> json,
 ) => _$BusinessHoursDtoImpl(
   day: json['day'] as String,
-  open: json['open'] as String?,
-  close: json['close'] as String?,
+  open: json['openTime'] as String?,
+  close: json['closeTime'] as String?,
   isClosed: json['isClosed'] as bool? ?? false,
 );
 
@@ -110,8 +97,8 @@ Map<String, dynamic> _$$BusinessHoursDtoImplToJson(
   _$BusinessHoursDtoImpl instance,
 ) => <String, dynamic>{
   'day': instance.day,
-  'open': instance.open,
-  'close': instance.close,
+  'openTime': instance.open,
+  'closeTime': instance.close,
   'isClosed': instance.isClosed,
 };
 

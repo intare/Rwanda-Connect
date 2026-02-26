@@ -22,26 +22,26 @@ BusinessDto _$BusinessDtoFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$BusinessDto {
   dynamic get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String get slug => throw _privateConstructorUsedError;
-  String get category => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
+  dynamic get name => throw _privateConstructorUsedError;
+  dynamic get slug => throw _privateConstructorUsedError;
+  dynamic get category => throw _privateConstructorUsedError;
+  dynamic get description => throw _privateConstructorUsedError;
   dynamic get logo => throw _privateConstructorUsedError;
-  String? get phone => throw _privateConstructorUsedError;
-  String? get email => throw _privateConstructorUsedError;
-  String? get website => throw _privateConstructorUsedError;
-  String? get address => throw _privateConstructorUsedError;
-  String? get city => throw _privateConstructorUsedError;
-  String? get district => throw _privateConstructorUsedError;
-  GeoLocationDto? get geo => throw _privateConstructorUsedError;
-  SocialLinksDto? get socialLinks => throw _privateConstructorUsedError;
-  List<BusinessHoursDto> get businessHours =>
-      throw _privateConstructorUsedError;
-  List<String> get services => throw _privateConstructorUsedError;
-  List<String> get tags => throw _privateConstructorUsedError;
+  dynamic get phone => throw _privateConstructorUsedError;
+  dynamic get email => throw _privateConstructorUsedError;
+  dynamic get website => throw _privateConstructorUsedError;
+  dynamic get address => throw _privateConstructorUsedError;
+  dynamic get city => throw _privateConstructorUsedError;
+  dynamic get district => throw _privateConstructorUsedError;
+  dynamic get geo => throw _privateConstructorUsedError;
+  @JsonKey(name: 'social')
+  dynamic get socialLinks => throw _privateConstructorUsedError;
+  List<dynamic> get businessHours => throw _privateConstructorUsedError;
+  List<dynamic> get services => throw _privateConstructorUsedError;
+  List<dynamic> get tags => throw _privateConstructorUsedError;
   bool get isFeatured => throw _privateConstructorUsedError;
   int get viewCount => throw _privateConstructorUsedError;
-  String? get createdAt => throw _privateConstructorUsedError;
+  dynamic get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this BusinessDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,29 +62,26 @@ abstract class $BusinessDtoCopyWith<$Res> {
   @useResult
   $Res call({
     dynamic id,
-    String name,
-    String slug,
-    String category,
-    String description,
+    dynamic name,
+    dynamic slug,
+    dynamic category,
+    dynamic description,
     dynamic logo,
-    String? phone,
-    String? email,
-    String? website,
-    String? address,
-    String? city,
-    String? district,
-    GeoLocationDto? geo,
-    SocialLinksDto? socialLinks,
-    List<BusinessHoursDto> businessHours,
-    List<String> services,
-    List<String> tags,
+    dynamic phone,
+    dynamic email,
+    dynamic website,
+    dynamic address,
+    dynamic city,
+    dynamic district,
+    dynamic geo,
+    @JsonKey(name: 'social') dynamic socialLinks,
+    List<dynamic> businessHours,
+    List<dynamic> services,
+    List<dynamic> tags,
     bool isFeatured,
     int viewCount,
-    String? createdAt,
+    dynamic createdAt,
   });
-
-  $GeoLocationDtoCopyWith<$Res>? get geo;
-  $SocialLinksDtoCopyWith<$Res>? get socialLinks;
 }
 
 /// @nodoc
@@ -103,10 +100,10 @@ class _$BusinessDtoCopyWithImpl<$Res, $Val extends BusinessDto>
   @override
   $Res call({
     Object? id = freezed,
-    Object? name = null,
-    Object? slug = null,
-    Object? category = null,
-    Object? description = null,
+    Object? name = freezed,
+    Object? slug = freezed,
+    Object? category = freezed,
+    Object? description = freezed,
     Object? logo = freezed,
     Object? phone = freezed,
     Object? email = freezed,
@@ -129,22 +126,22 @@ class _$BusinessDtoCopyWithImpl<$Res, $Val extends BusinessDto>
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
                       as dynamic,
-            name: null == name
+            name: freezed == name
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            slug: null == slug
+                      as dynamic,
+            slug: freezed == slug
                 ? _value.slug
                 : slug // ignore: cast_nullable_to_non_nullable
-                      as String,
-            category: null == category
+                      as dynamic,
+            category: freezed == category
                 ? _value.category
                 : category // ignore: cast_nullable_to_non_nullable
-                      as String,
-            description: null == description
+                      as dynamic,
+            description: freezed == description
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as dynamic,
             logo: freezed == logo
                 ? _value.logo
                 : logo // ignore: cast_nullable_to_non_nullable
@@ -152,47 +149,47 @@ class _$BusinessDtoCopyWithImpl<$Res, $Val extends BusinessDto>
             phone: freezed == phone
                 ? _value.phone
                 : phone // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             email: freezed == email
                 ? _value.email
                 : email // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             website: freezed == website
                 ? _value.website
                 : website // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             address: freezed == address
                 ? _value.address
                 : address // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             city: freezed == city
                 ? _value.city
                 : city // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             district: freezed == district
                 ? _value.district
                 : district // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
             geo: freezed == geo
                 ? _value.geo
                 : geo // ignore: cast_nullable_to_non_nullable
-                      as GeoLocationDto?,
+                      as dynamic,
             socialLinks: freezed == socialLinks
                 ? _value.socialLinks
                 : socialLinks // ignore: cast_nullable_to_non_nullable
-                      as SocialLinksDto?,
+                      as dynamic,
             businessHours: null == businessHours
                 ? _value.businessHours
                 : businessHours // ignore: cast_nullable_to_non_nullable
-                      as List<BusinessHoursDto>,
+                      as List<dynamic>,
             services: null == services
                 ? _value.services
                 : services // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
+                      as List<dynamic>,
             tags: null == tags
                 ? _value.tags
                 : tags // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
+                      as List<dynamic>,
             isFeatured: null == isFeatured
                 ? _value.isFeatured
                 : isFeatured // ignore: cast_nullable_to_non_nullable
@@ -204,38 +201,10 @@ class _$BusinessDtoCopyWithImpl<$Res, $Val extends BusinessDto>
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as dynamic,
           )
           as $Val,
     );
-  }
-
-  /// Create a copy of BusinessDto
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $GeoLocationDtoCopyWith<$Res>? get geo {
-    if (_value.geo == null) {
-      return null;
-    }
-
-    return $GeoLocationDtoCopyWith<$Res>(_value.geo!, (value) {
-      return _then(_value.copyWith(geo: value) as $Val);
-    });
-  }
-
-  /// Create a copy of BusinessDto
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $SocialLinksDtoCopyWith<$Res>? get socialLinks {
-    if (_value.socialLinks == null) {
-      return null;
-    }
-
-    return $SocialLinksDtoCopyWith<$Res>(_value.socialLinks!, (value) {
-      return _then(_value.copyWith(socialLinks: value) as $Val);
-    });
   }
 }
 
@@ -250,31 +219,26 @@ abstract class _$$BusinessDtoImplCopyWith<$Res>
   @useResult
   $Res call({
     dynamic id,
-    String name,
-    String slug,
-    String category,
-    String description,
+    dynamic name,
+    dynamic slug,
+    dynamic category,
+    dynamic description,
     dynamic logo,
-    String? phone,
-    String? email,
-    String? website,
-    String? address,
-    String? city,
-    String? district,
-    GeoLocationDto? geo,
-    SocialLinksDto? socialLinks,
-    List<BusinessHoursDto> businessHours,
-    List<String> services,
-    List<String> tags,
+    dynamic phone,
+    dynamic email,
+    dynamic website,
+    dynamic address,
+    dynamic city,
+    dynamic district,
+    dynamic geo,
+    @JsonKey(name: 'social') dynamic socialLinks,
+    List<dynamic> businessHours,
+    List<dynamic> services,
+    List<dynamic> tags,
     bool isFeatured,
     int viewCount,
-    String? createdAt,
+    dynamic createdAt,
   });
-
-  @override
-  $GeoLocationDtoCopyWith<$Res>? get geo;
-  @override
-  $SocialLinksDtoCopyWith<$Res>? get socialLinks;
 }
 
 /// @nodoc
@@ -292,10 +256,10 @@ class __$$BusinessDtoImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = freezed,
-    Object? name = null,
-    Object? slug = null,
-    Object? category = null,
-    Object? description = null,
+    Object? name = freezed,
+    Object? slug = freezed,
+    Object? category = freezed,
+    Object? description = freezed,
     Object? logo = freezed,
     Object? phone = freezed,
     Object? email = freezed,
@@ -318,22 +282,22 @@ class __$$BusinessDtoImplCopyWithImpl<$Res>
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
                   as dynamic,
-        name: null == name
+        name: freezed == name
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        slug: null == slug
+                  as dynamic,
+        slug: freezed == slug
             ? _value.slug
             : slug // ignore: cast_nullable_to_non_nullable
-                  as String,
-        category: null == category
+                  as dynamic,
+        category: freezed == category
             ? _value.category
             : category // ignore: cast_nullable_to_non_nullable
-                  as String,
-        description: null == description
+                  as dynamic,
+        description: freezed == description
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as dynamic,
         logo: freezed == logo
             ? _value.logo
             : logo // ignore: cast_nullable_to_non_nullable
@@ -341,47 +305,47 @@ class __$$BusinessDtoImplCopyWithImpl<$Res>
         phone: freezed == phone
             ? _value.phone
             : phone // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         email: freezed == email
             ? _value.email
             : email // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         website: freezed == website
             ? _value.website
             : website // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         address: freezed == address
             ? _value.address
             : address // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         city: freezed == city
             ? _value.city
             : city // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         district: freezed == district
             ? _value.district
             : district // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
         geo: freezed == geo
             ? _value.geo
             : geo // ignore: cast_nullable_to_non_nullable
-                  as GeoLocationDto?,
+                  as dynamic,
         socialLinks: freezed == socialLinks
             ? _value.socialLinks
             : socialLinks // ignore: cast_nullable_to_non_nullable
-                  as SocialLinksDto?,
+                  as dynamic,
         businessHours: null == businessHours
             ? _value._businessHours
             : businessHours // ignore: cast_nullable_to_non_nullable
-                  as List<BusinessHoursDto>,
+                  as List<dynamic>,
         services: null == services
             ? _value._services
             : services // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
+                  as List<dynamic>,
         tags: null == tags
             ? _value._tags
             : tags // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
+                  as List<dynamic>,
         isFeatured: null == isFeatured
             ? _value.isFeatured
             : isFeatured // ignore: cast_nullable_to_non_nullable
@@ -393,7 +357,7 @@ class __$$BusinessDtoImplCopyWithImpl<$Res>
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as dynamic,
       ),
     );
   }
@@ -407,7 +371,7 @@ class _$BusinessDtoImpl implements _BusinessDto {
     required this.name,
     required this.slug,
     required this.category,
-    this.description = '',
+    this.description,
     this.logo,
     this.phone,
     this.email,
@@ -416,10 +380,10 @@ class _$BusinessDtoImpl implements _BusinessDto {
     this.city,
     this.district,
     this.geo,
-    this.socialLinks,
-    final List<BusinessHoursDto> businessHours = const [],
-    final List<String> services = const [],
-    final List<String> tags = const [],
+    @JsonKey(name: 'social') this.socialLinks,
+    final List<dynamic> businessHours = const [],
+    final List<dynamic> services = const [],
+    final List<dynamic> tags = const [],
     this.isFeatured = false,
     this.viewCount = 0,
     this.createdAt,
@@ -433,54 +397,54 @@ class _$BusinessDtoImpl implements _BusinessDto {
   @override
   final dynamic id;
   @override
-  final String name;
+  final dynamic name;
   @override
-  final String slug;
+  final dynamic slug;
   @override
-  final String category;
+  final dynamic category;
   @override
-  @JsonKey()
-  final String description;
+  final dynamic description;
   @override
   final dynamic logo;
   @override
-  final String? phone;
+  final dynamic phone;
   @override
-  final String? email;
+  final dynamic email;
   @override
-  final String? website;
+  final dynamic website;
   @override
-  final String? address;
+  final dynamic address;
   @override
-  final String? city;
+  final dynamic city;
   @override
-  final String? district;
+  final dynamic district;
   @override
-  final GeoLocationDto? geo;
+  final dynamic geo;
   @override
-  final SocialLinksDto? socialLinks;
-  final List<BusinessHoursDto> _businessHours;
+  @JsonKey(name: 'social')
+  final dynamic socialLinks;
+  final List<dynamic> _businessHours;
   @override
   @JsonKey()
-  List<BusinessHoursDto> get businessHours {
+  List<dynamic> get businessHours {
     if (_businessHours is EqualUnmodifiableListView) return _businessHours;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_businessHours);
   }
 
-  final List<String> _services;
+  final List<dynamic> _services;
   @override
   @JsonKey()
-  List<String> get services {
+  List<dynamic> get services {
     if (_services is EqualUnmodifiableListView) return _services;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_services);
   }
 
-  final List<String> _tags;
+  final List<dynamic> _tags;
   @override
   @JsonKey()
-  List<String> get tags {
+  List<dynamic> get tags {
     if (_tags is EqualUnmodifiableListView) return _tags;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_tags);
@@ -493,7 +457,7 @@ class _$BusinessDtoImpl implements _BusinessDto {
   @JsonKey()
   final int viewCount;
   @override
-  final String? createdAt;
+  final dynamic createdAt;
 
   @override
   String toString() {
@@ -506,23 +470,25 @@ class _$BusinessDtoImpl implements _BusinessDto {
         (other.runtimeType == runtimeType &&
             other is _$BusinessDtoImpl &&
             const DeepCollectionEquality().equals(other.id, id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.slug, slug) || other.slug == slug) &&
-            (identical(other.category, category) ||
-                other.category == category) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality().equals(other.slug, slug) &&
+            const DeepCollectionEquality().equals(other.category, category) &&
+            const DeepCollectionEquality().equals(
+              other.description,
+              description,
+            ) &&
             const DeepCollectionEquality().equals(other.logo, logo) &&
-            (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.website, website) || other.website == website) &&
-            (identical(other.address, address) || other.address == address) &&
-            (identical(other.city, city) || other.city == city) &&
-            (identical(other.district, district) ||
-                other.district == district) &&
-            (identical(other.geo, geo) || other.geo == geo) &&
-            (identical(other.socialLinks, socialLinks) ||
-                other.socialLinks == socialLinks) &&
+            const DeepCollectionEquality().equals(other.phone, phone) &&
+            const DeepCollectionEquality().equals(other.email, email) &&
+            const DeepCollectionEquality().equals(other.website, website) &&
+            const DeepCollectionEquality().equals(other.address, address) &&
+            const DeepCollectionEquality().equals(other.city, city) &&
+            const DeepCollectionEquality().equals(other.district, district) &&
+            const DeepCollectionEquality().equals(other.geo, geo) &&
+            const DeepCollectionEquality().equals(
+              other.socialLinks,
+              socialLinks,
+            ) &&
             const DeepCollectionEquality().equals(
               other._businessHours,
               _businessHours,
@@ -533,8 +499,7 @@ class _$BusinessDtoImpl implements _BusinessDto {
                 other.isFeatured == isFeatured) &&
             (identical(other.viewCount, viewCount) ||
                 other.viewCount == viewCount) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+            const DeepCollectionEquality().equals(other.createdAt, createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -542,25 +507,25 @@ class _$BusinessDtoImpl implements _BusinessDto {
   int get hashCode => Object.hashAll([
     runtimeType,
     const DeepCollectionEquality().hash(id),
-    name,
-    slug,
-    category,
-    description,
+    const DeepCollectionEquality().hash(name),
+    const DeepCollectionEquality().hash(slug),
+    const DeepCollectionEquality().hash(category),
+    const DeepCollectionEquality().hash(description),
     const DeepCollectionEquality().hash(logo),
-    phone,
-    email,
-    website,
-    address,
-    city,
-    district,
-    geo,
-    socialLinks,
+    const DeepCollectionEquality().hash(phone),
+    const DeepCollectionEquality().hash(email),
+    const DeepCollectionEquality().hash(website),
+    const DeepCollectionEquality().hash(address),
+    const DeepCollectionEquality().hash(city),
+    const DeepCollectionEquality().hash(district),
+    const DeepCollectionEquality().hash(geo),
+    const DeepCollectionEquality().hash(socialLinks),
     const DeepCollectionEquality().hash(_businessHours),
     const DeepCollectionEquality().hash(_services),
     const DeepCollectionEquality().hash(_tags),
     isFeatured,
     viewCount,
-    createdAt,
+    const DeepCollectionEquality().hash(createdAt),
   ]);
 
   /// Create a copy of BusinessDto
@@ -580,25 +545,25 @@ class _$BusinessDtoImpl implements _BusinessDto {
 abstract class _BusinessDto implements BusinessDto {
   const factory _BusinessDto({
     required final dynamic id,
-    required final String name,
-    required final String slug,
-    required final String category,
-    final String description,
+    required final dynamic name,
+    required final dynamic slug,
+    required final dynamic category,
+    final dynamic description,
     final dynamic logo,
-    final String? phone,
-    final String? email,
-    final String? website,
-    final String? address,
-    final String? city,
-    final String? district,
-    final GeoLocationDto? geo,
-    final SocialLinksDto? socialLinks,
-    final List<BusinessHoursDto> businessHours,
-    final List<String> services,
-    final List<String> tags,
+    final dynamic phone,
+    final dynamic email,
+    final dynamic website,
+    final dynamic address,
+    final dynamic city,
+    final dynamic district,
+    final dynamic geo,
+    @JsonKey(name: 'social') final dynamic socialLinks,
+    final List<dynamic> businessHours,
+    final List<dynamic> services,
+    final List<dynamic> tags,
     final bool isFeatured,
     final int viewCount,
-    final String? createdAt,
+    final dynamic createdAt,
   }) = _$BusinessDtoImpl;
 
   factory _BusinessDto.fromJson(Map<String, dynamic> json) =
@@ -607,43 +572,44 @@ abstract class _BusinessDto implements BusinessDto {
   @override
   dynamic get id;
   @override
-  String get name;
+  dynamic get name;
   @override
-  String get slug;
+  dynamic get slug;
   @override
-  String get category;
+  dynamic get category;
   @override
-  String get description;
+  dynamic get description;
   @override
   dynamic get logo;
   @override
-  String? get phone;
+  dynamic get phone;
   @override
-  String? get email;
+  dynamic get email;
   @override
-  String? get website;
+  dynamic get website;
   @override
-  String? get address;
+  dynamic get address;
   @override
-  String? get city;
+  dynamic get city;
   @override
-  String? get district;
+  dynamic get district;
   @override
-  GeoLocationDto? get geo;
+  dynamic get geo;
   @override
-  SocialLinksDto? get socialLinks;
+  @JsonKey(name: 'social')
+  dynamic get socialLinks;
   @override
-  List<BusinessHoursDto> get businessHours;
+  List<dynamic> get businessHours;
   @override
-  List<String> get services;
+  List<dynamic> get services;
   @override
-  List<String> get tags;
+  List<dynamic> get tags;
   @override
   bool get isFeatured;
   @override
   int get viewCount;
   @override
-  String? get createdAt;
+  dynamic get createdAt;
 
   /// Create a copy of BusinessDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1063,7 +1029,9 @@ BusinessHoursDto _$BusinessHoursDtoFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$BusinessHoursDto {
   String get day => throw _privateConstructorUsedError;
+  @JsonKey(name: 'openTime')
   String? get open => throw _privateConstructorUsedError;
+  @JsonKey(name: 'closeTime')
   String? get close => throw _privateConstructorUsedError;
   bool get isClosed => throw _privateConstructorUsedError;
 
@@ -1084,7 +1052,12 @@ abstract class $BusinessHoursDtoCopyWith<$Res> {
     $Res Function(BusinessHoursDto) then,
   ) = _$BusinessHoursDtoCopyWithImpl<$Res, BusinessHoursDto>;
   @useResult
-  $Res call({String day, String? open, String? close, bool isClosed});
+  $Res call({
+    String day,
+    @JsonKey(name: 'openTime') String? open,
+    @JsonKey(name: 'closeTime') String? close,
+    bool isClosed,
+  });
 }
 
 /// @nodoc
@@ -1140,7 +1113,12 @@ abstract class _$$BusinessHoursDtoImplCopyWith<$Res>
   ) = __$$BusinessHoursDtoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String day, String? open, String? close, bool isClosed});
+  $Res call({
+    String day,
+    @JsonKey(name: 'openTime') String? open,
+    @JsonKey(name: 'closeTime') String? close,
+    bool isClosed,
+  });
 }
 
 /// @nodoc
@@ -1190,8 +1168,8 @@ class __$$BusinessHoursDtoImplCopyWithImpl<$Res>
 class _$BusinessHoursDtoImpl implements _BusinessHoursDto {
   const _$BusinessHoursDtoImpl({
     required this.day,
-    this.open,
-    this.close,
+    @JsonKey(name: 'openTime') this.open,
+    @JsonKey(name: 'closeTime') this.close,
     this.isClosed = false,
   });
 
@@ -1201,8 +1179,10 @@ class _$BusinessHoursDtoImpl implements _BusinessHoursDto {
   @override
   final String day;
   @override
+  @JsonKey(name: 'openTime')
   final String? open;
   @override
+  @JsonKey(name: 'closeTime')
   final String? close;
   @override
   @JsonKey()
@@ -1249,8 +1229,8 @@ class _$BusinessHoursDtoImpl implements _BusinessHoursDto {
 abstract class _BusinessHoursDto implements BusinessHoursDto {
   const factory _BusinessHoursDto({
     required final String day,
-    final String? open,
-    final String? close,
+    @JsonKey(name: 'openTime') final String? open,
+    @JsonKey(name: 'closeTime') final String? close,
     final bool isClosed,
   }) = _$BusinessHoursDtoImpl;
 
@@ -1260,8 +1240,10 @@ abstract class _BusinessHoursDto implements BusinessHoursDto {
   @override
   String get day;
   @override
+  @JsonKey(name: 'openTime')
   String? get open;
   @override
+  @JsonKey(name: 'closeTime')
   String? get close;
   @override
   bool get isClosed;

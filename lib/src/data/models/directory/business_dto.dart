@@ -8,25 +8,25 @@ part 'business_dto.g.dart';
 class BusinessDto with _$BusinessDto {
   const factory BusinessDto({
     required dynamic id,
-    required String name,
-    required String slug,
-    required String category,
-    @Default('') String description,
+    required dynamic name,
+    required dynamic slug,
+    required dynamic category,
+    dynamic description,
     dynamic logo,
-    String? phone,
-    String? email,
-    String? website,
-    String? address,
-    String? city,
-    String? district,
-    GeoLocationDto? geo,
-    SocialLinksDto? socialLinks,
-    @Default([]) List<BusinessHoursDto> businessHours,
-    @Default([]) List<String> services,
-    @Default([]) List<String> tags,
+    dynamic phone,
+    dynamic email,
+    dynamic website,
+    dynamic address,
+    dynamic city,
+    dynamic district,
+    dynamic geo,
+    @JsonKey(name: 'social') dynamic socialLinks,
+    @Default([]) List<dynamic> businessHours,
+    @Default([]) List<dynamic> services,
+    @Default([]) List<dynamic> tags,
     @Default(false) bool isFeatured,
     @Default(0) int viewCount,
-    String? createdAt,
+    dynamic createdAt,
   }) = _BusinessDto;
 
   factory BusinessDto.fromJson(Map<String, dynamic> json) =>
@@ -64,8 +64,8 @@ class SocialLinksDto with _$SocialLinksDto {
 class BusinessHoursDto with _$BusinessHoursDto {
   const factory BusinessHoursDto({
     required String day,
-    String? open,
-    String? close,
+    @JsonKey(name: 'openTime') String? open,
+    @JsonKey(name: 'closeTime') String? close,
     @Default(false) bool isClosed,
   }) = _BusinessHoursDto;
 

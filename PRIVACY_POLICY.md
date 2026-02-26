@@ -1,12 +1,38 @@
 # Privacy Policy for Rwanda Connect
 
-**Last Updated: February 20, 2026**
+**Last Updated: February 23, 2026**
 
 ## Introduction
 
 Rwanda Connect ("we," "our," or "us") operates the Rwanda Connect mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App.
 
 Please read this Privacy Policy carefully. By using the App, you agree to the collection and use of information in accordance with this policy.
+
+## Independence and Non-Government Affiliation
+
+Rwanda Connect is an independent, privately operated platform.
+
+Rwanda Connect does not represent, is not affiliated with, and is not endorsed by the Government of Rwanda, any embassy, any consulate, or any other government entity.
+
+Rwanda Connect does not provide official government services, does not process government applications on behalf of users, and does not act as an authorized government intermediary.
+
+## Government-Related Information and Source Verification
+
+Some content in the App may discuss public policies, procedures, tenders, visas, taxation, education, business registration, or other public-service topics.
+
+This information is provided for general informational purposes only and may come from third-party publishers or public sources. Users are responsible for independently verifying official requirements, deadlines, and decisions directly with official sources.
+
+Official public source examples:
+
+- Government of Rwanda: https://www.gov.rw
+- Ministry of Foreign Affairs and International Cooperation (MINAFFET): https://www.minaffet.gov.rw
+- Rwanda Development Board (RDB): https://rdb.rw
+- Rwanda Revenue Authority (RRA): https://www.rra.gov.rw
+- Rwanda Public Procurement Authority (RPPA): https://www.rppa.gov.rw
+- Irembo: https://www.irembo.gov.rw
+- Rwanda Directorate General of Immigration and Emigration: https://www.migration.gov.rw
+
+If information in the App differs from an official source, the official source takes precedence.
 
 ## Information We Collect
 
@@ -144,4 +170,4 @@ We comply with applicable Rwandan data protection laws and regulations governing
 
 ---
 
-*This Privacy Policy is effective as of February 20, 2026.*
+*This Privacy Policy is effective as of February 23, 2026.*

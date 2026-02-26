@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -66,24 +65,17 @@ class _FeaturedNewsCarouselState extends ConsumerState<FeaturedNewsCarousel> {
   Widget build(BuildContext context) {
     final featuredState = ref.watch(featuredNewsProvider);
 
-    debugPrint('FeaturedCarousel: isLoading=${featuredState.isLoading}, newsCount=${featuredState.news.length}, error=${featuredState.error}');
-
     if (featuredState.isLoading && featuredState.news.isEmpty) {
-      debugPrint('FeaturedCarousel: Showing shimmer');
       return const _FeaturedNewsShimmer();
     }
 
     if (featuredState.error != null && featuredState.news.isEmpty) {
-      debugPrint('FeaturedCarousel: Error, hiding widget');
       return const SizedBox.shrink();
     }
 
     if (featuredState.news.isEmpty) {
-      debugPrint('FeaturedCarousel: No news, hiding widget');
       return const SizedBox.shrink();
     }
-
-    debugPrint('FeaturedCarousel: Showing ${featuredState.news.length} items, first imageUrl=${featuredState.news.first.imageUrl}');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,29 +212,14 @@ class _FeaturedNewsCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               // Background image or gradient
-              if (news.imageUrl != null) ...[
-                Builder(builder: (context) {
-                  debugPrint('FeaturedNews: Loading image: ${news.imageUrl}');
-                  return Image.network(
-                    news.imageUrl!,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      debugPrint('FeaturedNews: Image loading progress...');
-                      return _buildGradientBackground();
-                    },
-                    errorBuilder: (_, error, ___) {
-                      debugPrint('FeaturedNews: Image error: $error');
-                      return _buildGradientBackground();
-                    },
-                  );
-                }),
-              ] else ...[
-                Builder(builder: (context) {
-                  debugPrint('FeaturedNews: No imageUrl for ${news.title}');
-                  return _buildGradientBackground();
-                }),
-              ],
+              if (news.imageUrl != null)
+                Image.network(
+                  news.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _buildGradientBackground(),
+                )
+              else
+                _buildGradientBackground(),
 
               // Gradient overlay
               Container(
