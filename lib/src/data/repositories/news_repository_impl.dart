@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/api_interceptors.dart';
@@ -117,16 +118,20 @@ class NewsRepositoryImpl implements NewsRepository {
 
   @override
   Future<NewsResult<List<News>>> getFeaturedNews({int limit = 5}) async {
+    debugPrint('NewsRepository: getFeaturedNews called, isOnline=${_connectivityService.isOnline}');
     if (_connectivityService.isOnline) {
       try {
         final response = await _newsService.getFeaturedNews(limit: limit);
+        debugPrint('NewsRepository: Got ${response.news.length} news items from API');
 
         // Cache featured news
         await _cacheService.cacheFeaturedNews(
           response.news.map((n) => n.toJson()).toList(),
         );
 
+        debugPrint('NewsRepository: Calling toEntities()...');
         final news = response.news.toEntities();
+        debugPrint('NewsRepository: toEntities done, first imageUrl=${news.isNotEmpty ? news.first.imageUrl : "empty"}');
         return NewsSuccess(news);
       } on DioException catch (e) {
         return _getFeaturedFromCache(e);
