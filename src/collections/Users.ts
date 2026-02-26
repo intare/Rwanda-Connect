@@ -101,13 +101,6 @@ export const Users: CollectionConfig = {
       defaultValue: 'user',
       required: true,
       saveToJWT: true,
-      access: {
-        // Only admins can set/change roles
-        create: ({ req: { user } }) => isAdmin(user),
-        update: ({ req: { user } }) => isAdmin(user),
-        // Admins see all roles, users see only their own
-        read: ({ req: { user }, doc }) => isAdmin(user) || user?.id === doc?.id,
-      },
       admin: {
         description: 'User role for access control',
       },
@@ -127,13 +120,6 @@ export const Users: CollectionConfig = {
       defaultValue: 'pending',
       required: true,
       saveToJWT: true,
-      access: {
-        // Only admins can set/change contributor status
-        create: ({ req: { user } }) => isAdmin(user),
-        update: ({ req: { user } }) => isAdmin(user),
-        // Admins see all statuses, users see only their own
-        read: ({ req: { user }, doc }) => isAdmin(user) || user?.id === doc?.id,
-      },
       admin: {
         description: 'Contributor approval required for posting events, real estate, and business listings',
       },
