@@ -66,17 +66,24 @@ class _FeaturedNewsCarouselState extends ConsumerState<FeaturedNewsCarousel> {
   Widget build(BuildContext context) {
     final featuredState = ref.watch(featuredNewsProvider);
 
+    debugPrint('FeaturedCarousel: isLoading=${featuredState.isLoading}, newsCount=${featuredState.news.length}, error=${featuredState.error}');
+
     if (featuredState.isLoading && featuredState.news.isEmpty) {
+      debugPrint('FeaturedCarousel: Showing shimmer');
       return const _FeaturedNewsShimmer();
     }
 
     if (featuredState.error != null && featuredState.news.isEmpty) {
+      debugPrint('FeaturedCarousel: Error, hiding widget');
       return const SizedBox.shrink();
     }
 
     if (featuredState.news.isEmpty) {
+      debugPrint('FeaturedCarousel: No news, hiding widget');
       return const SizedBox.shrink();
     }
+
+    debugPrint('FeaturedCarousel: Showing ${featuredState.news.length} items, first imageUrl=${featuredState.news.first.imageUrl}');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
