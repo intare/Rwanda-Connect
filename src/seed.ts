@@ -128,13 +128,7 @@ async function uploadImageFromUrl(
       overrideAccess: true,
     })
 
-    // Clean up temp file (Payload copies it)
-    try {
-      fs.unlinkSync(tempPath)
-    } catch {
-      // Ignore cleanup errors
-    }
-
+    // Don't delete the temp file - Payload uses it in place, not copies it
     console.log(`  Uploaded: ${filename} (ID: ${media.id})`)
     return media.id as number
   } catch (error) {
