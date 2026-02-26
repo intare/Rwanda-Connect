@@ -88,22 +88,6 @@ class HomeScreen extends ConsumerWidget {
                       'Stay updated with the latest news',
                       style: AppTypography.bodyMediumSecondary,
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: AppColors.warning.withValues(alpha: 0.1),
-                        borderRadius: AppRadius.cardRadius,
-                        border: Border.all(
-                          color: AppColors.warning.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Text(
-                        'Rwanda Connect is an independent private platform and does not represent any government entity. Verify official information directly from source websites.',
-                        style: AppTypography.bodySmall.copyWith(height: 1.4),
-                      ),
-                    ),
                   ],
                 ),
               ),

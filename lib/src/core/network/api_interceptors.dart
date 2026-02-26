@@ -5,6 +5,19 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// Key for storing the auth token in secure storage.
 const String _tokenKey = 'auth_token';
 
+/// Endpoints that should NOT have the auth token added (exact match).
+const List<String> _publicEndpoints = [
+  '/users/login',
+  '/users', // Registration endpoint
+  '/users/forgot-password',
+  '/users/reset-password',
+];
+
+/// Endpoint prefixes that should NOT have the auth token added.
+const List<String> _publicEndpointPrefixes = [
+  '/users/verify/', // Email verification: /users/verify/{token}
+];
+
 /// Interceptor that adds JWT token to requests.
 class AuthInterceptor extends Interceptor {
   AuthInterceptor(this._secureStorage);
@@ -16,9 +29,16 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await _secureStorage.read(key: _tokenKey);
-    if (token != null) {
-      options.headers['Authorization'] = 'JWT $token';
+    // Don't add token to public/auth endpoints
+    final path = options.path;
+    final isPublicEndpoint = _publicEndpoints.contains(path) ||
+        _publicEndpointPrefixes.any((prefix) => path.startsWith(prefix));
+
+    if (!isPublicEndpoint) {
+      final token = await _secureStorage.read(key: _tokenKey);
+      if (token != null) {
+        options.headers['Authorization'] = 'JWT $token';
+      }
     }
     handler.next(options);
   }
