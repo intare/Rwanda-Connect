@@ -202,17 +202,8 @@ const seed = async () => {
     })
     console.log(`Created admin user: ${adminEmail}`)
   } else {
-    // Ensure existing user is admin
-    await payload.update({
-      collection: 'users',
-      id: existingAdmin.docs[0].id,
-      data: {
-        role: 'admin',
-        contributorStatus: 'approved',
-      },
-      overrideAccess: true,
-    })
-    console.log(`Admin user already exists: ${adminEmail}`)
+    // Admin already exists, skip update to avoid field access issues
+    console.log(`Admin user already exists: ${adminEmail} (skipping update)`)
   }
 
   // ============================================
