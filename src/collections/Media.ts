@@ -1,13 +1,18 @@
 import type { CollectionConfig } from 'payload'
 
+const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
+
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    // Open access for all operations (temporary for debugging)
+    // Anyone can read/view media
     read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    // Only authenticated users can upload
+    create: ({ req: { user } }) => Boolean(user),
+    // Only authenticated users can update
+    update: ({ req: { user } }) => Boolean(user),
+    // Only admins can delete
+    delete: ({ req: { user } }) => isAdmin(user),
   },
   fields: [
     {

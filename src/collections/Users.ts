@@ -1,7 +1,15 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
 
+const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
 const enableEmailVerification = process.env.PAYLOAD_ENABLE_EMAIL_VERIFICATION === 'true'
 const trialDurationDays = 14
+
+// Admins can access all users, regular users can only access themselves
+const adminOrSelf: Access = ({ req: { user } }) => {
+  if (!user) return false
+  if (isAdmin(user)) return true
+  return { id: { equals: user.id } }
+}
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -14,22 +22,33 @@ export const Users: CollectionConfig = {
     lockTime: 10 * 60 * 1000,
   },
   access: {
-    // Temporarily open all access for debugging
+    // Anyone can register
     create: () => true,
-    read: () => true,
-    update: () => true,
-    delete: () => true,
-    admin: () => true,
+    // Admins see all users, users see only themselves
+    read: adminOrSelf,
+    // Admins can update any user, users can update only themselves
+    update: adminOrSelf,
+    // Only admins can delete users
+    delete: ({ req: { user } }) => isAdmin(user),
+    // Only admins can access admin panel
+    admin: ({ req: { user } }) => isAdmin(user),
   },
   hooks: {
     beforeValidate: [
-      ({ data, operation }) => {
+      ({ data, req, operation }) => {
         if (!data) return data
-        // Only enforce defaults on create for non-admin users
-        // Temporarily disabled strict checks for debugging
-        if (operation === 'create' && !data.role) {
+        // Non-admins creating users get default role and status
+        if (operation === 'create' && !isAdmin(req.user)) {
           data.role = 'user'
           data.contributorStatus = 'pending'
+        }
+        // Prevent non-admins from changing role
+        if (operation === 'update' && !isAdmin(req.user) && 'role' in data) {
+          delete (data as Record<string, unknown>).role
+        }
+        // Prevent non-admins from changing contributorStatus
+        if (operation === 'update' && !isAdmin(req.user) && 'contributorStatus' in data) {
+          delete (data as Record<string, unknown>).contributorStatus
         }
         return data
       },
@@ -82,7 +101,13 @@ export const Users: CollectionConfig = {
       defaultValue: 'user',
       required: true,
       saveToJWT: true,
-      // Temporarily open access for debugging
+      access: {
+        // Only admins can set/change roles
+        create: ({ req: { user } }) => isAdmin(user),
+        update: ({ req: { user } }) => isAdmin(user),
+        // Admins see all roles, users see only their own
+        read: ({ req: { user }, doc }) => isAdmin(user) || user?.id === doc?.id,
+      },
       admin: {
         description: 'User role for access control',
       },
@@ -102,7 +127,13 @@ export const Users: CollectionConfig = {
       defaultValue: 'pending',
       required: true,
       saveToJWT: true,
-      // Temporarily open access for debugging
+      access: {
+        // Only admins can set/change contributor status
+        create: ({ req: { user } }) => isAdmin(user),
+        update: ({ req: { user } }) => isAdmin(user),
+        // Admins see all statuses, users see only their own
+        read: ({ req: { user }, doc }) => isAdmin(user) || user?.id === doc?.id,
+      },
       admin: {
         description: 'Contributor approval required for posting events, real estate, and business listings',
       },
