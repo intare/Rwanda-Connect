@@ -30,8 +30,8 @@ export const Users: CollectionConfig = {
     update: adminOrSelf,
     // Only admins can delete users
     delete: ({ req: { user } }) => isAdmin(user),
-    // Only admins can access admin panel
-    admin: ({ req: { user } }) => isAdmin(user),
+    // Allow admin panel access - rely on adminOrSelf for data protection
+    admin: () => true,
   },
   hooks: {
     beforeValidate: [
