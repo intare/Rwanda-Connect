@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -212,14 +213,29 @@ class _FeaturedNewsCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               // Background image or gradient
-              if (news.imageUrl != null)
-                Image.network(
-                  news.imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _buildGradientBackground(),
-                )
-              else
-                _buildGradientBackground(),
+              if (news.imageUrl != null) ...[
+                Builder(builder: (context) {
+                  debugPrint('FeaturedNews: Loading image: ${news.imageUrl}');
+                  return Image.network(
+                    news.imageUrl!,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      debugPrint('FeaturedNews: Image loading progress...');
+                      return _buildGradientBackground();
+                    },
+                    errorBuilder: (_, error, ___) {
+                      debugPrint('FeaturedNews: Image error: $error');
+                      return _buildGradientBackground();
+                    },
+                  );
+                }),
+              ] else ...[
+                Builder(builder: (context) {
+                  debugPrint('FeaturedNews: No imageUrl for ${news.title}');
+                  return _buildGradientBackground();
+                }),
+              ],
 
               // Gradient overlay
               Container(
