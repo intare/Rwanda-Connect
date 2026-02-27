@@ -23,6 +23,8 @@ class NewsListResponse {
 }
 
 /// Service for making news-related API calls using Payload CMS.
+/// Note: Currently not used - news is fetched directly from RSS feeds.
+/// Kept for potential future use or fallback.
 class NewsService {
   NewsService(this._dio);
 

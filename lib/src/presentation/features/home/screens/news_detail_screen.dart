@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/theme.dart';
@@ -100,49 +101,17 @@ class NewsDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xxl),
 
-                  // Summary
-                  Container(
-                    padding: AppSpacing.paddingLg,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: AppRadius.cardRadius,
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Text(
-                      news.summary,
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-
                   // Content
                   if (news.content != null) ...[
-                    _RichTextContent(content: news.content),
+                    _HtmlContent(content: news.content),
                   ] else ...[
                     Text(
-                      'Full article content is not available.',
-                      style: AppTypography.bodyMediumSecondary,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    OutlinedButton.icon(
-                      onPressed: () => _openInBrowser(context),
-                      icon: const Icon(Icons.open_in_new),
-                      label: const Text('Read full article'),
+                      news.summary,
+                      style: AppTypography.bodyMedium.copyWith(
+                        height: 1.7,
+                      ),
                     ),
                   ],
-
-                  const SizedBox(height: AppSpacing.xxxl),
-
-                  // Source link
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () => _openInBrowser(context),
-                      icon: const Icon(Icons.link),
-                      label: const Text('View original source'),
-                    ),
-                  ),
 
                   const SizedBox(height: AppSpacing.xxxl),
                 ],
@@ -224,91 +193,161 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-/// Widget to render Lexical rich text content.
-class _RichTextContent extends StatelessWidget {
-  const _RichTextContent({required this.content});
+/// Widget to render HTML content with links, images, and tweets.
+class _HtmlContent extends StatelessWidget {
+  const _HtmlContent({required this.content});
 
   final dynamic content;
 
   @override
   Widget build(BuildContext context) {
-    // Extract text from Lexical JSON format
-    final textContent = _extractTextFromLexical(content);
+    final htmlContent = _getHtmlString();
 
-    if (textContent.isEmpty) {
+    if (htmlContent.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: textContent.map((paragraph) {
-        if (paragraph.startsWith('# ')) {
-          // Heading
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-            child: Text(
-              paragraph.substring(2),
-              style: AppTypography.titleLarge,
+    return Html(
+      data: htmlContent,
+      style: {
+        'body': Style(
+          fontSize: FontSize(16),
+          lineHeight: const LineHeight(1.7),
+          color: AppColors.primaryText,
+          margin: Margins.zero,
+          padding: HtmlPaddings.zero,
+        ),
+        'p': Style(
+          margin: Margins.only(bottom: 16),
+        ),
+        'a': Style(
+          color: AppColors.accent,
+          textDecoration: TextDecoration.underline,
+        ),
+        'img': Style(
+          margin: Margins.symmetric(vertical: 12),
+        ),
+        'h1': Style(
+          fontSize: FontSize(24),
+          fontWeight: FontWeight.bold,
+          margin: Margins.only(bottom: 12, top: 16),
+        ),
+        'h2': Style(
+          fontSize: FontSize(20),
+          fontWeight: FontWeight.bold,
+          margin: Margins.only(bottom: 10, top: 14),
+        ),
+        'h3': Style(
+          fontSize: FontSize(18),
+          fontWeight: FontWeight.bold,
+          margin: Margins.only(bottom: 8, top: 12),
+        ),
+        'blockquote': Style(
+          margin: Margins.symmetric(vertical: 12),
+          padding: HtmlPaddings.only(left: 16),
+          border: const Border(
+            left: BorderSide(
+              color: AppColors.accent,
+              width: 4,
             ),
-          );
-        } else if (paragraph.startsWith('## ')) {
-          // Subheading
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: Text(
-              paragraph.substring(3),
-              style: AppTypography.titleMedium,
-            ),
-          );
-        } else {
-          // Regular paragraph
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: Text(
-              paragraph,
-              style: AppTypography.bodyMedium.copyWith(
-                height: 1.7,
-              ),
-            ),
-          );
+          ),
+          fontStyle: FontStyle.italic,
+          color: AppColors.secondaryText,
+        ),
+        'figure': Style(
+          margin: Margins.symmetric(vertical: 12),
+        ),
+        'figcaption': Style(
+          fontSize: FontSize(14),
+          color: AppColors.secondaryText,
+          fontStyle: FontStyle.italic,
+          textAlign: TextAlign.center,
+          margin: Margins.only(top: 8),
+        ),
+        // Twitter embed styling
+        '.twitter-tweet': Style(
+          backgroundColor: AppColors.surface,
+          padding: HtmlPaddings.all(16),
+          margin: Margins.symmetric(vertical: 12),
+          border: Border.all(color: AppColors.border),
+        ),
+      },
+      onLinkTap: (url, _, __) async {
+        if (url != null) {
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
         }
-      }).toList(),
+      },
+      extensions: [
+        // Handle iframes (for embedded content)
+        TagExtension(
+          tagsToExtend: {'iframe'},
+          builder: (extensionContext) {
+            final src = extensionContext.attributes['src'] ?? '';
+            if (src.contains('twitter.com') || src.contains('x.com')) {
+              return _EmbedPlaceholder(
+                icon: Icons.alternate_email,
+                label: 'View Tweet',
+                url: src,
+              );
+            }
+            if (src.contains('youtube.com') || src.contains('youtu.be')) {
+              return _EmbedPlaceholder(
+                icon: Icons.play_circle_outline,
+                label: 'Watch Video',
+                url: src,
+              );
+            }
+            return _EmbedPlaceholder(
+              icon: Icons.open_in_new,
+              label: 'View Embed',
+              url: src,
+            );
+          },
+        ),
+      ],
     );
   }
 
-  /// Extract plain text from Lexical JSON format.
-  List<String> _extractTextFromLexical(dynamic content) {
-    final paragraphs = <String>[];
+  String _getHtmlString() {
+    if (content == null) return '';
 
-    if (content == null) return paragraphs;
+    if (content is String) {
+      return content as String;
+    }
+
+    // Handle Lexical JSON format
+    if (content is Map<String, dynamic>) {
+      return _extractTextFromLexical(content);
+    }
+
+    return content.toString();
+  }
+
+  String _extractTextFromLexical(Map<String, dynamic> content) {
+    final buffer = StringBuffer();
 
     try {
-      if (content is Map<String, dynamic>) {
-        final root = content['root'];
-        if (root is Map<String, dynamic>) {
-          final children = root['children'] as List<dynamic>?;
-          if (children != null) {
-            for (final child in children) {
-              final text = _extractTextFromNode(child);
-              if (text.isNotEmpty) {
-                paragraphs.add(text);
-              }
-            }
+      final root = content['root'];
+      if (root is Map<String, dynamic>) {
+        final children = root['children'] as List<dynamic>?;
+        if (children != null) {
+          for (final child in children) {
+            buffer.write(_nodeToHtml(child));
           }
         }
       }
     } catch (e) {
-      // If parsing fails, try to convert to string
-      paragraphs.add(content.toString());
+      return content.toString();
     }
 
-    return paragraphs;
+    return buffer.toString();
   }
 
-  /// Recursively extract text from a Lexical node.
-  String _extractTextFromNode(dynamic node) {
+  String _nodeToHtml(dynamic node) {
     if (node == null) return '';
-
     if (node is String) return node;
 
     if (node is Map<String, dynamic>) {
@@ -317,30 +356,56 @@ class _RichTextContent extends StatelessWidget {
 
       if (text != null) return text;
 
-      // Handle heading nodes
-      if (type == 'heading') {
-        final tag = node['tag'] as String?;
-        final childText = _extractChildrenText(node['children']);
-        if (tag == 'h1') return '# $childText';
-        if (tag == 'h2') return '## $childText';
-        return childText;
-      }
+      final children = node['children'] as List<dynamic>?;
+      final childHtml = children?.map(_nodeToHtml).join('') ?? '';
 
-      // Handle paragraph and other nodes
-      return _extractChildrenText(node['children']);
+      switch (type) {
+        case 'heading':
+          final tag = node['tag'] as String? ?? 'h2';
+          return '<$tag>$childHtml</$tag>';
+        case 'paragraph':
+          return '<p>$childHtml</p>';
+        case 'link':
+          final url = node['url'] as String? ?? '';
+          return '<a href="$url">$childHtml</a>';
+        default:
+          return childHtml;
+      }
     }
 
     return '';
   }
+}
 
-  /// Extract text from children array.
-  String _extractChildrenText(dynamic children) {
-    if (children == null) return '';
+/// Placeholder widget for embedded content.
+class _EmbedPlaceholder extends StatelessWidget {
+  const _EmbedPlaceholder({
+    required this.icon,
+    required this.label,
+    required this.url,
+  });
 
-    if (children is List) {
-      return children.map(_extractTextFromNode).join('');
-    }
+  final IconData icon;
+  final String label;
+  final String url;
 
-    return '';
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: OutlinedButton.icon(
+        onPressed: () async {
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        },
+        icon: Icon(icon),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        ),
+      ),
+    );
   }
 }

@@ -16,7 +16,9 @@
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
-    "seed": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/seed.ts"
+    "seed": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/seed.ts",
+    "scrape": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/run-scrapers.ts",
+    "scrape:test": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/run-scrapers.ts test"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.75.0",
@@ -24,6 +26,8 @@
     "@payloadcms/next": "3.75.0",
     "@payloadcms/richtext-lexical": "3.75.0",
     "@payloadcms/ui": "3.75.0",
+    "axios": "^1.13.6",
+    "cheerio": "^1.2.0",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
