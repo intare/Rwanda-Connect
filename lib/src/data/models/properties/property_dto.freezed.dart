@@ -23,25 +23,27 @@ PropertyDto _$PropertyDtoFromJson(Map<String, dynamic> json) {
 mixin _$PropertyDto {
   dynamic get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
+  @JsonKey(name: 'category')
   String get type => throw _privateConstructorUsedError;
+  @JsonKey(name: 'listingType')
   String get status => throw _privateConstructorUsedError;
   double get price => throw _privateConstructorUsedError;
+  String get currency => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
-  String? get agentId => throw _privateConstructorUsedError;
-  String? get agentName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'contactPhone')
   String? get agentPhone => throw _privateConstructorUsedError;
+  @JsonKey(name: 'contactEmail')
   String? get agentEmail => throw _privateConstructorUsedError;
   List<dynamic> get images => throw _privateConstructorUsedError;
-  List<String> get amenities => throw _privateConstructorUsedError;
+  @JsonKey(name: 'areaSqm')
   double? get size => throw _privateConstructorUsedError;
   int? get bedrooms => throw _privateConstructorUsedError;
   int? get bathrooms => throw _privateConstructorUsedError;
-  int? get yearBuilt => throw _privateConstructorUsedError;
   bool get isFeatured => throw _privateConstructorUsedError;
+  bool get isAvailable => throw _privateConstructorUsedError;
+  @JsonKey(name: 'datePosted')
   String? get createdAt => throw _privateConstructorUsedError;
-  int? get bidCount => throw _privateConstructorUsedError;
-  double? get highestBid => throw _privateConstructorUsedError;
 
   /// Serializes this PropertyDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -63,25 +65,21 @@ abstract class $PropertyDtoCopyWith<$Res> {
   $Res call({
     dynamic id,
     String title,
-    String type,
-    String status,
+    @JsonKey(name: 'category') String type,
+    @JsonKey(name: 'listingType') String status,
     double price,
+    String currency,
     String location,
     String description,
-    String? agentId,
-    String? agentName,
-    String? agentPhone,
-    String? agentEmail,
+    @JsonKey(name: 'contactPhone') String? agentPhone,
+    @JsonKey(name: 'contactEmail') String? agentEmail,
     List<dynamic> images,
-    List<String> amenities,
-    double? size,
+    @JsonKey(name: 'areaSqm') double? size,
     int? bedrooms,
     int? bathrooms,
-    int? yearBuilt,
     bool isFeatured,
-    String? createdAt,
-    int? bidCount,
-    double? highestBid,
+    bool isAvailable,
+    @JsonKey(name: 'datePosted') String? createdAt,
   });
 }
 
@@ -105,22 +103,18 @@ class _$PropertyDtoCopyWithImpl<$Res, $Val extends PropertyDto>
     Object? type = null,
     Object? status = null,
     Object? price = null,
+    Object? currency = null,
     Object? location = null,
     Object? description = null,
-    Object? agentId = freezed,
-    Object? agentName = freezed,
     Object? agentPhone = freezed,
     Object? agentEmail = freezed,
     Object? images = null,
-    Object? amenities = null,
     Object? size = freezed,
     Object? bedrooms = freezed,
     Object? bathrooms = freezed,
-    Object? yearBuilt = freezed,
     Object? isFeatured = null,
+    Object? isAvailable = null,
     Object? createdAt = freezed,
-    Object? bidCount = freezed,
-    Object? highestBid = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -144,6 +138,10 @@ class _$PropertyDtoCopyWithImpl<$Res, $Val extends PropertyDto>
                 ? _value.price
                 : price // ignore: cast_nullable_to_non_nullable
                       as double,
+            currency: null == currency
+                ? _value.currency
+                : currency // ignore: cast_nullable_to_non_nullable
+                      as String,
             location: null == location
                 ? _value.location
                 : location // ignore: cast_nullable_to_non_nullable
@@ -152,14 +150,6 @@ class _$PropertyDtoCopyWithImpl<$Res, $Val extends PropertyDto>
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
                       as String,
-            agentId: freezed == agentId
-                ? _value.agentId
-                : agentId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            agentName: freezed == agentName
-                ? _value.agentName
-                : agentName // ignore: cast_nullable_to_non_nullable
-                      as String?,
             agentPhone: freezed == agentPhone
                 ? _value.agentPhone
                 : agentPhone // ignore: cast_nullable_to_non_nullable
@@ -172,10 +162,6 @@ class _$PropertyDtoCopyWithImpl<$Res, $Val extends PropertyDto>
                 ? _value.images
                 : images // ignore: cast_nullable_to_non_nullable
                       as List<dynamic>,
-            amenities: null == amenities
-                ? _value.amenities
-                : amenities // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
             size: freezed == size
                 ? _value.size
                 : size // ignore: cast_nullable_to_non_nullable
@@ -188,26 +174,18 @@ class _$PropertyDtoCopyWithImpl<$Res, $Val extends PropertyDto>
                 ? _value.bathrooms
                 : bathrooms // ignore: cast_nullable_to_non_nullable
                       as int?,
-            yearBuilt: freezed == yearBuilt
-                ? _value.yearBuilt
-                : yearBuilt // ignore: cast_nullable_to_non_nullable
-                      as int?,
             isFeatured: null == isFeatured
                 ? _value.isFeatured
                 : isFeatured // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isAvailable: null == isAvailable
+                ? _value.isAvailable
+                : isAvailable // ignore: cast_nullable_to_non_nullable
                       as bool,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as String?,
-            bidCount: freezed == bidCount
-                ? _value.bidCount
-                : bidCount // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            highestBid: freezed == highestBid
-                ? _value.highestBid
-                : highestBid // ignore: cast_nullable_to_non_nullable
-                      as double?,
           )
           as $Val,
     );
@@ -226,25 +204,21 @@ abstract class _$$PropertyDtoImplCopyWith<$Res>
   $Res call({
     dynamic id,
     String title,
-    String type,
-    String status,
+    @JsonKey(name: 'category') String type,
+    @JsonKey(name: 'listingType') String status,
     double price,
+    String currency,
     String location,
     String description,
-    String? agentId,
-    String? agentName,
-    String? agentPhone,
-    String? agentEmail,
+    @JsonKey(name: 'contactPhone') String? agentPhone,
+    @JsonKey(name: 'contactEmail') String? agentEmail,
     List<dynamic> images,
-    List<String> amenities,
-    double? size,
+    @JsonKey(name: 'areaSqm') double? size,
     int? bedrooms,
     int? bathrooms,
-    int? yearBuilt,
     bool isFeatured,
-    String? createdAt,
-    int? bidCount,
-    double? highestBid,
+    bool isAvailable,
+    @JsonKey(name: 'datePosted') String? createdAt,
   });
 }
 
@@ -267,22 +241,18 @@ class __$$PropertyDtoImplCopyWithImpl<$Res>
     Object? type = null,
     Object? status = null,
     Object? price = null,
+    Object? currency = null,
     Object? location = null,
     Object? description = null,
-    Object? agentId = freezed,
-    Object? agentName = freezed,
     Object? agentPhone = freezed,
     Object? agentEmail = freezed,
     Object? images = null,
-    Object? amenities = null,
     Object? size = freezed,
     Object? bedrooms = freezed,
     Object? bathrooms = freezed,
-    Object? yearBuilt = freezed,
     Object? isFeatured = null,
+    Object? isAvailable = null,
     Object? createdAt = freezed,
-    Object? bidCount = freezed,
-    Object? highestBid = freezed,
   }) {
     return _then(
       _$PropertyDtoImpl(
@@ -306,6 +276,10 @@ class __$$PropertyDtoImplCopyWithImpl<$Res>
             ? _value.price
             : price // ignore: cast_nullable_to_non_nullable
                   as double,
+        currency: null == currency
+            ? _value.currency
+            : currency // ignore: cast_nullable_to_non_nullable
+                  as String,
         location: null == location
             ? _value.location
             : location // ignore: cast_nullable_to_non_nullable
@@ -314,14 +288,6 @@ class __$$PropertyDtoImplCopyWithImpl<$Res>
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
                   as String,
-        agentId: freezed == agentId
-            ? _value.agentId
-            : agentId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        agentName: freezed == agentName
-            ? _value.agentName
-            : agentName // ignore: cast_nullable_to_non_nullable
-                  as String?,
         agentPhone: freezed == agentPhone
             ? _value.agentPhone
             : agentPhone // ignore: cast_nullable_to_non_nullable
@@ -334,10 +300,6 @@ class __$$PropertyDtoImplCopyWithImpl<$Res>
             ? _value._images
             : images // ignore: cast_nullable_to_non_nullable
                   as List<dynamic>,
-        amenities: null == amenities
-            ? _value._amenities
-            : amenities // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
         size: freezed == size
             ? _value.size
             : size // ignore: cast_nullable_to_non_nullable
@@ -350,26 +312,18 @@ class __$$PropertyDtoImplCopyWithImpl<$Res>
             ? _value.bathrooms
             : bathrooms // ignore: cast_nullable_to_non_nullable
                   as int?,
-        yearBuilt: freezed == yearBuilt
-            ? _value.yearBuilt
-            : yearBuilt // ignore: cast_nullable_to_non_nullable
-                  as int?,
         isFeatured: null == isFeatured
             ? _value.isFeatured
             : isFeatured // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isAvailable: null == isAvailable
+            ? _value.isAvailable
+            : isAvailable // ignore: cast_nullable_to_non_nullable
                   as bool,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as String?,
-        bidCount: freezed == bidCount
-            ? _value.bidCount
-            : bidCount // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        highestBid: freezed == highestBid
-            ? _value.highestBid
-            : highestBid // ignore: cast_nullable_to_non_nullable
-                  as double?,
       ),
     );
   }
@@ -381,27 +335,22 @@ class _$PropertyDtoImpl implements _PropertyDto {
   const _$PropertyDtoImpl({
     required this.id,
     required this.title,
-    required this.type,
-    this.status = 'available',
-    required this.price,
-    required this.location,
+    @JsonKey(name: 'category') this.type = 'house',
+    @JsonKey(name: 'listingType') this.status = 'sale',
+    this.price = 0,
+    this.currency = 'RWF',
+    this.location = '',
     this.description = '',
-    this.agentId,
-    this.agentName,
-    this.agentPhone,
-    this.agentEmail,
+    @JsonKey(name: 'contactPhone') this.agentPhone,
+    @JsonKey(name: 'contactEmail') this.agentEmail,
     final List<dynamic> images = const [],
-    final List<String> amenities = const [],
-    this.size,
+    @JsonKey(name: 'areaSqm') this.size,
     this.bedrooms,
     this.bathrooms,
-    this.yearBuilt,
     this.isFeatured = false,
-    this.createdAt,
-    this.bidCount,
-    this.highestBid,
-  }) : _images = images,
-       _amenities = amenities;
+    this.isAvailable = true,
+    @JsonKey(name: 'datePosted') this.createdAt,
+  }) : _images = images;
 
   factory _$PropertyDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$PropertyDtoImplFromJson(json);
@@ -411,24 +360,28 @@ class _$PropertyDtoImpl implements _PropertyDto {
   @override
   final String title;
   @override
+  @JsonKey(name: 'category')
   final String type;
   @override
-  @JsonKey()
+  @JsonKey(name: 'listingType')
   final String status;
   @override
+  @JsonKey()
   final double price;
   @override
+  @JsonKey()
+  final String currency;
+  @override
+  @JsonKey()
   final String location;
   @override
   @JsonKey()
   final String description;
   @override
-  final String? agentId;
-  @override
-  final String? agentName;
-  @override
+  @JsonKey(name: 'contactPhone')
   final String? agentPhone;
   @override
+  @JsonKey(name: 'contactEmail')
   final String? agentEmail;
   final List<dynamic> _images;
   @override
@@ -439,36 +392,26 @@ class _$PropertyDtoImpl implements _PropertyDto {
     return EqualUnmodifiableListView(_images);
   }
 
-  final List<String> _amenities;
   @override
-  @JsonKey()
-  List<String> get amenities {
-    if (_amenities is EqualUnmodifiableListView) return _amenities;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_amenities);
-  }
-
-  @override
+  @JsonKey(name: 'areaSqm')
   final double? size;
   @override
   final int? bedrooms;
   @override
   final int? bathrooms;
   @override
-  final int? yearBuilt;
-  @override
   @JsonKey()
   final bool isFeatured;
   @override
+  @JsonKey()
+  final bool isAvailable;
+  @override
+  @JsonKey(name: 'datePosted')
   final String? createdAt;
-  @override
-  final int? bidCount;
-  @override
-  final double? highestBid;
 
   @override
   String toString() {
-    return 'PropertyDto(id: $id, title: $title, type: $type, status: $status, price: $price, location: $location, description: $description, agentId: $agentId, agentName: $agentName, agentPhone: $agentPhone, agentEmail: $agentEmail, images: $images, amenities: $amenities, size: $size, bedrooms: $bedrooms, bathrooms: $bathrooms, yearBuilt: $yearBuilt, isFeatured: $isFeatured, createdAt: $createdAt, bidCount: $bidCount, highestBid: $highestBid)';
+    return 'PropertyDto(id: $id, title: $title, type: $type, status: $status, price: $price, currency: $currency, location: $location, description: $description, agentPhone: $agentPhone, agentEmail: $agentEmail, images: $images, size: $size, bedrooms: $bedrooms, bathrooms: $bathrooms, isFeatured: $isFeatured, isAvailable: $isAvailable, createdAt: $createdAt)';
   }
 
   @override
@@ -481,65 +424,52 @@ class _$PropertyDtoImpl implements _PropertyDto {
             (identical(other.type, type) || other.type == type) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.price, price) || other.price == price) &&
+            (identical(other.currency, currency) ||
+                other.currency == currency) &&
             (identical(other.location, location) ||
                 other.location == location) &&
             (identical(other.description, description) ||
                 other.description == description) &&
-            (identical(other.agentId, agentId) || other.agentId == agentId) &&
-            (identical(other.agentName, agentName) ||
-                other.agentName == agentName) &&
             (identical(other.agentPhone, agentPhone) ||
                 other.agentPhone == agentPhone) &&
             (identical(other.agentEmail, agentEmail) ||
                 other.agentEmail == agentEmail) &&
             const DeepCollectionEquality().equals(other._images, _images) &&
-            const DeepCollectionEquality().equals(
-              other._amenities,
-              _amenities,
-            ) &&
             (identical(other.size, size) || other.size == size) &&
             (identical(other.bedrooms, bedrooms) ||
                 other.bedrooms == bedrooms) &&
             (identical(other.bathrooms, bathrooms) ||
                 other.bathrooms == bathrooms) &&
-            (identical(other.yearBuilt, yearBuilt) ||
-                other.yearBuilt == yearBuilt) &&
             (identical(other.isFeatured, isFeatured) ||
                 other.isFeatured == isFeatured) &&
+            (identical(other.isAvailable, isAvailable) ||
+                other.isAvailable == isAvailable) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.bidCount, bidCount) ||
-                other.bidCount == bidCount) &&
-            (identical(other.highestBid, highestBid) ||
-                other.highestBid == highestBid));
+                other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hashAll([
+  int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(id),
     title,
     type,
     status,
     price,
+    currency,
     location,
     description,
-    agentId,
-    agentName,
     agentPhone,
     agentEmail,
     const DeepCollectionEquality().hash(_images),
-    const DeepCollectionEquality().hash(_amenities),
     size,
     bedrooms,
     bathrooms,
-    yearBuilt,
     isFeatured,
+    isAvailable,
     createdAt,
-    bidCount,
-    highestBid,
-  ]);
+  );
 
   /// Create a copy of PropertyDto
   /// with the given fields replaced by the non-null parameter values.
@@ -559,25 +489,21 @@ abstract class _PropertyDto implements PropertyDto {
   const factory _PropertyDto({
     required final dynamic id,
     required final String title,
-    required final String type,
-    final String status,
-    required final double price,
-    required final String location,
+    @JsonKey(name: 'category') final String type,
+    @JsonKey(name: 'listingType') final String status,
+    final double price,
+    final String currency,
+    final String location,
     final String description,
-    final String? agentId,
-    final String? agentName,
-    final String? agentPhone,
-    final String? agentEmail,
+    @JsonKey(name: 'contactPhone') final String? agentPhone,
+    @JsonKey(name: 'contactEmail') final String? agentEmail,
     final List<dynamic> images,
-    final List<String> amenities,
-    final double? size,
+    @JsonKey(name: 'areaSqm') final double? size,
     final int? bedrooms,
     final int? bathrooms,
-    final int? yearBuilt,
     final bool isFeatured,
-    final String? createdAt,
-    final int? bidCount,
-    final double? highestBid,
+    final bool isAvailable,
+    @JsonKey(name: 'datePosted') final String? createdAt,
   }) = _$PropertyDtoImpl;
 
   factory _PropertyDto.fromJson(Map<String, dynamic> json) =
@@ -588,43 +514,41 @@ abstract class _PropertyDto implements PropertyDto {
   @override
   String get title;
   @override
+  @JsonKey(name: 'category')
   String get type;
   @override
+  @JsonKey(name: 'listingType')
   String get status;
   @override
   double get price;
+  @override
+  String get currency;
   @override
   String get location;
   @override
   String get description;
   @override
-  String? get agentId;
-  @override
-  String? get agentName;
-  @override
+  @JsonKey(name: 'contactPhone')
   String? get agentPhone;
   @override
+  @JsonKey(name: 'contactEmail')
   String? get agentEmail;
   @override
   List<dynamic> get images;
   @override
-  List<String> get amenities;
-  @override
+  @JsonKey(name: 'areaSqm')
   double? get size;
   @override
   int? get bedrooms;
   @override
   int? get bathrooms;
   @override
-  int? get yearBuilt;
-  @override
   bool get isFeatured;
   @override
+  bool get isAvailable;
+  @override
+  @JsonKey(name: 'datePosted')
   String? get createdAt;
-  @override
-  int? get bidCount;
-  @override
-  double? get highestBid;
 
   /// Create a copy of PropertyDto
   /// with the given fields replaced by the non-null parameter values.

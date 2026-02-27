@@ -4,30 +4,27 @@ part 'property_dto.freezed.dart';
 part 'property_dto.g.dart';
 
 /// Data transfer object for Property from API.
+/// Maps to Payload CMS real-estate collection.
 @freezed
 class PropertyDto with _$PropertyDto {
   const factory PropertyDto({
     required dynamic id,
     required String title,
-    required String type,
-    @Default('available') String status,
-    required double price,
-    required String location,
+    @JsonKey(name: 'category') @Default('house') String type,
+    @JsonKey(name: 'listingType') @Default('sale') String status,
+    @Default(0) double price,
+    @Default('RWF') String currency,
+    @Default('') String location,
     @Default('') String description,
-    String? agentId,
-    String? agentName,
-    String? agentPhone,
-    String? agentEmail,
+    @JsonKey(name: 'contactPhone') String? agentPhone,
+    @JsonKey(name: 'contactEmail') String? agentEmail,
     @Default([]) List<dynamic> images,
-    @Default([]) List<String> amenities,
-    double? size,
+    @JsonKey(name: 'areaSqm') double? size,
     int? bedrooms,
     int? bathrooms,
-    int? yearBuilt,
     @Default(false) bool isFeatured,
-    String? createdAt,
-    int? bidCount,
-    double? highestBid,
+    @Default(true) bool isAvailable,
+    @JsonKey(name: 'datePosted') String? createdAt,
   }) = _PropertyDto;
 
   factory PropertyDto.fromJson(Map<String, dynamic> json) =>
