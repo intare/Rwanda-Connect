@@ -12,6 +12,14 @@ interface ImportResult {
   errors: string[]
 }
 
+// Map event type to lowercase values expected by Payload
+const eventTypeMap: Record<string, string> = {
+  'Networking': 'networking',
+  'Seminar': 'seminar',
+  'Workshop': 'workshop',
+  'Conference': 'conference',
+}
+
 /**
  * Import scraped events to Payload CMS
  */
@@ -37,12 +45,15 @@ async function importEvents(events: ScrapedEvent[]): Promise<ImportResult> {
         continue
       }
 
+      // Map type to lowercase value
+      const eventType = eventTypeMap[event.type] || 'networking'
+
       await payload.create({
         collection: 'events',
         data: {
           title: event.title,
           description: event.description,
-          type: event.type,
+          type: eventType,
           organizer: event.organizer,
           location: event.location,
           venue: event.venue,
@@ -58,10 +69,24 @@ async function importEvents(events: ScrapedEvent[]): Promise<ImportResult> {
       imported++
     } catch (error) {
       errors.push(`Failed to import event "${event.title}": ${error}`)
+      console.error(`Error importing event "${event.title}":`, error)
     }
   }
 
+  if (errors.length > 0) {
+    console.log(`\nEvent import errors (showing first 5):`)
+    errors.slice(0, 5).forEach((e) => console.log(`  - ${e}`))
+  }
+
   return { success: errors.length === 0, imported, skipped, errors }
+}
+
+// Map opportunity type to lowercase values expected by Payload
+const opportunityTypeMap: Record<string, string> = {
+  'Job': 'job',
+  'Investment': 'investment',
+  'Scholarship': 'scholarship',
+  'Tender': 'tender',
 }
 
 /**
@@ -89,10 +114,13 @@ async function importOpportunities(opportunities: ScrapedOpportunity[]): Promise
         continue
       }
 
+      // Map type to lowercase value
+      const oppType = opportunityTypeMap[opp.type] || 'job'
+
       await payload.create({
         collection: 'opportunities',
         data: {
-          type: opp.type,
+          type: oppType,
           title: opp.title,
           company: opp.company,
           location: opp.location,
@@ -110,10 +138,23 @@ async function importOpportunities(opportunities: ScrapedOpportunity[]): Promise
       imported++
     } catch (error) {
       errors.push(`Failed to import opportunity "${opp.title}": ${error}`)
+      console.error(`Error importing opportunity "${opp.title}":`, error)
     }
   }
 
+  if (errors.length > 0) {
+    console.log(`\nOpportunity import errors (showing first 5):`)
+    errors.slice(0, 5).forEach((e) => console.log(`  - ${e}`))
+  }
+
   return { success: errors.length === 0, imported, skipped, errors }
+}
+
+// Map property category to lowercase values expected by Payload
+const propertyCategoryMap: Record<string, string> = {
+  'House': 'house',
+  'Apartment': 'apartment',
+  'Land': 'land',
 }
 
 /**
@@ -141,11 +182,14 @@ async function importProperties(properties: ScrapedProperty[]): Promise<ImportRe
         continue
       }
 
+      // Map category to lowercase value
+      const category = propertyCategoryMap[prop.category] || 'house'
+
       await payload.create({
         collection: 'real-estate',
         data: {
           title: prop.title,
-          category: prop.category,
+          category,
           listingType: prop.listingType,
           description: prop.description,
           price: prop.price,
@@ -164,10 +208,31 @@ async function importProperties(properties: ScrapedProperty[]): Promise<ImportRe
       imported++
     } catch (error) {
       errors.push(`Failed to import property "${prop.title}": ${error}`)
+      console.error(`Error importing property "${prop.title}":`, error)
     }
   }
 
+  if (errors.length > 0) {
+    console.log(`\nProperty import errors (showing first 5):`)
+    errors.slice(0, 5).forEach((e) => console.log(`  - ${e}`))
+  }
+
   return { success: errors.length === 0, imported, skipped, errors }
+}
+
+// Map scraper category names to Payload collection values
+const categoryMap: Record<string, string> = {
+  'Real Estate': 'real_estate',
+  'Hospitality': 'hospitality',
+  'Retail': 'retail',
+  'Professional Services': 'professional_services',
+  'Technology': 'technology',
+  'Finance': 'finance',
+  'Health': 'health',
+  'Education': 'education',
+  'Construction': 'construction',
+  'Agriculture': 'agriculture',
+  'Other': 'other',
 }
 
 /**
@@ -178,6 +243,45 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
   let imported = 0
   let skipped = 0
   const errors: string[] = []
+
+  // Find or create a system user for scraped content
+  let systemUser = await payload.find({
+    collection: 'users',
+    where: { email: { equals: 'scraper@rwandaconnect.com' } },
+    limit: 1,
+  })
+
+  let ownerId: number
+  if (systemUser.docs.length === 0) {
+    // Create a system user for scraped content
+    try {
+      const newUser = await payload.create({
+        collection: 'users',
+        data: {
+          email: 'scraper@rwandaconnect.com',
+          password: 'scraper-system-' + Date.now(),
+          role: 'admin',
+        },
+      })
+      ownerId = newUser.id
+      console.log('Created system user for scraped content')
+    } catch (e) {
+      // User might exist, try to find admin user instead
+      const adminUser = await payload.find({
+        collection: 'users',
+        where: { role: { equals: 'admin' } },
+        limit: 1,
+      })
+      if (adminUser.docs.length > 0) {
+        ownerId = adminUser.docs[0].id
+      } else {
+        errors.push('No admin user found to assign as owner')
+        return { success: false, imported: 0, skipped: 0, errors }
+      }
+    }
+  } else {
+    ownerId = systemUser.docs[0].id
+  }
 
   for (const biz of businesses) {
     try {
@@ -201,12 +305,16 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
         continue
       }
 
+      // Map category to valid value
+      const category = categoryMap[biz.category] || 'other'
+
       await payload.create({
         collection: 'business-directory',
         data: {
+          owner: ownerId,
           name: biz.name,
           slug,
-          category: biz.category,
+          category,
           subcategory: biz.subcategory,
           description: biz.description,
           phone: biz.phone || 'N/A',
@@ -228,7 +336,13 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
       imported++
     } catch (error) {
       errors.push(`Failed to import business "${biz.name}": ${error}`)
+      console.error(`Error importing "${biz.name}":`, error)
     }
+  }
+
+  if (errors.length > 0) {
+    console.log(`\nBusiness import errors (showing first 5):`)
+    errors.slice(0, 5).forEach((e) => console.log(`  - ${e}`))
   }
 
   return { success: errors.length === 0, imported, skipped, errors }
