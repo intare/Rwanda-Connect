@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/user.dart';
@@ -62,7 +63,7 @@ class AuthRepositoryImpl implements AuthRepository {
           token: response.token,
         ),
       );
-    } on FirebaseAuthException catch (e) {
+    } on AppAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -102,7 +103,7 @@ class AuthRepositoryImpl implements AuthRepository {
           token: response.token,
         ),
       );
-    } on FirebaseAuthException catch (e) {
+    } on AppAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -204,7 +205,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _authService.saveUser(mergedUser);
 
       return AuthSuccess(mergedUser.toEntity());
-    } on FirebaseAuthException catch (e) {
+    } on AppAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -217,7 +218,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Send password reset email via Firebase
       await _firebaseAuthService.sendPasswordResetEmail(email);
       return const AuthSuccess(null);
-    } on FirebaseAuthException catch (e) {
+    } on AppAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -241,7 +242,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _firebaseAuthService.reloadUser();
       return const AuthSuccess(null);
-    } on FirebaseAuthException catch (e) {
+    } on AppAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -254,7 +255,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Send verification email via Firebase
       await _firebaseAuthService.sendEmailVerification();
       return const AuthSuccess(null);
-    } on FirebaseAuthException catch (e) {
+    } on AppAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -264,11 +265,15 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthResult<AuthSession>> signInWithGoogle() async {
     try {
+      debugPrint('📱 Repository: Starting Google Sign-In...');
       final response = await _socialAuthService.signInWithGoogle();
+      debugPrint('📱 Repository: Got response from social auth service');
 
       // Fetch or create profile in Firestore
+      debugPrint('📱 Repository: Fetching Firestore profile...');
       var profile = await _firestoreProfileService.getProfile(response.user.idString);
       if (profile == null) {
+        debugPrint('📱 Repository: Creating new Firestore profile...');
         profile = await _firestoreProfileService.createInitialProfile(
           userId: response.user.idString,
           email: response.user.email,
@@ -276,9 +281,11 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
 
+      debugPrint('📱 Repository: Merging user data...');
       final mergedUser = _mergeUserData(response.user, profile);
       await _authService.saveFirebaseUser(mergedUser, response.token);
 
+      debugPrint('📱 Repository: Google Sign-In successful!');
       return AuthSuccess(
         AuthSession(
           user: mergedUser.toEntity(),
@@ -286,8 +293,10 @@ class AuthRepositoryImpl implements AuthRepository {
         ),
       );
     } on AuthException catch (e) {
+      debugPrint('📱 Repository: AuthException: ${e.message}');
       return AuthFailure(e.message);
     } catch (e) {
+      debugPrint('📱 Repository: Unexpected error: $e');
       return AuthFailure('An unexpected error occurred: $e');
     }
   }

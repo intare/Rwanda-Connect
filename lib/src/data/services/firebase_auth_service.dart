@@ -4,15 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/auth/auth_models.dart';
 
 /// Exception thrown for Firebase authentication errors.
-class FirebaseAuthException implements Exception {
-  const FirebaseAuthException(this.message);
+/// Named differently to avoid conflict with Firebase's own AppAuthException.
+class AppAuthException implements Exception {
+  const AppAuthException(this.message);
   final String message;
 
   @override
   String toString() => message;
 
-  /// Create from FirebaseAuthException with user-friendly messages.
-  factory FirebaseAuthException.fromFirebase(FirebaseException e) {
+  /// Create from FirebaseException with user-friendly messages.
+  factory AppAuthException.fromFirebase(FirebaseException e) {
     final message = switch (e.code) {
       'user-not-found' => 'No account found with this email.',
       'wrong-password' => 'Invalid password. Please try again.',
@@ -28,7 +29,7 @@ class FirebaseAuthException implements Exception {
       'invalid-action-code' => 'This link is invalid. Please request a new one.',
       _ => e.message ?? 'An unexpected error occurred.',
     };
-    return FirebaseAuthException(message);
+    return AppAuthException(message);
   }
 }
 
@@ -60,24 +61,24 @@ class FirebaseAuthService {
 
       final user = credential.user;
       if (user == null) {
-        throw const FirebaseAuthException('Login failed. Please try again.');
+        throw const AppAuthException('Login failed. Please try again.');
       }
 
       final token = await user.getIdToken();
       if (token == null) {
-        throw const FirebaseAuthException('Failed to get authentication token.');
+        throw const AppAuthException('Failed to get authentication token.');
       }
 
       return AuthResponse(
         token: token,
         user: _mapFirebaseUser(user),
       );
-    } on FirebaseAuthException {
+    } on AppAuthException {
       rethrow;
     } on FirebaseException catch (e) {
-      throw FirebaseAuthException.fromFirebase(e);
+      throw AppAuthException.fromFirebase(e);
     } catch (e) {
-      throw FirebaseAuthException('Login failed: $e');
+      throw AppAuthException('Login failed: $e');
     }
   }
 
@@ -95,7 +96,7 @@ class FirebaseAuthService {
 
       final user = credential.user;
       if (user == null) {
-        throw const FirebaseAuthException('Registration failed. Please try again.');
+        throw const AppAuthException('Registration failed. Please try again.');
       }
 
       // Update display name
@@ -110,19 +111,19 @@ class FirebaseAuthService {
 
       final token = await updatedUser?.getIdToken();
       if (token == null) {
-        throw const FirebaseAuthException('Failed to get authentication token.');
+        throw const AppAuthException('Failed to get authentication token.');
       }
 
       return AuthResponse(
         token: token,
         user: _mapFirebaseUser(updatedUser ?? user),
       );
-    } on FirebaseAuthException {
+    } on AppAuthException {
       rethrow;
     } on FirebaseException catch (e) {
-      throw FirebaseAuthException.fromFirebase(e);
+      throw AppAuthException.fromFirebase(e);
     } catch (e) {
-      throw FirebaseAuthException('Registration failed: $e');
+      throw AppAuthException('Registration failed: $e');
     }
   }
 
@@ -148,7 +149,7 @@ class FirebaseAuthService {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on FirebaseException catch (e) {
-      throw FirebaseAuthException.fromFirebase(e);
+      throw AppAuthException.fromFirebase(e);
     }
   }
 
@@ -157,11 +158,11 @@ class FirebaseAuthService {
     try {
       final user = currentUser;
       if (user == null) {
-        throw const FirebaseAuthException('No user is currently signed in.');
+        throw const AppAuthException('No user is currently signed in.');
       }
       await user.sendEmailVerification();
     } on FirebaseException catch (e) {
-      throw FirebaseAuthException.fromFirebase(e);
+      throw AppAuthException.fromFirebase(e);
     }
   }
 
@@ -186,7 +187,7 @@ class FirebaseAuthService {
     try {
       final user = currentUser;
       if (user == null) {
-        throw const FirebaseAuthException('No user is currently signed in.');
+        throw const AppAuthException('No user is currently signed in.');
       }
 
       if (displayName != null) {
@@ -199,7 +200,7 @@ class FirebaseAuthService {
       await user.reload();
       return _mapFirebaseUser(_firebaseAuth.currentUser ?? user);
     } on FirebaseException catch (e) {
-      throw FirebaseAuthException.fromFirebase(e);
+      throw AppAuthException.fromFirebase(e);
     }
   }
 

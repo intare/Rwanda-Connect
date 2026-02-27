@@ -2,92 +2,99 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import '../../core/network/api_client.dart';
-import '../../core/network/api_endpoints.dart';
 import '../models/auth/auth_models.dart';
 import 'auth_service.dart';
+import 'firebase_auth_service.dart' show AppAuthException, firebaseAuthProvider;
 
-/// Service for handling social authentication (Google, Apple).
+/// Service for handling social authentication (Google, Apple) with Firebase.
 class SocialAuthService {
-  SocialAuthService(this._dio, this._secureStorage);
+  SocialAuthService(this._firebaseAuth);
 
-  final Dio _dio;
-  final FlutterSecureStorage _secureStorage;
-
-  static const _tokenKey = 'auth_token';
-  static const _userIdKey = 'user_id';
-
-  // Google Sign-In configuration
-  // TODO: Replace with your actual Google OAuth client IDs
-  static const _googleClientId = String.fromEnvironment(
-    'GOOGLE_CLIENT_ID',
-    defaultValue: '',
-  );
-
-  static const _googleServerClientId = String.fromEnvironment(
-    'GOOGLE_SERVER_CLIENT_ID',
-    defaultValue: '',
-  );
+  final FirebaseAuth _firebaseAuth;
 
   late final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId: _googleClientId.isNotEmpty ? _googleClientId : null,
-    serverClientId:
-        _googleServerClientId.isNotEmpty ? _googleServerClientId : null,
     scopes: ['email', 'profile'],
   );
 
-  /// Sign in with Google.
+  /// Sign in with Google using Firebase Auth.
   Future<AuthResponse> signInWithGoogle() async {
     try {
+      debugPrint('🔐 Starting Google Sign-In...');
+
       // Trigger Google sign-in flow
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
+        debugPrint('🔐 Google Sign-In cancelled by user');
         throw const AuthException('Google sign-in was cancelled.');
       }
+
+      debugPrint('🔐 Google user: ${googleUser.email}');
 
       // Get authentication details
       final googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
       final accessToken = googleAuth.accessToken;
 
-      if (idToken == null) {
+      debugPrint('🔐 Got Google tokens - idToken: ${idToken != null}, accessToken: ${accessToken != null}');
+
+      if (idToken == null || accessToken == null) {
         throw const AuthException('Failed to get Google credentials.');
       }
 
-      // Send to backend for verification and user creation/login
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.googleAuth,
-        data: {
-          'idToken': idToken,
-          'accessToken': accessToken,
-          'email': googleUser.email,
-          'name': googleUser.displayName,
-          'photoUrl': googleUser.photoUrl,
-        },
+      // Create Firebase credential from Google tokens
+      final credential = GoogleAuthProvider.credential(
+        idToken: idToken,
+        accessToken: accessToken,
       );
 
-      return _handleAuthResponse(response.data);
-    } on DioException catch (e) {
-      await _googleSignIn.signOut();
-      if (e.response?.statusCode == 401) {
-        throw const AuthException('Google authentication failed.');
+      debugPrint('🔐 Signing in to Firebase with Google credential...');
+
+      // Sign in to Firebase with Google credential
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      debugPrint('🔐 Firebase sign-in result - user: ${user?.uid}');
+
+      if (user == null) {
+        throw const AuthException('Google sign-in failed. Please try again.');
       }
-      throw AuthException(
-          e.message ?? 'Google sign-in failed. Please try again.');
-    } catch (e) {
+
+      // Get Firebase ID token
+      final token = await user.getIdToken();
+      if (token == null) {
+        throw const AuthException('Failed to get authentication token.');
+      }
+
+      debugPrint('🔐 Google Sign-In successful! User: ${user.email}');
+
+      return AuthResponse(
+        token: token,
+        user: _mapFirebaseUser(user),
+      );
+    } on AppAuthException catch (e) {
+      debugPrint('🔐 AppAuthException: ${e.message}');
+      await _googleSignIn.signOut();
+      rethrow;
+    } on FirebaseException catch (e) {
+      debugPrint('🔐 FirebaseException: ${e.code} - ${e.message}');
+      await _googleSignIn.signOut();
+      throw AppAuthException.fromFirebase(e);
+    } catch (e, stackTrace) {
+      debugPrint('🔐 Google Sign-In error: $e');
+      debugPrint('🔐 Stack trace: $stackTrace');
       await _googleSignIn.signOut();
       if (e is AuthException) rethrow;
       throw AuthException('Google sign-in failed: $e');
     }
   }
 
-  /// Sign in with Apple.
+  /// Sign in with Apple using Firebase Auth.
   Future<AuthResponse> signInWithApple() async {
     try {
       // Generate nonce for security
@@ -95,7 +102,7 @@ class SocialAuthService {
       final nonce = _sha256ofString(rawNonce);
 
       // Trigger Apple sign-in flow
-      final credential = await SignInWithApple.getAppleIDCredential(
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
@@ -103,44 +110,54 @@ class SocialAuthService {
         nonce: nonce,
       );
 
-      final identityToken = credential.identityToken;
+      final identityToken = appleCredential.identityToken;
       if (identityToken == null) {
         throw const AuthException('Failed to get Apple credentials.');
       }
 
-      // Build name from Apple credential (only provided on first sign-in)
-      String? fullName;
-      if (credential.givenName != null || credential.familyName != null) {
-        fullName = [credential.givenName, credential.familyName]
-            .where((s) => s != null && s.isNotEmpty)
-            .join(' ');
-      }
-
-      // Send to backend for verification and user creation/login
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.appleAuth,
-        data: {
-          'identityToken': identityToken,
-          'authorizationCode': credential.authorizationCode,
-          'email': credential.email,
-          'name': fullName,
-          'userIdentifier': credential.userIdentifier,
-          'nonce': rawNonce,
-        },
+      // Create Firebase credential from Apple tokens
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: identityToken,
+        rawNonce: rawNonce,
       );
 
-      return _handleAuthResponse(response.data);
+      // Sign in to Firebase with Apple credential
+      final userCredential = await _firebaseAuth.signInWithCredential(oauthCredential);
+      final user = userCredential.user;
+
+      if (user == null) {
+        throw const AuthException('Apple sign-in failed. Please try again.');
+      }
+
+      // Update display name if provided (only on first sign-in)
+      if (appleCredential.givenName != null || appleCredential.familyName != null) {
+        final fullName = [appleCredential.givenName, appleCredential.familyName]
+            .where((s) => s != null && s.isNotEmpty)
+            .join(' ');
+        if (fullName.isNotEmpty) {
+          await user.updateDisplayName(fullName);
+        }
+      }
+
+      // Get Firebase ID token
+      final token = await user.getIdToken();
+      if (token == null) {
+        throw const AuthException('Failed to get authentication token.');
+      }
+
+      return AuthResponse(
+        token: token,
+        user: _mapFirebaseUser(user),
+      );
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {
         throw const AuthException('Apple sign-in was cancelled.');
       }
       throw AuthException('Apple sign-in failed: ${e.message}');
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw const AuthException('Apple authentication failed.');
-      }
-      throw AuthException(
-          e.message ?? 'Apple sign-in failed. Please try again.');
+    } on AppAuthException {
+      rethrow;
+    } on FirebaseException catch (e) {
+      throw AppAuthException.fromFirebase(e);
     } catch (e) {
       if (e is AuthException) rethrow;
       throw AuthException('Apple sign-in failed: $e');
@@ -161,26 +178,17 @@ class SocialAuthService {
     }
   }
 
-  /// Handle auth response from backend.
-  AuthResponse _handleAuthResponse(Map<String, dynamic>? data) {
-    if (data == null) {
-      throw const AuthException('Authentication failed. Invalid response.');
-    }
-
-    final token = data['token'] as String?;
-    final userData = data['user'] as Map<String, dynamic>?;
-
-    if (token == null || userData == null) {
-      throw const AuthException('Authentication failed. Invalid response.');
-    }
-
-    // Store token securely
-    _secureStorage.write(key: _tokenKey, value: token);
-    _secureStorage.write(key: _userIdKey, value: userData['id'].toString());
-
-    return AuthResponse(
-      token: token,
-      user: UserDto.fromJson(userData),
+  /// Map Firebase User to UserDto.
+  UserDto _mapFirebaseUser(User user) {
+    return UserDto(
+      id: user.uid,
+      email: user.email ?? '',
+      name: user.displayName ?? '',
+      emailVerified: user.emailVerified,
+      profileImage: user.photoURL,
+      onboardingCompleted: false, // Will be managed by Firestore
+      createdAt: user.metadata.creationTime?.toIso8601String(),
+      updatedAt: DateTime.now().toIso8601String(),
     );
   }
 
@@ -203,7 +211,6 @@ class SocialAuthService {
 
 /// Provider for SocialAuthService.
 final socialAuthServiceProvider = Provider<SocialAuthService>((ref) {
-  final dio = ref.watch(dioProvider);
-  final secureStorage = ref.watch(secureStorageProvider);
-  return SocialAuthService(dio, secureStorage);
+  final firebaseAuth = ref.watch(firebaseAuthProvider);
+  return SocialAuthService(firebaseAuth);
 });

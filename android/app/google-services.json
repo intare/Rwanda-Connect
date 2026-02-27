@@ -13,7 +13,28 @@
           "package_name": "com.newtimes.rwandaconnect"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "481567131894-ce504tjop275i396grfioq38pll5tnj2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.newtimes.rwandaconnect",
+            "certificate_hash": "0a9e2bc971602da9fb6c2d3d97902c67e3930a0d"
+          }
+        },
+        {
+          "client_id": "481567131894-jb29urd31f6makbsnijs4oalq1cvolss.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.newtimes.rwandaconnect",
+            "certificate_hash": "fd0d230134aaa09d351ad5406f4a274d3fe097fe"
+          }
+        },
+        {
+          "client_id": "481567131894-c44f8k6mrkakh9rium6ikmjuh5gl5b40.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCLGBjCbB1mGz_SIYK3MqjIZCgP_rDa7Bs"
@@ -21,7 +42,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "481567131894-c44f8k6mrkakh9rium6ikmjuh5gl5b40.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "481567131894-l156h8u7n0527d6q1mc9kkn4mloqfo90.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.newtimes.rwandaconnect"
+              }
+            }
+          ]
         }
       }
     }
