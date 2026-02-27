@@ -6,7 +6,7 @@ import '../models/properties/property_dto.dart';
 extension PropertyMapper on PropertyDto {
   /// Convert DTO to domain entity.
   Property toEntity() {
-    // Extract image URLs
+    // Extract image URLs from Payload media format
     final imageUrls = images.map((img) {
       if (img is Map<String, dynamic>) {
         final url = img['url'] as String?;
@@ -27,20 +27,14 @@ extension PropertyMapper on PropertyDto {
       price: price,
       location: location,
       description: description,
-      agentId: agentId,
-      agentName: agentName,
       agentPhone: agentPhone,
       agentEmail: agentEmail,
       images: imageUrls,
-      amenities: amenities,
       size: size,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
-      yearBuilt: yearBuilt,
       isFeatured: isFeatured,
       createdAt: createdAt != null ? DateTime.tryParse(createdAt!) : null,
-      bidCount: bidCount,
-      highestBid: highestBid,
     );
   }
 }
