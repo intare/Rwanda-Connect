@@ -64,9 +64,9 @@ abstract final class ApiEndpoints {
   static const String bookmarks = '/bookmarks';
   static String bookmarkDetail(String id) => '/bookmarks/$id';
 
-  // Properties endpoints
-  static const String properties = '/properties';
-  static String propertyDetail(String id) => '/properties/$id';
+  // Properties endpoints (Payload collection: real-estate)
+  static const String properties = '/real-estate';
+  static String propertyDetail(String id) => '/real-estate/$id';
   static String propertyBids(String id) => '/properties/$id/bids';
 
   // Bids endpoints
