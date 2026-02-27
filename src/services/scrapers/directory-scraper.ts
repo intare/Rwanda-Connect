@@ -35,68 +35,82 @@ export interface ScrapedBusiness {
 }
 
 /**
- * Scraper for Rwanda Yellow Pages
+ * Scraper for Rwanda YP (Yellow Pages)
+ * URL: https://rwandayp.com
+ * Uses /category/[Category_Name] for categories, /company/[ID]/[Name] for businesses
  */
 class RwandaYellowPagesScraper extends BaseScraper<ScrapedBusiness> {
   constructor() {
-    super('RwandaYellowPages', 'https://www.yellowpages.rw')
+    super('RwandaYellowPages', 'https://rwandayp.com')
   }
 
   async scrape(): Promise<ScraperResult<ScrapedBusiness>> {
     const businesses: ScrapedBusiness[] = []
     const errors: string[] = []
 
+    // Categories from rwandayp.com
     const categories = [
-      'hotels',
-      'restaurants',
-      'banks',
-      'hospitals',
-      'schools',
-      'real-estate',
-      'technology',
-      'construction',
+      { url: 'Restaurants', category: 'Hospitality' as const },
+      { url: 'Hotels', category: 'Hospitality' as const },
+      { url: 'Doctors_and_Clinics', category: 'Health' as const },
+      { url: 'Estate_agents', category: 'Real Estate' as const },
+      { url: 'Construction_services', category: 'Construction' as const },
+      { url: 'Schools', category: 'Education' as const },
+      { url: 'Banks', category: 'Finance' as const },
+      { url: 'Lawyers', category: 'Professional Services' as const },
     ]
 
-    for (const category of categories) {
+    for (const { url, category } of categories) {
       try {
-        const $ = await this.fetchPage(`${this.baseUrl}/category/${category}`)
+        const $ = await this.fetchPage(`${this.baseUrl}/category/${url}`)
 
         if (!$) {
-          errors.push(`Failed to fetch ${category} category`)
+          errors.push(`Failed to fetch ${url} category`)
           continue
         }
 
-        $('.business-item, .listing, .company-card, article').each((_, element) => {
+        // Look for company links
+        $('a[href*="/company/"]').each((_, element) => {
           try {
             const $el = $(element)
-            const name = this.cleanText($el.find('h2, h3, .company-name, .title').first().text())
-            if (!name) return
+            const href = $el.attr('href')
+            if (!href) return
 
-            const description = this.cleanText($el.find('.description, p').first().text())
-            const address = this.cleanText($el.find('.address, .location').first().text())
-            const phone = this.cleanText($el.find('.phone, .tel, [href^="tel:"]').first().text())
-            const email = this.cleanText($el.find('.email, [href^="mailto:"]').first().text())
-            const website = $el.find('a[href^="http"]:not([href*="yellowpages"])').first().attr('href')
+            // Get company name from link text or nearby heading
+            const name = this.cleanText($el.text())
+            if (!name || name.length < 3 || name.length > 100) return
 
+            // Skip navigation/generic links
+            if (name.toLowerCase().includes('view') ||
+                name.toLowerCase().includes('more') ||
+                name.toLowerCase().includes('see all')) return
+
+            // Get parent container for more details
+            const $container = $el.closest('div, article, li')
+            const description = this.cleanText($container.find('p, .description').first().text())
+            const phone = this.cleanText($container.find('[href^="tel:"]').text())
+            const address = this.cleanText($container.find('.address, .location').text())
+
+            // Get image
+            const imageUrl = $container.find('img').first().attr('src')
             const imageUrls: string[] = []
-            $el.find('img').each((_, img) => {
-              const src = $(img).attr('src')
-              if (src && src.startsWith('http')) {
-                imageUrls.push(src)
-              }
-            })
+            if (imageUrl && imageUrl.startsWith('http')) {
+              imageUrls.push(imageUrl)
+            }
+
+            // Avoid duplicates
+            if (businesses.some((b) => b.name.toLowerCase() === name.toLowerCase())) return
 
             businesses.push({
               name,
-              category: this.mapCategory(category),
+              category,
               description: description || name,
               phone: phone || undefined,
-              email: email || undefined,
-              website: website || undefined,
               address: address || 'Kigali',
               city: 'Kigali',
+              website: href.startsWith('http') ? href : `${this.baseUrl}${href}`,
               services: [],
-              tags: [category, 'rwanda'],
+              tags: [url.toLowerCase().replace('_', '-'), 'rwanda'],
               imageUrls,
             })
           } catch (e) {
@@ -104,34 +118,21 @@ class RwandaYellowPagesScraper extends BaseScraper<ScrapedBusiness> {
           }
         })
       } catch (error) {
-        errors.push(`Yellow Pages category ${category} error: ${error}`)
+        errors.push(`Rwanda YP category ${url} error: ${error}`)
       }
     }
 
     return { success: errors.length === 0, data: businesses, errors, source: this.name }
   }
-
-  private mapCategory(urlCategory: string): ScrapedBusiness['category'] {
-    const mapping: Record<string, ScrapedBusiness['category']> = {
-      hotels: 'Hospitality',
-      restaurants: 'Hospitality',
-      banks: 'Finance',
-      hospitals: 'Health',
-      schools: 'Education',
-      'real-estate': 'Real Estate',
-      technology: 'Technology',
-      construction: 'Construction',
-    }
-    return mapping[urlCategory] || 'Other'
-  }
 }
 
 /**
- * Scraper for Rwanda Business Directory
+ * Scraper for Kigali location businesses from Rwanda YP
+ * Scrapes by location instead of category for more coverage
  */
-class RwandaBusinessDirectoryScraper extends BaseScraper<ScrapedBusiness> {
+class KigaliBusinessScraper extends BaseScraper<ScrapedBusiness> {
   constructor() {
-    super('RwandaBusinessDirectory', 'https://www.rwandabusiness.rw')
+    super('KigaliBusinesses', 'https://rwandayp.com')
   }
 
   async scrape(): Promise<ScraperResult<ScrapedBusiness>> {
@@ -139,54 +140,51 @@ class RwandaBusinessDirectoryScraper extends BaseScraper<ScrapedBusiness> {
     const errors: string[] = []
 
     try {
-      const $ = await this.fetchPage(`${this.baseUrl}/directory`)
+      const $ = await this.fetchPage(`${this.baseUrl}/location/Kigali`)
 
       if (!$) {
-        errors.push('Failed to fetch Rwanda Business Directory page')
+        errors.push('Failed to fetch Kigali businesses page')
         return { success: false, data: [], errors, source: this.name }
       }
 
-      $('.business, .company, .listing, article').each((_, element) => {
+      // Look for company links
+      $('a[href*="/company/"]').each((_, element) => {
         try {
           const $el = $(element)
-          const name = this.cleanText($el.find('h2, h3, .name, .title').first().text())
-          if (!name) return
+          const href = $el.attr('href')
+          if (!href) return
 
-          const description = this.cleanText($el.find('.description, p').first().text())
-          const categoryText = this.cleanText($el.find('.category, .sector').first().text())
-          const address = this.cleanText($el.find('.address, .location').first().text())
-          const phone = this.cleanText($el.find('.phone, .contact').first().text())
-          const email = $el.find('[href^="mailto:"]').first().attr('href')?.replace('mailto:', '')
-          const website = $el.find('a[href^="http"]:not([href*="rwandabusiness"])').first().attr('href')
+          const name = this.cleanText($el.text())
+          if (!name || name.length < 3 || name.length > 100) return
 
-          const imageUrls: string[] = []
-          $el.find('img').each((_, img) => {
-            const src = $(img).attr('src')
-            if (src && src.startsWith('http')) {
-              imageUrls.push(src)
-            }
-          })
+          // Skip navigation links
+          if (name.toLowerCase().includes('view') ||
+              name.toLowerCase().includes('more') ||
+              name.toLowerCase().includes('see all')) return
+
+          const $container = $el.closest('div, article, li')
+          const description = this.cleanText($container.find('p, .description').first().text())
+
+          // Avoid duplicates
+          if (businesses.some((b) => b.name.toLowerCase() === name.toLowerCase())) return
 
           businesses.push({
             name,
-            category: this.inferCategory(categoryText || name),
-            subcategory: categoryText || undefined,
+            category: this.inferCategory(name + ' ' + description),
             description: description || name,
-            phone: phone || undefined,
-            email: email || undefined,
-            website: website || undefined,
-            address: address || 'Kigali',
+            address: 'Kigali',
             city: 'Kigali',
+            website: href.startsWith('http') ? href : `${this.baseUrl}${href}`,
             services: [],
-            tags: ['rwanda', 'business'],
-            imageUrls,
+            tags: ['rwanda', 'kigali'],
+            imageUrls: [],
           })
         } catch (e) {
           errors.push(`Error parsing business: ${e}`)
         }
       })
     } catch (error) {
-      errors.push(`Rwanda Business Directory scraper error: ${error}`)
+      errors.push(`Kigali businesses scraper error: ${error}`)
     }
 
     return { success: errors.length === 0, data: businesses, errors, source: this.name }
@@ -195,119 +193,38 @@ class RwandaBusinessDirectoryScraper extends BaseScraper<ScrapedBusiness> {
   private inferCategory(text: string): ScrapedBusiness['category'] {
     const lower = text.toLowerCase()
 
-    if (lower.includes('hotel') || lower.includes('restaurant') || lower.includes('hospitality')) {
+    if (lower.includes('hotel') || lower.includes('restaurant') || lower.includes('cafe') || lower.includes('bar')) {
       return 'Hospitality'
     }
-    if (lower.includes('bank') || lower.includes('finance') || lower.includes('insurance')) {
+    if (lower.includes('bank') || lower.includes('finance') || lower.includes('insurance') || lower.includes('microfinance')) {
       return 'Finance'
     }
-    if (lower.includes('hospital') || lower.includes('clinic') || lower.includes('health')) {
+    if (lower.includes('hospital') || lower.includes('clinic') || lower.includes('health') || lower.includes('pharma') || lower.includes('doctor')) {
       return 'Health'
     }
-    if (lower.includes('school') || lower.includes('university') || lower.includes('education')) {
+    if (lower.includes('school') || lower.includes('university') || lower.includes('college') || lower.includes('academy') || lower.includes('education')) {
       return 'Education'
     }
-    if (lower.includes('tech') || lower.includes('software') || lower.includes('it ')) {
+    if (lower.includes('tech') || lower.includes('software') || lower.includes('it ') || lower.includes('digital') || lower.includes('computer')) {
       return 'Technology'
     }
-    if (lower.includes('construction') || lower.includes('building')) {
+    if (lower.includes('construction') || lower.includes('building') || lower.includes('contractor')) {
       return 'Construction'
     }
-    if (lower.includes('real estate') || lower.includes('property')) {
+    if (lower.includes('real estate') || lower.includes('property') || lower.includes('estate')) {
       return 'Real Estate'
     }
-    if (lower.includes('retail') || lower.includes('shop') || lower.includes('store')) {
+    if (lower.includes('retail') || lower.includes('shop') || lower.includes('store') || lower.includes('supermarket')) {
       return 'Retail'
     }
-    if (lower.includes('farm') || lower.includes('agri')) {
+    if (lower.includes('farm') || lower.includes('agri') || lower.includes('coffee') || lower.includes('tea')) {
       return 'Agriculture'
     }
-    if (lower.includes('law') || lower.includes('consult') || lower.includes('service')) {
+    if (lower.includes('law') || lower.includes('consult') || lower.includes('accounting') || lower.includes('audit')) {
       return 'Professional Services'
     }
 
     return 'Other'
-  }
-}
-
-/**
- * Scraper for Private Sector Federation Rwanda members
- */
-class PSFRwandaScraper extends BaseScraper<ScrapedBusiness> {
-  constructor() {
-    super('PSFRwanda', 'https://www.psf.org.rw')
-  }
-
-  async scrape(): Promise<ScraperResult<ScrapedBusiness>> {
-    const businesses: ScrapedBusiness[] = []
-    const errors: string[] = []
-
-    try {
-      const $ = await this.fetchPage(`${this.baseUrl}/members`)
-
-      if (!$) {
-        errors.push('Failed to fetch PSF Rwanda members page')
-        return { success: false, data: [], errors, source: this.name }
-      }
-
-      $('.member, .company, .listing, article, .card').each((_, element) => {
-        try {
-          const $el = $(element)
-          const name = this.cleanText($el.find('h2, h3, .name, .title').first().text())
-          if (!name) return
-
-          const description = this.cleanText($el.find('.description, p').first().text())
-          const sector = this.cleanText($el.find('.sector, .category').first().text())
-          const address = this.cleanText($el.find('.address, .location').first().text())
-          const phone = this.cleanText($el.find('.phone, .contact').first().text())
-          const website = $el.find('a[href^="http"]:not([href*="psf.org"])').first().attr('href')
-
-          const imageUrls: string[] = []
-          const logo = $el.find('img').first().attr('src')
-          if (logo && logo.startsWith('http')) {
-            imageUrls.push(logo)
-          }
-
-          businesses.push({
-            name,
-            category: this.inferCategory(sector || name),
-            subcategory: sector || undefined,
-            description: description || `${name} - PSF Rwanda Member`,
-            phone: phone || undefined,
-            website: website || undefined,
-            address: address || 'Kigali',
-            city: 'Kigali',
-            services: [],
-            tags: ['rwanda', 'psf-member', 'verified'],
-            logoUrl: logo,
-            imageUrls,
-          })
-        } catch (e) {
-          errors.push(`Error parsing PSF member: ${e}`)
-        }
-      })
-    } catch (error) {
-      errors.push(`PSF Rwanda scraper error: ${error}`)
-    }
-
-    return { success: errors.length === 0, data: businesses, errors, source: this.name }
-  }
-
-  private inferCategory(text: string): ScrapedBusiness['category'] {
-    const lower = text.toLowerCase()
-
-    if (lower.includes('hotel') || lower.includes('tourism') || lower.includes('hospitality')) {
-      return 'Hospitality'
-    }
-    if (lower.includes('bank') || lower.includes('finance')) return 'Finance'
-    if (lower.includes('health') || lower.includes('pharma')) return 'Health'
-    if (lower.includes('education') || lower.includes('training')) return 'Education'
-    if (lower.includes('tech') || lower.includes('ict')) return 'Technology'
-    if (lower.includes('construction')) return 'Construction'
-    if (lower.includes('agriculture') || lower.includes('agro')) return 'Agriculture'
-    if (lower.includes('manufacturing') || lower.includes('industry')) return 'Other'
-
-    return 'Professional Services'
   }
 }
 
@@ -320,8 +237,7 @@ export async function scrapeAllBusinesses(): Promise<ScraperResult<ScrapedBusine
 
   const scrapers = [
     new RwandaYellowPagesScraper(),
-    new RwandaBusinessDirectoryScraper(),
-    new PSFRwandaScraper(),
+    new KigaliBusinessScraper(),
   ]
 
   for (const scraper of scrapers) {

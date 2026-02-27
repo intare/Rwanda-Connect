@@ -18,118 +18,9 @@ export interface ScrapedProperty {
 }
 
 /**
- * Scraper for Rwanda real estate listings from Lamudi
- */
-class LamudiRwandaScraper extends BaseScraper<ScrapedProperty> {
-  constructor() {
-    super('LamudiRwanda', 'https://www.lamudi.co.rw')
-  }
-
-  async scrape(): Promise<ScraperResult<ScrapedProperty>> {
-    const properties: ScrapedProperty[] = []
-    const errors: string[] = []
-
-    try {
-      // Scrape for sale listings
-      const $sale = await this.fetchPage(`${this.baseUrl}/for-sale/`)
-
-      if ($sale) {
-        $sale('.ListingCell, .listing-item, .property-card, article').each((_, element) => {
-          try {
-            const prop = this.parseProperty($sale, element, 'sale')
-            if (prop) properties.push(prop)
-          } catch (e) {
-            errors.push(`Error parsing sale property: ${e}`)
-          }
-        })
-      }
-
-      // Scrape for rent listings
-      const $rent = await this.fetchPage(`${this.baseUrl}/for-rent/`)
-
-      if ($rent) {
-        $rent('.ListingCell, .listing-item, .property-card, article').each((_, element) => {
-          try {
-            const prop = this.parseProperty($rent, element, 'rent')
-            if (prop) properties.push(prop)
-          } catch (e) {
-            errors.push(`Error parsing rent property: ${e}`)
-          }
-        })
-      }
-    } catch (error) {
-      errors.push(`Lamudi scraper error: ${error}`)
-    }
-
-    return { success: errors.length === 0, data: properties, errors, source: this.name }
-  }
-
-  private parseProperty(
-    $: cheerio.CheerioAPI,
-    element: cheerio.Element,
-    listingType: 'sale' | 'rent'
-  ): ScrapedProperty | null {
-    const $el = $(element)
-
-    const title = this.cleanText($el.find('h2, h3, .title, .listing-title').first().text())
-    if (!title) return null
-
-    const priceStr = this.cleanText($el.find('.price, .listing-price').first().text())
-    const { price, currency } = this.parsePrice(priceStr)
-
-    const location = this.cleanText($el.find('.location, .address').first().text())
-    const description = this.cleanText($el.find('.description, p').first().text())
-
-    // Parse features
-    const bedroomsStr = this.cleanText($el.find('.bedrooms, .beds, [data-bedrooms]').first().text())
-    const bathroomsStr = this.cleanText($el.find('.bathrooms, .baths, [data-bathrooms]').first().text())
-    const areaStr = this.cleanText($el.find('.area, .size, [data-area]').first().text())
-
-    const bedrooms = parseInt(bedroomsStr.match(/\d+/)?.[0] || '0', 10)
-    const bathrooms = parseInt(bathroomsStr.match(/\d+/)?.[0] || '0', 10)
-    const areaSqm = parseInt(areaStr.match(/\d+/)?.[0] || '0', 10)
-
-    // Get images
-    const imageUrls: string[] = []
-    $el.find('img').each((_, img) => {
-      const src = $(img).attr('src') || $(img).attr('data-src')
-      if (src && src.startsWith('http')) {
-        imageUrls.push(src)
-      }
-    })
-
-    const link = $el.find('a').first().attr('href')
-
-    return {
-      title,
-      category: this.inferCategory(title),
-      listingType,
-      description: description || title,
-      price,
-      currency,
-      location: location || 'Kigali, Rwanda',
-      areaSqm: areaSqm || undefined,
-      bedrooms: bedrooms || undefined,
-      bathrooms: bathrooms || undefined,
-      imageUrls,
-      sourceUrl: link?.startsWith('http') ? link : `${this.baseUrl}${link}`,
-    }
-  }
-
-  private inferCategory(title: string): ScrapedProperty['category'] {
-    const lower = title.toLowerCase()
-    if (lower.includes('land') || lower.includes('plot') || lower.includes('terrain')) {
-      return 'Land'
-    }
-    if (lower.includes('apartment') || lower.includes('flat') || lower.includes('condo')) {
-      return 'Apartment'
-    }
-    return 'House'
-  }
-}
-
-/**
- * Scraper for HouseInRwanda listings
+ * Scraper for House In Rwanda
+ * URL: https://www.houseinrwanda.com
+ * Uses Drupal with advert_teaser class for property cards
  */
 class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
   constructor() {
@@ -140,82 +31,170 @@ class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
     const properties: ScrapedProperty[] = []
     const errors: string[] = []
 
-    try {
-      const $ = await this.fetchPage(`${this.baseUrl}/properties`)
+    // Scrape both sale and rent listings
+    const pages = [
+      { url: '/sale-adverts', listingType: 'sale' as const },
+      { url: '/rent-adverts', listingType: 'rent' as const },
+    ]
 
-      if (!$) {
-        errors.push('Failed to fetch HouseInRwanda page')
-        return { success: false, data: [], errors, source: this.name }
-      }
+    for (const page of pages) {
+      try {
+        const $ = await this.fetchPage(`${this.baseUrl}${page.url}`)
 
-      $('.property-item, .listing, article, .card').each((_, element) => {
-        try {
-          const $el = $(element)
-          const title = this.cleanText($el.find('h2, h3, .title').first().text())
-          if (!title) return
-
-          const priceStr = this.cleanText($el.find('.price').first().text())
-          const { price, currency } = this.parsePrice(priceStr)
-
-          const location = this.cleanText($el.find('.location, .address').first().text())
-          const description = this.cleanText($el.find('.description, p').first().text())
-          const link = $el.find('a').first().attr('href')
-
-          // Parse features
-          const featuresText = $el.find('.features, .specs').text().toLowerCase()
-          const bedroomMatch = featuresText.match(/(\d+)\s*bed/)
-          const bathroomMatch = featuresText.match(/(\d+)\s*bath/)
-
-          // Get images
-          const imageUrls: string[] = []
-          $el.find('img').each((_, img) => {
-            const src = $(img).attr('src') || $(img).attr('data-src')
-            if (src && src.startsWith('http')) {
-              imageUrls.push(src)
-            }
-          })
-
-          // Determine listing type
-          const isRent = title.toLowerCase().includes('rent') || priceStr.toLowerCase().includes('/month')
-
-          properties.push({
-            title,
-            category: this.inferCategory(title),
-            listingType: isRent ? 'rent' : 'sale',
-            description: description || title,
-            price,
-            currency,
-            location: location || 'Kigali, Rwanda',
-            bedrooms: bedroomMatch ? parseInt(bedroomMatch[1], 10) : undefined,
-            bathrooms: bathroomMatch ? parseInt(bathroomMatch[1], 10) : undefined,
-            imageUrls,
-            sourceUrl: link?.startsWith('http') ? link : `${this.baseUrl}${link}`,
-          })
-        } catch (e) {
-          errors.push(`Error parsing property: ${e}`)
+        if (!$) {
+          errors.push(`Failed to fetch ${this.baseUrl}${page.url}`)
+          continue
         }
-      })
-    } catch (error) {
-      errors.push(`HouseInRwanda scraper error: ${error}`)
+
+        // Property cards use advert_teaser class
+        // Structure: .advert_teaser contains images, h5/h6 title in <a href="/property/...">
+        $('.advert_teaser').each((_, element) => {
+          try {
+            const $el = $(element)
+
+            // Get title from h5 or h6 within property link
+            const titleEl = $el.find('a[href*="/property/"] h5, a[href*="/property/"] h6, h5 a, h6 a').first()
+            let title = this.cleanText(titleEl.text())
+
+            // Fallback: get any link to /property/
+            if (!title || title.length < 5) {
+              const propLink = $el.find('a[href*="/property/"]').first()
+              title = this.cleanText(propLink.text())
+            }
+            if (!title || title.length < 5) return
+
+            const link = $el.find('a[href*="/property/"]').first().attr('href')
+            const sourceUrl = link?.startsWith('http') ? link : `${this.baseUrl}${link}`
+
+            // Get price - format like "600,000 RWF/month" or "50,000,000 RWF"
+            const priceText = $el.text()
+            const { price, currency } = this.parseRwandaPrice(priceText)
+
+            // Get location - City, District, Sector format
+            const location = this.extractLocation($el.text())
+
+            // Get images from flexslider or img tags
+            const imageUrls: string[] = []
+            $el.find('img').each((_, img) => {
+              const src = $(img).attr('src') || $(img).attr('data-src')
+              if (src && (src.startsWith('http') || src.startsWith('/'))) {
+                const fullUrl = src.startsWith('http') ? src : `${this.baseUrl}${src}`
+                if (!imageUrls.includes(fullUrl)) {
+                  imageUrls.push(fullUrl)
+                }
+              }
+            })
+
+            // Extract bedrooms/bathrooms from text
+            const bedrooms = this.extractNumber(priceText, /(\d+)\s*(?:bed|bedroom|br)/i)
+            const bathrooms = this.extractNumber(priceText, /(\d+)\s*(?:bath|bathroom)/i)
+
+            // Determine property category
+            const category = this.inferCategory(title + ' ' + priceText)
+
+            properties.push({
+              title,
+              category,
+              listingType: page.listingType,
+              description: title,
+              price,
+              currency,
+              location,
+              bedrooms,
+              bathrooms,
+              imageUrls: imageUrls.slice(0, 5), // Limit to 5 images
+              sourceUrl,
+            })
+          } catch (e) {
+            errors.push(`Error parsing property: ${e}`)
+          }
+        })
+      } catch (error) {
+        errors.push(`HouseInRwanda ${page.url} error: ${error}`)
+      }
     }
 
     return { success: errors.length === 0, data: properties, errors, source: this.name }
   }
 
-  private inferCategory(title: string): ScrapedProperty['category'] {
-    const lower = title.toLowerCase()
-    if (lower.includes('land') || lower.includes('plot')) return 'Land'
-    if (lower.includes('apartment') || lower.includes('flat')) return 'Apartment'
+  private parseRwandaPrice(text: string): { price: number; currency: string } {
+    // Look for RWF prices like "600,000 RWF" or "50,000,000 RWF"
+    const rwfMatch = text.match(/([\d,]+)\s*(?:RWF|Rwf|rwf|FRW|Frw)/i)
+    if (rwfMatch) {
+      return {
+        price: parseInt(rwfMatch[1].replace(/,/g, ''), 10),
+        currency: 'RWF',
+      }
+    }
+
+    // Look for USD prices
+    const usdMatch = text.match(/\$\s*([\d,]+)|USD\s*([\d,]+)|([\d,]+)\s*USD/i)
+    if (usdMatch) {
+      const priceStr = usdMatch[1] || usdMatch[2] || usdMatch[3]
+      return {
+        price: parseInt(priceStr.replace(/,/g, ''), 10),
+        currency: 'USD',
+      }
+    }
+
+    // Generic number extraction
+    const numMatch = text.match(/([\d,]+)/);
+    if (numMatch) {
+      return {
+        price: parseInt(numMatch[1].replace(/,/g, ''), 10),
+        currency: 'RWF',
+      }
+    }
+
+    return { price: 0, currency: 'RWF' }
+  }
+
+  private extractLocation(text: string): string {
+    // Common Kigali areas
+    const areas = [
+      'Kiyovu', 'Nyarutarama', 'Gacuriro', 'Kibagabaga', 'Kimihurura',
+      'Kacyiru', 'Remera', 'Kanombe', 'Gikondo', 'Nyamirambo',
+      'Kimironko', 'Kabeza', 'Kagugu', 'Rusororo', 'Masaka',
+      'Gasabo', 'Kicukiro', 'Nyarugenge',
+    ]
+
+    for (const area of areas) {
+      if (text.includes(area)) {
+        return `${area}, Kigali, Rwanda`
+      }
+    }
+
+    if (text.toLowerCase().includes('kigali')) {
+      return 'Kigali, Rwanda'
+    }
+
+    return 'Rwanda'
+  }
+
+  private extractNumber(text: string, pattern: RegExp): number | undefined {
+    const match = text.match(pattern)
+    return match ? parseInt(match[1], 10) : undefined
+  }
+
+  private inferCategory(text: string): ScrapedProperty['category'] {
+    const lower = text.toLowerCase()
+    if (lower.includes('land') || lower.includes('plot') || lower.includes('terrain')) {
+      return 'Land'
+    }
+    if (lower.includes('apartment') || lower.includes('flat') || lower.includes('studio')) {
+      return 'Apartment'
+    }
     return 'House'
   }
 }
 
 /**
- * Scraper for RwandaHousing listings
+ * Scraper for Rwanda Housing Authority listings
+ * URL: https://rha.gov.rw
  */
-class RwandaHousingScraper extends BaseScraper<ScrapedProperty> {
+class RHAScraper extends BaseScraper<ScrapedProperty> {
   constructor() {
-    super('RwandaHousing', 'https://rwandahousing.rw')
+    super('RHA', 'https://rha.gov.rw')
   }
 
   async scrape(): Promise<ScraperResult<ScrapedProperty>> {
@@ -223,63 +202,44 @@ class RwandaHousingScraper extends BaseScraper<ScrapedProperty> {
     const errors: string[] = []
 
     try {
-      const $ = await this.fetchPage(`${this.baseUrl}/listings`)
+      const $ = await this.fetchPage(`${this.baseUrl}/index.php?id=affordable-houses`)
 
       if (!$) {
-        errors.push('Failed to fetch RwandaHousing page')
+        errors.push('Failed to fetch RHA page')
         return { success: false, data: [], errors, source: this.name }
       }
 
-      $('.property, .listing-item, article, .card').each((_, element) => {
+      // Look for housing project listings
+      $('article, .housing-project, .card, .listing').each((_, element) => {
         try {
           const $el = $(element)
           const title = this.cleanText($el.find('h2, h3, .title').first().text())
           if (!title) return
 
-          const priceStr = this.cleanText($el.find('.price').first().text())
-          const { price, currency } = this.parsePrice(priceStr)
-
-          const location = this.cleanText($el.find('.location').first().text())
-          const description = this.cleanText($el.find('.description, p').first().text())
+          const description = this.cleanText($el.find('p, .description').first().text())
           const link = $el.find('a').first().attr('href')
 
-          const imageUrls: string[] = []
-          $el.find('img').each((_, img) => {
-            const src = $(img).attr('src')
-            if (src && src.startsWith('http')) {
-              imageUrls.push(src)
-            }
-          })
-
-          const isRent = title.toLowerCase().includes('rent')
-
+          // RHA usually shows affordable housing projects
           properties.push({
             title,
-            category: this.inferCategory(title),
-            listingType: isRent ? 'rent' : 'sale',
+            category: 'House',
+            listingType: 'sale',
             description: description || title,
-            price,
-            currency,
-            location: location || 'Kigali, Rwanda',
-            imageUrls,
+            price: 0, // RHA prices vary
+            currency: 'RWF',
+            location: 'Kigali, Rwanda',
+            imageUrls: [],
             sourceUrl: link?.startsWith('http') ? link : `${this.baseUrl}${link}`,
           })
         } catch (e) {
-          errors.push(`Error parsing property: ${e}`)
+          errors.push(`Error parsing RHA listing: ${e}`)
         }
       })
     } catch (error) {
-      errors.push(`RwandaHousing scraper error: ${error}`)
+      errors.push(`RHA scraper error: ${error}`)
     }
 
     return { success: errors.length === 0, data: properties, errors, source: this.name }
-  }
-
-  private inferCategory(title: string): ScrapedProperty['category'] {
-    const lower = title.toLowerCase()
-    if (lower.includes('land') || lower.includes('plot')) return 'Land'
-    if (lower.includes('apartment') || lower.includes('flat')) return 'Apartment'
-    return 'House'
   }
 }
 
@@ -291,9 +251,8 @@ export async function scrapeAllProperties(): Promise<ScraperResult<ScrapedProper
   const allErrors: string[] = []
 
   const scrapers = [
-    new LamudiRwandaScraper(),
     new HouseInRwandaScraper(),
-    new RwandaHousingScraper(),
+    new RHAScraper(),
   ]
 
   for (const scraper of scrapers) {
