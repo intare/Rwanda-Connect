@@ -2,7 +2,6 @@ import RssParser from 'rss-parser'
 
 export interface RSSNewsItem {
   title: string
-  source: string
   summary: string
   content: string | null
   url: string
@@ -36,8 +35,6 @@ const RSS_FEEDS = [
   { url: 'https://www.newtimes.co.rw/rssFeed/17', category: 'Lifestyle' },
   { url: 'https://www.newtimes.co.rw/rssFeed/33', category: 'Entertainment' },
 ]
-
-const SOURCE_NAME = 'The New Times'
 
 const parser = new RssParser<CustomRSSFeed, CustomRSSItem>({
   customFields: {
@@ -131,7 +128,6 @@ async function fetchSingleFeed(feedUrl: string, feedCategory: string): Promise<R
 
       return {
         title: item.title || 'Untitled',
-        source: SOURCE_NAME,
         summary: summary.slice(0, 500),
         content: content ? stripHtml(content).slice(0, 2000) : null,
         url,

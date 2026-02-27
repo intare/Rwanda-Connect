@@ -69,7 +69,7 @@ class AboutScreen extends StatelessWidget {
 
           // Description
           Text(
-            'An independent community platform connecting the Rwandan diaspora to opportunities, resources, and each other.',
+            'A community platform by The New Times, connecting the Rwandan diaspora to opportunities, news, and each other.',
             style: AppTypography.bodyLarge,
             textAlign: TextAlign.center,
           ),
@@ -106,7 +106,7 @@ class AboutScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Rwanda Connect is an independent, privately-owned platform. '
+                  'Rwanda Connect is a product of The New Times. '
                   'We are NOT affiliated with, endorsed by, or connected to any government entity, '
                   'embassy, or official institution.',
                   style: AppTypography.bodySmall.copyWith(height: 1.5),
@@ -203,6 +203,15 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxxl),
 
           // Credits
+          Center(
+            child: Text(
+              'Powered by The New Times',
+              style: AppTypography.titleSmall.copyWith(
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Center(
             child: Text(
               'Made with love for the Rwandan diaspora',

@@ -37,7 +37,6 @@ export async function GET(request: Request) {
     const docs = paginatedArticles.map((article, index) => ({
       id: `rss-${startIndex + index}`,
       title: article.title,
-      source: article.source,
       category: article.category,
       summary: article.summary,
       url: article.url,
