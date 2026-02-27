@@ -31,10 +31,10 @@ class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
     const properties: ScrapedProperty[] = []
     const errors: string[] = []
 
-    // Scrape both sale and rent listings
+    // Scrape both sale and rent listings (updated URLs)
     const pages = [
-      { url: '/sale-adverts', listingType: 'sale' as const },
-      { url: '/rent-adverts', listingType: 'rent' as const },
+      { url: '/for-sale', listingType: 'sale' as const },
+      { url: '/for-rent', listingType: 'rent' as const },
     ]
 
     for (const page of pages) {
@@ -46,36 +46,40 @@ class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
           continue
         }
 
-        // Property cards use advert_teaser class
-        // Structure: .advert_teaser contains images, h5/h6 title in <a href="/property/...">
-        $('.advert_teaser').each((_, element) => {
+        // Property listings: look for h3/h5 links to /property/
+        // Site uses semantic HTML without dedicated card classes
+        $('a[href*="/property/"]').each((_, element) => {
           try {
-            const $el = $(element)
+            const $link = $(element)
+            const href = $link.attr('href')
+            if (!href) return
 
-            // Get title from h5 or h6 within property link
-            const titleEl = $el.find('a[href*="/property/"] h5, a[href*="/property/"] h6, h5 a, h6 a').first()
-            let title = this.cleanText(titleEl.text())
+            // Get title from heading inside link or link text
+            const h5 = $link.find('h5, h3').first()
+            let title = this.cleanText(h5.text() || $link.text())
 
-            // Fallback: get any link to /property/
-            if (!title || title.length < 5) {
-              const propLink = $el.find('a[href*="/property/"]').first()
-              title = this.cleanText(propLink.text())
-            }
-            if (!title || title.length < 5) return
+            // Skip navigation/short links
+            if (!title || title.length < 10) return
+            if (title.toLowerCase().includes('previous') || title.toLowerCase().includes('next')) return
 
-            const link = $el.find('a[href*="/property/"]').first().attr('href')
-            const sourceUrl = link?.startsWith('http') ? link : `${this.baseUrl}${link}`
+            const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`
+
+            // Skip duplicates
+            if (properties.some((p) => p.sourceUrl === sourceUrl)) return
+
+            // Get parent container for context (price, location, etc.)
+            const $container = $link.parent().parent().parent()
+            const containerText = $container.text()
 
             // Get price - format like "600,000 RWF/month" or "50,000,000 RWF"
-            const priceText = $el.text()
-            const { price, currency } = this.parseRwandaPrice(priceText)
+            const { price, currency } = this.parseRwandaPrice(containerText)
 
             // Get location - City, District, Sector format
-            const location = this.extractLocation($el.text())
+            const location = this.extractLocation(containerText)
 
-            // Get images from flexslider or img tags
+            // Get images from container
             const imageUrls: string[] = []
-            $el.find('img').each((_, img) => {
+            $container.find('img').each((_, img) => {
               const src = $(img).attr('src') || $(img).attr('data-src')
               if (src && (src.startsWith('http') || src.startsWith('/'))) {
                 const fullUrl = src.startsWith('http') ? src : `${this.baseUrl}${src}`
@@ -86,11 +90,11 @@ class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
             })
 
             // Extract bedrooms/bathrooms from text
-            const bedrooms = this.extractNumber(priceText, /(\d+)\s*(?:bed|bedroom|br)/i)
-            const bathrooms = this.extractNumber(priceText, /(\d+)\s*(?:bath|bathroom)/i)
+            const bedrooms = this.extractNumber(containerText, /(\d+)\s*(?:bed|bedroom|br)/i)
+            const bathrooms = this.extractNumber(containerText, /(\d+)\s*(?:bath|bathroom)/i)
 
-            // Determine property category
-            const category = this.inferCategory(title + ' ' + priceText)
+            // Determine property category from title or URL
+            const category = this.inferCategory(title + ' ' + href)
 
             properties.push({
               title,
