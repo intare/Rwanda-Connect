@@ -6,22 +6,26 @@ import '../mappers/user_mapper.dart';
 import '../models/auth/auth_models.dart';
 import '../services/auth_service.dart';
 import '../services/firebase_auth_service.dart';
+import '../services/firestore_profile_service.dart';
 import '../services/social_auth_service.dart';
 
 /// Implementation of AuthRepository using Firebase Auth.
-/// Uses Firebase for authentication and syncs profile data with backend.
+/// Uses Firebase for authentication and Firestore for profile data.
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required FirebaseAuthService firebaseAuthService,
     required AuthService authService,
     required SocialAuthService socialAuthService,
+    required FirestoreProfileService firestoreProfileService,
   })  : _firebaseAuthService = firebaseAuthService,
         _authService = authService,
-        _socialAuthService = socialAuthService;
+        _socialAuthService = socialAuthService,
+        _firestoreProfileService = firestoreProfileService;
 
   final FirebaseAuthService _firebaseAuthService;
   final AuthService _authService;
   final SocialAuthService _socialAuthService;
+  final FirestoreProfileService _firestoreProfileService;
 
   @override
   Future<AuthResult<AuthSession>> login({
@@ -35,12 +39,26 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
 
-      // Save to local storage for session persistence
-      await _authService.saveFirebaseUser(response.user, response.token);
+      // Fetch profile from Firestore (or create if doesn't exist)
+      var profile = await _firestoreProfileService.getProfile(response.user.idString);
+      if (profile == null) {
+        // First login - create profile in Firestore
+        profile = await _firestoreProfileService.createInitialProfile(
+          userId: response.user.idString,
+          email: response.user.email,
+          name: response.user.name,
+        );
+      }
+
+      // Merge Firebase user data with Firestore profile
+      final mergedUser = _mergeUserData(response.user, profile);
+
+      // Save to local storage for offline access
+      await _authService.saveFirebaseUser(mergedUser, response.token);
 
       return AuthSuccess(
         AuthSession(
-          user: response.user.toEntity(),
+          user: mergedUser.toEntity(),
           token: response.token,
         ),
       );
@@ -65,12 +83,22 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
 
-      // Save to local storage for session persistence
-      await _authService.saveFirebaseUser(response.user, response.token);
+      // Create profile in Firestore
+      final profile = await _firestoreProfileService.createInitialProfile(
+        userId: response.user.idString,
+        email: email,
+        name: name,
+      );
+
+      // Merge data
+      final mergedUser = _mergeUserData(response.user, profile);
+
+      // Save to local storage for offline access
+      await _authService.saveFirebaseUser(mergedUser, response.token);
 
       return AuthSuccess(
         AuthSession(
-          user: response.user.toEntity(),
+          user: mergedUser.toEntity(),
           token: response.token,
         ),
       );
@@ -104,6 +132,21 @@ class AuthRepositoryImpl implements AuthRepository {
       if (cachedToken != null) {
         final cachedUser = await _authService.getStoredUser();
         if (cachedUser != null) {
+          // Try to fetch latest profile from Firestore
+          try {
+            final firestoreProfile = await _firestoreProfileService.getProfile(cachedUser.idString);
+            if (firestoreProfile != null) {
+              final mergedUser = _mergeUserData(cachedUser, firestoreProfile);
+              await _authService.saveUser(mergedUser);
+              return AuthSession(
+                user: mergedUser.toEntity(),
+                token: cachedToken,
+              );
+            }
+          } catch (_) {
+            // Firestore unavailable, use cached data
+          }
+
           return AuthSession(
             user: cachedUser.toEntity(),
             token: cachedToken,
@@ -130,34 +173,37 @@ class AuthRepositoryImpl implements AuthRepository {
     bool? onboardingCompleted,
   }) async {
     try {
-      // Update Firebase profile (name only)
-      if (name != null) {
-        await _firebaseAuthService.updateProfile(displayName: name);
-      }
-
       // Get current user from Firebase
       final firebaseUser = _firebaseAuthService.getCurrentUserDto();
       if (firebaseUser == null) {
         return const AuthFailure('No user is currently signed in.');
       }
 
-      // Create updated user with local preferences
-      final updatedUser = UserDto(
-        id: firebaseUser.id,
-        email: firebaseUser.email,
-        name: name ?? firebaseUser.name,
-        emailVerified: firebaseUser.emailVerified,
-        onboardingCompleted: onboardingCompleted ?? firebaseUser.onboardingCompleted,
+      // Update Firebase profile (name only)
+      if (name != null) {
+        await _firebaseAuthService.updateProfile(displayName: name);
+      }
+
+      // Update profile in Firestore
+      final updatedProfile = await _firestoreProfileService.updateProfile(
+        userId: firebaseUser.idString,
+        name: name,
         location: location,
         interests: interests,
-        createdAt: firebaseUser.createdAt,
-        updatedAt: DateTime.now().toIso8601String(),
+        onboardingCompleted: onboardingCompleted,
       );
 
-      // Save updated user to local storage
-      await _authService.saveUser(updatedUser);
+      if (updatedProfile == null) {
+        return const AuthFailure('Failed to update profile.');
+      }
 
-      return AuthSuccess(updatedUser.toEntity());
+      // Merge with Firebase data
+      final mergedUser = _mergeUserData(firebaseUser, updatedProfile);
+
+      // Save updated user to local storage
+      await _authService.saveUser(mergedUser);
+
+      return AuthSuccess(mergedUser.toEntity());
     } on FirebaseAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
@@ -219,10 +265,23 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthResult<AuthSession>> signInWithGoogle() async {
     try {
       final response = await _socialAuthService.signInWithGoogle();
-      await _authService.saveFirebaseUser(response.user, response.token);
+
+      // Fetch or create profile in Firestore
+      var profile = await _firestoreProfileService.getProfile(response.user.idString);
+      if (profile == null) {
+        profile = await _firestoreProfileService.createInitialProfile(
+          userId: response.user.idString,
+          email: response.user.email,
+          name: response.user.name,
+        );
+      }
+
+      final mergedUser = _mergeUserData(response.user, profile);
+      await _authService.saveFirebaseUser(mergedUser, response.token);
+
       return AuthSuccess(
         AuthSession(
-          user: response.user.toEntity(),
+          user: mergedUser.toEntity(),
           token: response.token,
         ),
       );
@@ -237,10 +296,23 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthResult<AuthSession>> signInWithApple() async {
     try {
       final response = await _socialAuthService.signInWithApple();
-      await _authService.saveFirebaseUser(response.user, response.token);
+
+      // Fetch or create profile in Firestore
+      var profile = await _firestoreProfileService.getProfile(response.user.idString);
+      if (profile == null) {
+        profile = await _firestoreProfileService.createInitialProfile(
+          userId: response.user.idString,
+          email: response.user.email,
+          name: response.user.name,
+        );
+      }
+
+      final mergedUser = _mergeUserData(response.user, profile);
+      await _authService.saveFirebaseUser(mergedUser, response.token);
+
       return AuthSuccess(
         AuthSession(
-          user: response.user.toEntity(),
+          user: mergedUser.toEntity(),
           token: response.token,
         ),
       );
@@ -260,6 +332,24 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOutSocialProviders() async {
     await _socialAuthService.signOutGoogle();
   }
+
+  /// Merge Firebase user data with Firestore profile data.
+  /// Firebase provides: id, email, name, emailVerified
+  /// Firestore provides: location, interests, onboardingCompleted, etc.
+  UserDto _mergeUserData(UserDto firebaseUser, UserDto firestoreProfile) {
+    return UserDto(
+      id: firebaseUser.id,
+      email: firebaseUser.email,
+      name: firestoreProfile.name ?? firebaseUser.name,
+      emailVerified: firebaseUser.emailVerified,
+      location: firestoreProfile.location,
+      interests: firestoreProfile.interests,
+      onboardingCompleted: firestoreProfile.onboardingCompleted,
+      profileImage: firestoreProfile.profileImage,
+      createdAt: firestoreProfile.createdAt ?? firebaseUser.createdAt,
+      updatedAt: firestoreProfile.updatedAt ?? firebaseUser.updatedAt,
+    );
+  }
 }
 
 /// Provider for AuthRepository.
@@ -267,9 +357,11 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final firebaseAuthService = ref.watch(firebaseAuthServiceProvider);
   final authService = ref.watch(authServiceProvider);
   final socialAuthService = ref.watch(socialAuthServiceProvider);
+  final firestoreProfileService = ref.watch(firestoreProfileServiceProvider);
   return AuthRepositoryImpl(
     firebaseAuthService: firebaseAuthService,
     authService: authService,
     socialAuthService: socialAuthService,
+    firestoreProfileService: firestoreProfileService,
   );
 });
