@@ -9,6 +9,7 @@ export interface RSSNewsItem {
   category: 'Economy' | 'Investment' | 'Events' | 'Business' | 'Policy'
   imageUrl: string | null
   tags: string[]
+  source: string
 }
 
 interface CustomRSSItem {
@@ -35,6 +36,8 @@ const RSS_FEEDS = [
   { url: 'https://www.newtimes.co.rw/rssFeed/17', category: 'Lifestyle' },
   { url: 'https://www.newtimes.co.rw/rssFeed/33', category: 'Entertainment' },
 ]
+
+const SOURCE_NAME = 'The New Times'
 
 const parser = new RssParser<CustomRSSFeed, CustomRSSItem>({
   customFields: {
@@ -135,6 +138,7 @@ async function fetchSingleFeed(feedUrl: string, feedCategory: string): Promise<R
         category: mapCategory(feedCategory, url),
         imageUrl: extractImageUrl(content),
         tags: [extractTag(url)],
+        source: SOURCE_NAME,
       }
     })
   } catch (error) {

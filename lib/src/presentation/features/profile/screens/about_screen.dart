@@ -146,6 +146,12 @@ class AboutScreen extends StatelessWidget {
             subtitle: 'support@rwandaconnect.com',
             onTap: () => _launchUrl('mailto:support@rwandaconnect.com'),
           ),
+          _AboutLink(
+            icon: Icons.edit_outlined,
+            title: 'Editorial',
+            subtitle: 'editor@newtimesrwanda.com',
+            onTap: () => _launchUrl('mailto:editor@newtimesrwanda.com'),
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             'Official Sources',

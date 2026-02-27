@@ -51,6 +51,7 @@ export async function GET(request: Request) {
       tags: article.tags.map((tag) => ({ tag })),
       createdAt: article.publishDate,
       updatedAt: article.publishDate,
+      source: article.source,
     }))
 
     return NextResponse.json({
