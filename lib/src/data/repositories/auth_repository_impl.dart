@@ -29,10 +29,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      // Authenticate with Payload CMS backend
-      final response = await _authService.login(
-        LoginRequest(email: email, password: password),
+      // Authenticate with Firebase
+      final response = await _firebaseAuthService.login(
+        email: email,
+        password: password,
       );
+
+      // Save to local storage for session persistence
+      await _authService.saveFirebaseUser(response.user, response.token);
 
       return AuthSuccess(
         AuthSession(
@@ -40,7 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
           token: response.token,
         ),
       );
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -54,10 +58,15 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      // Register with Payload CMS backend
-      final response = await _authService.register(
-        RegisterRequest(name: name, email: email, password: password),
+      // Register with Firebase
+      final response = await _firebaseAuthService.register(
+        name: name,
+        email: email,
+        password: password,
       );
+
+      // Save to local storage for session persistence
+      await _authService.saveFirebaseUser(response.user, response.token);
 
       return AuthSuccess(
         AuthSession(
@@ -65,7 +74,7 @@ class AuthRepositoryImpl implements AuthRepository {
           token: response.token,
         ),
       );
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -75,8 +84,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthResult<void>> logout() async {
     try {
-      // Clear Payload CMS session and local storage
+      // Sign out from Firebase
+      await _firebaseAuthService.logout();
+      // Clear local storage
       await _authService.logout();
+      // Sign out from social providers
+      await _socialAuthService.signOutGoogle();
       return const AuthSuccess(null);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -117,16 +130,35 @@ class AuthRepositoryImpl implements AuthRepository {
     bool? onboardingCompleted,
   }) async {
     try {
-      // Update profile via Payload CMS
-      final updatedUser = await _authService.updateProfile(
-        name: name,
+      // Update Firebase profile (name only)
+      if (name != null) {
+        await _firebaseAuthService.updateProfile(displayName: name);
+      }
+
+      // Get current user from Firebase
+      final firebaseUser = _firebaseAuthService.getCurrentUserDto();
+      if (firebaseUser == null) {
+        return const AuthFailure('No user is currently signed in.');
+      }
+
+      // Create updated user with local preferences
+      final updatedUser = UserDto(
+        id: firebaseUser.id,
+        email: firebaseUser.email,
+        name: name ?? firebaseUser.name,
+        emailVerified: firebaseUser.emailVerified,
+        onboardingCompleted: onboardingCompleted ?? firebaseUser.onboardingCompleted,
         location: location,
         interests: interests,
-        onboardingCompleted: onboardingCompleted,
+        createdAt: firebaseUser.createdAt,
+        updatedAt: DateTime.now().toIso8601String(),
       );
 
+      // Save updated user to local storage
+      await _authService.saveUser(updatedUser);
+
       return AuthSuccess(updatedUser.toEntity());
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -136,9 +168,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthResult<void>> forgotPassword(String email) async {
     try {
-      await _authService.forgotPassword(email);
+      // Send password reset email via Firebase
+      await _firebaseAuthService.sendPasswordResetEmail(email);
       return const AuthSuccess(null);
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -150,22 +183,19 @@ class AuthRepositoryImpl implements AuthRepository {
     required String token,
     required String newPassword,
   }) async {
-    try {
-      await _authService.resetPassword(token: token, newPassword: newPassword);
-      return const AuthSuccess(null);
-    } on AuthException catch (e) {
-      return AuthFailure(e.message);
-    } catch (e) {
-      return AuthFailure('An unexpected error occurred: $e');
-    }
+    // Firebase handles password reset via email link, not token-based
+    // This method is kept for interface compatibility but not used with Firebase
+    return const AuthFailure('Password reset is handled via email link.');
   }
 
   @override
   Future<AuthResult<void>> verifyEmail(String token) async {
+    // Firebase handles email verification via email link
+    // Reload user to check verification status
     try {
-      await _authService.verifyEmail(token);
+      await _firebaseAuthService.reloadUser();
       return const AuthSuccess(null);
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
@@ -175,9 +205,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthResult<void>> resendVerificationEmail(String email) async {
     try {
-      await _authService.resendVerificationEmail(email);
+      // Send verification email via Firebase
+      await _firebaseAuthService.sendEmailVerification();
       return const AuthSuccess(null);
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       return AuthFailure(e.message);
     } catch (e) {
       return AuthFailure('An unexpected error occurred: $e');
