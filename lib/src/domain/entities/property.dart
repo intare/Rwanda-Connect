@@ -4,10 +4,11 @@ part 'property.freezed.dart';
 
 /// Property type enum.
 enum PropertyType {
+  house('house', 'House'),
+  apartment('apartment', 'Apartment'),
+  land('land', 'Land'),
   residential('residential', 'Residential'),
   commercial('commercial', 'Commercial'),
-  land('land', 'Land'),
-  apartment('apartment', 'Apartment'),
   villa('villa', 'Villa'),
   office('office', 'Office Space');
 
@@ -18,13 +19,15 @@ enum PropertyType {
   static PropertyType fromString(String value) {
     return PropertyType.values.firstWhere(
       (e) => e.value == value.toLowerCase(),
-      orElse: () => PropertyType.residential,
+      orElse: () => PropertyType.house,
     );
   }
 }
 
-/// Property status enum.
+/// Property status/listing type enum.
 enum PropertyStatus {
+  sale('sale', 'For Sale'),
+  rent('rent', 'For Rent'),
   available('available', 'Available'),
   pending('pending', 'Pending'),
   sold('sold', 'Sold'),
@@ -37,7 +40,7 @@ enum PropertyStatus {
   static PropertyStatus fromString(String value) {
     return PropertyStatus.values.firstWhere(
       (e) => e.value == value.toLowerCase(),
-      orElse: () => PropertyStatus.available,
+      orElse: () => PropertyStatus.sale,
     );
   }
 }
