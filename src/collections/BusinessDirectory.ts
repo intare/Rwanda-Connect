@@ -13,11 +13,6 @@ const slugify = (value: string): string =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
-const ownerOrAdmin: Access = ({ req: { user } }) => {
-  if (!user) return false
-  if (isAdminUser(user)) return true
-  return { owner: { equals: user.id } }
-}
 const manageBusinessDirectoryAccess = canManageOwnContentAsPaidContributor('owner')
 
 const publicReadOrOwner: Access = ({ req: { user } }) => {
