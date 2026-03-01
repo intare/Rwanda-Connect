@@ -1,5 +1,6 @@
-import { getPayload } from 'payload'
+import { getPayload, Payload } from 'payload'
 import config from '@payload-config'
+import axios from 'axios'
 import { scrapeAllEvents, ScrapedEvent } from './events-scraper'
 import { scrapeAllOpportunities, ScrapedOpportunity } from './opportunities-scraper'
 import { scrapeAllProperties, ScrapedProperty } from './properties-scraper'
@@ -10,6 +11,63 @@ interface ImportResult {
   imported: number
   skipped: number
   errors: string[]
+}
+
+/**
+ * Download an image from URL and upload to Payload Media collection
+ * Returns the media document ID or null if failed
+ */
+async function downloadAndUploadImage(
+  payload: Payload,
+  imageUrl: string,
+  altText: string
+): Promise<number | null> {
+  try {
+    // Skip invalid URLs
+    if (!imageUrl || !imageUrl.startsWith('http')) {
+      return null
+    }
+
+    // Download the image
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+      timeout: 30000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    })
+
+    // Get content type and determine extension
+    const contentType = response.headers['content-type'] || 'image/jpeg'
+    const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg'
+
+    // Create a filename from the alt text
+    const filename = `${altText.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50)}-${Date.now()}.${ext}`
+
+    // Create a File-like object for Payload
+    const buffer = Buffer.from(response.data)
+    const file = {
+      data: buffer,
+      mimetype: contentType,
+      name: filename,
+      size: buffer.length,
+    }
+
+    // Upload to Payload Media collection
+    const media = await payload.create({
+      collection: 'media',
+      data: {
+        alt: altText,
+      },
+      file,
+    })
+
+    console.log(`  Uploaded image: ${filename}`)
+    return media.id
+  } catch (error) {
+    console.error(`  Failed to download/upload image from ${imageUrl}:`, error instanceof Error ? error.message : error)
+    return null
+  }
 }
 
 // Map event type to lowercase values expected by Payload
@@ -185,6 +243,17 @@ async function importProperties(properties: ScrapedProperty[]): Promise<ImportRe
       // Map category to lowercase value
       const category = propertyCategoryMap[prop.category] || 'house'
 
+      // Download and upload images (limit to first 3 images)
+      const imageIds: number[] = []
+      const imagesToProcess = prop.imageUrls.slice(0, 3)
+
+      for (const imageUrl of imagesToProcess) {
+        const mediaId = await downloadAndUploadImage(payload, imageUrl, prop.title)
+        if (mediaId) {
+          imageIds.push(mediaId)
+        }
+      }
+
       await payload.create({
         collection: 'real-estate',
         data: {
@@ -200,12 +269,14 @@ async function importProperties(properties: ScrapedProperty[]): Promise<ImportRe
           bathrooms: prop.bathrooms,
           contactPhone: prop.contactPhone,
           contactEmail: prop.contactEmail,
+          images: imageIds.length > 0 ? imageIds : undefined,
           isFeatured: false,
           isAvailable: true,
         },
       })
 
       imported++
+      console.log(`  Imported: ${prop.title} (${imageIds.length} images)`)
     } catch (error) {
       errors.push(`Failed to import property "${prop.title}": ${error}`)
       console.error(`Error importing property "${prop.title}":`, error)

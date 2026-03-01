@@ -297,6 +297,10 @@ class _StatusBadge extends StatelessWidget {
 
   Color get _color {
     switch (status) {
+      case PropertyStatus.sale:
+        return AppColors.primary;
+      case PropertyStatus.rent:
+        return AppColors.info;
       case PropertyStatus.available:
         return AppColors.success;
       case PropertyStatus.pending:
