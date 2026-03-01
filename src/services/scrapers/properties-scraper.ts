@@ -67,8 +67,13 @@ class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
             // Skip duplicates
             if (properties.some((p) => p.sourceUrl === sourceUrl)) return
 
-            // Get parent container for context (price, location, etc.)
-            const $container = $link.parent().parent().parent()
+            // Get parent container for context - go up multiple levels to find the card
+            let $container = $link.parent()
+            // Go up until we find a container with images or hit 6 levels
+            for (let i = 0; i < 6; i++) {
+              if ($container.find('img').length > 0) break
+              $container = $container.parent()
+            }
             const containerText = $container.text()
 
             // Get price - format like "600,000 RWF/month" or "50,000,000 RWF"
@@ -77,13 +82,27 @@ class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
             // Get location - City, District, Sector format
             const location = this.extractLocation(containerText)
 
-            // Get images from container
+            // Get images from container - look for various image sources
             const imageUrls: string[] = []
             $container.find('img').each((_, img) => {
-              const src = $(img).attr('src') || $(img).attr('data-src')
-              if (src && (src.startsWith('http') || src.startsWith('/'))) {
-                const fullUrl = src.startsWith('http') ? src : `${this.baseUrl}${src}`
-                if (!imageUrls.includes(fullUrl)) {
+              const $img = $(img)
+              // Try multiple attributes for image source
+              const src = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src')
+              if (src) {
+                // Skip tiny images (likely icons)
+                const width = parseInt($img.attr('width') || '100', 10)
+                if (width < 50) return
+
+                // Build full URL
+                let fullUrl = src
+                if (src.startsWith('//')) {
+                  fullUrl = 'https:' + src
+                } else if (src.startsWith('/')) {
+                  fullUrl = `${this.baseUrl}${src}`
+                }
+
+                // Skip duplicates and non-property images
+                if (!imageUrls.includes(fullUrl) && !fullUrl.includes('logo') && !fullUrl.includes('icon')) {
                   imageUrls.push(fullUrl)
                 }
               }
