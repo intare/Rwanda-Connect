@@ -328,6 +328,7 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
     try {
       const newUser = await payload.create({
         collection: 'users',
+        draft: false,
         data: {
           email: 'scraper@rwandaconnect.com',
           password: 'scraper-system-' + Date.now(),
