@@ -104,7 +104,7 @@ async function importEvents(events: ScrapedEvent[]): Promise<ImportResult> {
       }
 
       // Map type to lowercase value
-      const eventType = eventTypeMap[event.type] || 'networking'
+      const eventType = (eventTypeMap[event.type] || 'networking') as 'networking' | 'seminar' | 'workshop' | 'conference'
 
       await payload.create({
         collection: 'events',
