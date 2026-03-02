@@ -56,7 +56,7 @@ class HouseInRwandaScraper extends BaseScraper<ScrapedProperty> {
 
             // Get title from heading inside link or link text
             const h5 = $link.find('h5, h3').first()
-            let title = this.cleanText(h5.text() || $link.text())
+            const title = this.cleanText(h5.text() || $link.text())
 
             // Skip navigation/short links
             if (!title || title.length < 10) return

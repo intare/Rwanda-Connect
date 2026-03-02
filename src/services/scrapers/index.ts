@@ -316,7 +316,7 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
   const errors: string[] = []
 
   // Find or create a system user for scraped content
-  let systemUser = await payload.find({
+  const systemUser = await payload.find({
     collection: 'users',
     where: { email: { equals: 'scraper@rwandaconnect.com' } },
     limit: 1,
@@ -336,7 +336,7 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
       })
       ownerId = newUser.id
       console.log('Created system user for scraped content')
-    } catch (e) {
+    } catch (_e) {
       // User might exist, try to find admin user instead
       const adminUser = await payload.find({
         collection: 'users',
