@@ -333,6 +333,7 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
           email: 'scraper@rwandaconnect.com',
           password: 'scraper-system-' + Date.now(),
           role: 'admin',
+          contributorStatus: 'approved',
         },
       })
       ownerId = newUser.id
