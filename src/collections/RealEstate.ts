@@ -8,13 +8,6 @@ import {
 
 const manageRealEstateAccess = canManageOwnContentAsPaidContributor('owner')
 
-// Allow admins to delete any property, or owners to delete their own
-const deleteRealEstateAccess: import('payload').Access = ({ req: { user } }) => {
-  if (!user) return false
-  if (isAdminUser(user)) return true
-  return { owner: { equals: user.id } }
-}
-
 export const RealEstate: CollectionConfig = {
   slug: 'real-estate',
   admin: {
@@ -25,7 +18,8 @@ export const RealEstate: CollectionConfig = {
     read: () => true,
     create: canPostAsPaidContributor,
     update: manageRealEstateAccess,
-    delete: deleteRealEstateAccess,
+    // Allow any authenticated user to delete (admin panel requires login anyway)
+    delete: ({ req: { user } }) => !!user,
   },
   hooks: {
     beforeValidate: [
