@@ -173,7 +173,7 @@ async function importOpportunities(opportunities: ScrapedOpportunity[]): Promise
       }
 
       // Map type to lowercase value
-      const oppType = opportunityTypeMap[opp.type] || 'job'
+      const oppType = (opportunityTypeMap[opp.type] || 'job') as 'job' | 'investment' | 'scholarship' | 'tender'
 
       await payload.create({
         collection: 'opportunities',
@@ -241,7 +241,7 @@ async function importProperties(properties: ScrapedProperty[]): Promise<ImportRe
       }
 
       // Map category to lowercase value
-      const category = propertyCategoryMap[prop.category] || 'house'
+      const category = (propertyCategoryMap[prop.category] || 'house') as 'house' | 'apartment' | 'land'
 
       // Download and upload images (limit to first 3 images)
       const imageIds: number[] = []
@@ -377,7 +377,7 @@ async function importBusinesses(businesses: ScrapedBusiness[]): Promise<ImportRe
       }
 
       // Map category to valid value
-      const category = categoryMap[biz.category] || 'other'
+      const category = (categoryMap[biz.category] || 'other') as 'real_estate' | 'hospitality' | 'retail' | 'professional_services' | 'technology' | 'finance' | 'health' | 'education' | 'construction' | 'agriculture' | 'other'
 
       await payload.create({
         collection: 'business-directory',
