@@ -1,8 +1,6 @@
 import type { Access, CollectionConfig } from 'payload'
 
 import {
-  canManageOwnContentAsPaidContributor,
-  canPostAsPaidContributor,
   isAdminUser,
 } from '../access/publishingAccess'
 
@@ -13,22 +11,7 @@ const slugify = (value: string): string =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
-const manageBusinessDirectoryAccess = canManageOwnContentAsPaidContributor('owner')
-
-const publicReadOrOwner: Access = ({ req: { user } }) => {
-  if (isAdminUser(user)) return true
-
-  const approvedAndActive = {
-    status: { equals: 'approved' },
-    isActive: { equals: true },
-  }
-
-  if (!user) return approvedAndActive
-
-  return {
-    or: [approvedAndActive, { owner: { equals: user.id } }],
-  }
-}
+const isAdmin = (user: any) => user?.role === 'admin'
 
 export const BusinessDirectory: CollectionConfig = {
   slug: 'business-directory',
@@ -37,10 +20,10 @@ export const BusinessDirectory: CollectionConfig = {
     defaultColumns: ['name', 'category', 'city', 'status', 'isActive', 'isFeatured'],
   },
   access: {
-    read: publicReadOrOwner,
-    create: canPostAsPaidContributor,
-    update: manageBusinessDirectoryAccess,
-    delete: manageBusinessDirectoryAccess,
+    read: () => true,
+    create: ({ req: { user } }) => isAdmin(user),
+    update: ({ req: { user } }) => isAdmin(user),
+    delete: ({ req: { user } }) => isAdmin(user),
   },
   hooks: {
     beforeValidate: [

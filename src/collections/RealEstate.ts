@@ -1,12 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
 import {
-  canManageOwnContentAsPaidContributor,
-  canPostAsPaidContributor,
   isAdminUser,
 } from '../access/publishingAccess'
 
-const manageRealEstateAccess = canManageOwnContentAsPaidContributor('owner')
+const isAdmin = (user: any) => user?.role === 'admin'
 
 export const RealEstate: CollectionConfig = {
   slug: 'real-estate',
@@ -16,10 +14,9 @@ export const RealEstate: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: canPostAsPaidContributor,
-    update: manageRealEstateAccess,
-    // Allow any authenticated user to delete (admin panel requires login anyway)
-    delete: ({ req: { user } }) => !!user,
+    create: ({ req: { user } }) => isAdmin(user),
+    update: ({ req: { user } }) => isAdmin(user),
+    delete: ({ req: { user } }) => isAdmin(user),
   },
   hooks: {
     beforeValidate: [

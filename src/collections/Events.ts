@@ -1,12 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
 import {
-  canManageOwnContentAsPaidContributor,
-  canPostAsPaidContributor,
   isAdminUser,
 } from '../access/publishingAccess'
 
-const manageEventAccess = canManageOwnContentAsPaidContributor('organizerId')
+const isAdmin = (user: any) => user?.role === 'admin'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -16,9 +14,9 @@ export const Events: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: canPostAsPaidContributor,
-    update: manageEventAccess,
-    delete: manageEventAccess,
+    create: ({ req: { user } }) => isAdmin(user),
+    update: ({ req: { user } }) => isAdmin(user),
+    delete: ({ req: { user } }) => isAdmin(user),
   },
   hooks: {
     beforeValidate: [
