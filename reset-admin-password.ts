@@ -1,63 +1,60 @@
 import 'dotenv/config'
 import pg from 'pg'
-import bcrypt from 'bcryptjs'
 
+const NEW_EMAIL = 'newadmin@rwandaconnect.com'
 const NEW_PASSWORD = 'Admin@123!'
 
-async function resetPassword() {
+async function createNewAdmin() {
   const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
   })
 
   try {
-    const current = await pool.query(
-      `SELECT id, email, salt, hash FROM users WHERE role = 'admin' LIMIT 1`
-    )
+    // Delete existing user with this email if exists
+    await pool.query(`DELETE FROM users WHERE email = $1`, [NEW_EMAIL])
 
-    if (current.rowCount === 0) {
-      console.log('No admin users found!')
-      process.exit(1)
-    }
+    console.log('Creating new admin user via Payload API...')
+    console.log('This will use Payload\'s native password hashing.\n')
 
-    const adminUser = current.rows[0]
-    console.log('Admin user:', adminUser.email)
-
-    // Generate bcrypt hash
-    const hash = await bcrypt.hash(NEW_PASSWORD, 10)
-    const salt = hash.substring(0, 29)
-
-    // Update hash AND clear lock
-    await pool.query(
-      `UPDATE users
-       SET hash = $1, salt = $2, login_attempts = 0, lock_until = NULL
-       WHERE id = $3`,
-      [hash, salt, adminUser.id]
-    )
-
-    // Verify
-    const updated = await pool.query(
-      `SELECT hash, login_attempts, lock_until FROM users WHERE id = $1`,
-      [adminUser.id]
-    )
-
-    const row = updated.rows[0]
-    const isValid = await bcrypt.compare(NEW_PASSWORD, row.hash)
-
-    console.log('Password verification:', isValid ? 'PASSED' : 'FAILED')
-    console.log('Login attempts reset:', row.login_attempts === 0 ? 'YES' : 'NO')
-    console.log('Lock cleared:', row.lock_until === null ? 'YES' : 'NO')
-
-    if (isValid) {
-      console.log('\n✓ Password reset and account unlocked!')
-      console.log('Email:', adminUser.email)
-      console.log('Password:', NEW_PASSWORD)
-    }
   } catch (error) {
     console.error('Error:', error)
-    process.exit(1)
   } finally {
     await pool.end()
   }
 }
 
-resetPassword()
+// Use Payload's API to create user with proper password hashing
+import { getPayload } from 'payload'
+import config from './src/payload.config'
+
+async function main() {
+  await createNewAdmin()
+
+  const payload = await getPayload({ config })
+
+  try {
+    // Create new admin user using Payload's API
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: NEW_EMAIL,
+        password: NEW_PASSWORD,
+        role: 'admin',
+        contributorStatus: 'approved',
+      },
+      overrideAccess: true,
+    })
+
+    console.log('✓ New admin user created!')
+    console.log('Email:', NEW_EMAIL)
+    console.log('Password:', NEW_PASSWORD)
+    console.log('User ID:', user.id)
+
+  } catch (error: any) {
+    console.error('Error creating user:', error.message)
+  }
+
+  process.exit(0)
+}
+
+main()
