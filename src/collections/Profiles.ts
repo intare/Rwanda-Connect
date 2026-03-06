@@ -1,4 +1,12 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
+
+const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
+
+const ownerOrAdmin: Access = ({ req: { user } }) => {
+  if (!user) return false
+  if (isAdmin(user)) return true
+  return { user: { equals: user.id } }
+}
 
 export const Profiles: CollectionConfig = {
   slug: 'profiles',
@@ -8,6 +16,9 @@ export const Profiles: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: ({ req: { user } }) => Boolean(user),
+    update: ownerOrAdmin,
+    delete: ownerOrAdmin,
   },
   fields: [
     {

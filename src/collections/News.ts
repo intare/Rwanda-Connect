@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
+
 export const News: CollectionConfig = {
   slug: 'news',
   admin: {
@@ -8,6 +10,9 @@ export const News: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: ({ req: { user } }) => isAdmin(user),
+    update: ({ req: { user } }) => isAdmin(user),
+    delete: ({ req: { user } }) => isAdmin(user),
   },
   fields: [
     {

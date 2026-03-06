@@ -1,4 +1,12 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
+
+const isAdmin = (user: { role?: string } | null | undefined) => user?.role === 'admin'
+
+const authorOrAdmin: Access = ({ req: { user } }) => {
+  if (!user) return false
+  if (isAdmin(user)) return true
+  return { author: { equals: user.id } }
+}
 
 export const CommunityPosts: CollectionConfig = {
   slug: 'community-posts',
@@ -8,6 +16,9 @@ export const CommunityPosts: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: ({ req: { user } }) => Boolean(user),
+    update: authorOrAdmin,
+    delete: authorOrAdmin,
   },
   fields: [
     {

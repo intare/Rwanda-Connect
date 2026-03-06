@@ -2,12 +2,23 @@ import type { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  admin: {
+    // Allow all authenticated users to manage media in admin panel
+    hidden: false,
+  },
   access: {
-    // Media access is open - admin panel access is already gated
+    // Media access is open for all operations
     read: () => true,
-    create: () => true,
+    create: ({ req }) => {
+      // Allow anyone (authenticated or not) to upload
+      return true
+    },
     update: () => true,
     delete: () => true,
+    admin: ({ req }) => {
+      // Allow any authenticated user to access media in admin
+      return Boolean(req.user)
+    },
   },
   fields: [
     {
