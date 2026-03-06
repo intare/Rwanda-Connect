@@ -21,41 +21,36 @@ async function resetPassword() {
 
     const adminUser = current.rows[0]
     console.log('Admin user:', adminUser.email)
-    console.log('Old hash:', adminUser.hash)
 
     // Generate bcrypt hash
     const hash = await bcrypt.hash(NEW_PASSWORD, 10)
     const salt = hash.substring(0, 29)
 
-    console.log('\nNew salt:', salt)
-    console.log('New hash:', hash)
-
-    // Update the hash column only (salt might not be used)
+    // Update hash AND clear lock
     await pool.query(
-      `UPDATE users SET hash = $1, salt = $2 WHERE id = $3`,
+      `UPDATE users
+       SET hash = $1, salt = $2, login_attempts = 0, lock_until = NULL
+       WHERE id = $3`,
       [hash, salt, adminUser.id]
     )
 
-    // Verify by reading back and testing
+    // Verify
     const updated = await pool.query(
-      `SELECT hash FROM users WHERE id = $1`,
+      `SELECT hash, login_attempts, lock_until FROM users WHERE id = $1`,
       [adminUser.id]
     )
 
-    const storedHash = updated.rows[0].hash
-    console.log('\nStored hash:', storedHash)
+    const row = updated.rows[0]
+    const isValid = await bcrypt.compare(NEW_PASSWORD, row.hash)
 
-    // Test if password verification works
-    const isValid = await bcrypt.compare(NEW_PASSWORD, storedHash)
-    console.log('Password verification test:', isValid ? 'PASSED' : 'FAILED')
+    console.log('Password verification:', isValid ? 'PASSED' : 'FAILED')
+    console.log('Login attempts reset:', row.login_attempts === 0 ? 'YES' : 'NO')
+    console.log('Lock cleared:', row.lock_until === null ? 'YES' : 'NO')
 
     if (isValid) {
-      console.log('\n✓ Password reset successfully!')
+      console.log('\n✓ Password reset and account unlocked!')
       console.log('Email:', adminUser.email)
       console.log('Password:', NEW_PASSWORD)
-      console.log('\n>>> RESTART PM2: pm2 restart all <<<')
-    } else {
-      console.log('\n✗ Password verification failed!')
     }
   } catch (error) {
     console.error('Error:', error)
