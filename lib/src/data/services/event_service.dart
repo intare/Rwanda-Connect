@@ -42,6 +42,7 @@ class EventService {
     String sort = 'date',
     bool? isVirtual,
     bool? isFeatured,
+    bool excludePast = true,
   }) async {
     final queryParams = <String, dynamic>{
       'page': page,
@@ -49,6 +50,11 @@ class EventService {
       'sort': sort,
       'depth': 1,
     };
+
+    // Exclude past events by default
+    if (excludePast) {
+      queryParams['where[date][greater_than_equal]'] = DateTime.now().toIso8601String();
+    }
 
     // Add filters using Payload's where syntax
     if (type != null && type.isNotEmpty) {

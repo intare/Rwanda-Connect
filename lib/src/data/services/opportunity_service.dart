@@ -38,6 +38,7 @@ class OpportunityService {
     String sort = '-datePosted',
     bool? verified,
     bool? isFeatured,
+    bool excludeExpired = true,
   }) async {
     final queryParams = <String, dynamic>{
       'page': page,
@@ -46,27 +47,34 @@ class OpportunityService {
       'depth': 1,
     };
 
+    // Exclude expired opportunities by default (deadline >= today)
+    // Note: opportunities without a deadline will still show
+    if (excludeExpired) {
+      queryParams['where[and][0][or][0][deadline][greater_than_equal]'] = DateTime.now().toIso8601String();
+      queryParams['where[and][0][or][1][deadline][exists]'] = false;
+    }
+
     // Add filters using Payload's where syntax
     if (type != null && type.isNotEmpty) {
-      queryParams['where[type][equals]'] = type;
+      queryParams['where[and][1][type][equals]'] = type;
     }
 
     if (location != null && location.isNotEmpty) {
-      queryParams['where[location][contains]'] = location;
+      queryParams['where[and][2][location][contains]'] = location;
     }
 
     if (verified != null) {
-      queryParams['where[verified][equals]'] = verified;
+      queryParams['where[and][3][verified][equals]'] = verified;
     }
 
     if (isFeatured != null) {
-      queryParams['where[isFeatured][equals]'] = isFeatured;
+      queryParams['where[and][4][isFeatured][equals]'] = isFeatured;
     }
 
     if (search != null && search.isNotEmpty) {
-      queryParams['where[or][0][title][contains]'] = search;
-      queryParams['where[or][1][company][contains]'] = search;
-      queryParams['where[or][2][location][contains]'] = search;
+      queryParams['where[and][5][or][0][title][contains]'] = search;
+      queryParams['where[and][5][or][1][company][contains]'] = search;
+      queryParams['where[and][5][or][2][location][contains]'] = search;
     }
 
     final response = await _dio.get<Map<String, dynamic>>(
