@@ -1,9 +1,7 @@
 import 'dotenv/config'
 import pg from 'pg'
-import { scrypt, randomBytes } from 'crypto'
-import { promisify } from 'util'
+import bcrypt from 'bcryptjs'
 
-const scryptAsync = promisify(scrypt)
 const NEW_PASSWORD = 'Admin@123!'
 
 async function resetPassword() {
@@ -12,7 +10,6 @@ async function resetPassword() {
   })
 
   try {
-    // Check current hash format
     const current = await pool.query(
       `SELECT id, email, salt, hash FROM users WHERE role = 'admin' LIMIT 1`
     )
@@ -24,19 +21,17 @@ async function resetPassword() {
 
     const adminUser = current.rows[0]
     console.log('Admin user:', adminUser.email)
-    console.log('Current salt length:', adminUser.salt?.length)
-    console.log('Current hash length:', adminUser.hash?.length)
-    console.log('Current salt sample:', adminUser.salt?.substring(0, 20))
-    console.log('Current hash sample:', adminUser.hash?.substring(0, 20))
 
-    // Generate new salt and hash using scrypt (Payload's method)
-    const salt = randomBytes(32).toString('hex')
-    const hash = ((await scryptAsync(NEW_PASSWORD, salt, 64)) as Buffer).toString('hex')
+    // Generate bcrypt hash (includes salt in the hash string)
+    const hash = await bcrypt.hash(NEW_PASSWORD, 10)
 
-    console.log('\nNew salt length:', salt.length)
-    console.log('New hash length:', hash.length)
+    // Extract salt portion from bcrypt hash (first 29 chars)
+    const salt = hash.substring(0, 29)
 
-    // Update salt and hash
+    console.log('New salt:', salt)
+    console.log('New hash:', hash)
+
+    // Update both columns - Payload expects bcrypt format
     const result = await pool.query(
       `UPDATE users SET salt = $1, hash = $2 WHERE id = $3 RETURNING id, email`,
       [salt, hash, adminUser.id]
