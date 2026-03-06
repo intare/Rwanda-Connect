@@ -1,7 +1,9 @@
 import 'dotenv/config'
 import pg from 'pg'
-import bcrypt from 'bcryptjs'
+import { scrypt, randomBytes } from 'crypto'
+import { promisify } from 'util'
 
+const scryptAsync = promisify(scrypt)
 const NEW_PASSWORD = 'Admin@123!'
 
 async function resetPassword() {
@@ -10,29 +12,31 @@ async function resetPassword() {
   })
 
   try {
-    // Find admin users
-    const admins = await pool.query(
-      `SELECT id, email, role FROM users WHERE role = 'admin'`
+    // Check current hash format
+    const current = await pool.query(
+      `SELECT id, email, salt, hash FROM users WHERE role = 'admin' LIMIT 1`
     )
 
-    console.log(`Found ${admins.rowCount} admin users:`)
-    admins.rows.forEach((u: any) => {
-      console.log(`  - ID: ${u.id}, Email: ${u.email}`)
-    })
-
-    if (admins.rowCount === 0) {
+    if (current.rowCount === 0) {
       console.log('No admin users found!')
       process.exit(1)
     }
 
-    const adminUser = admins.rows[0]
-    console.log(`\nResetting password for: ${adminUser.email} (ID: ${adminUser.id})`)
+    const adminUser = current.rows[0]
+    console.log('Admin user:', adminUser.email)
+    console.log('Current salt length:', adminUser.salt?.length)
+    console.log('Current hash length:', adminUser.hash?.length)
+    console.log('Current salt sample:', adminUser.salt?.substring(0, 20))
+    console.log('Current hash sample:', adminUser.hash?.substring(0, 20))
 
-    // Generate salt and hash using bcrypt (Payload's default)
-    const salt = await bcrypt.genSalt(10)
-    const hash = await bcrypt.hash(NEW_PASSWORD, salt)
+    // Generate new salt and hash using scrypt (Payload's method)
+    const salt = randomBytes(32).toString('hex')
+    const hash = ((await scryptAsync(NEW_PASSWORD, salt, 64)) as Buffer).toString('hex')
 
-    // Update salt and hash directly in database
+    console.log('\nNew salt length:', salt.length)
+    console.log('New hash length:', hash.length)
+
+    // Update salt and hash
     const result = await pool.query(
       `UPDATE users SET salt = $1, hash = $2 WHERE id = $3 RETURNING id, email`,
       [salt, hash, adminUser.id]
