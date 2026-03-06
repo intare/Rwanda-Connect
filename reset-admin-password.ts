@@ -25,24 +25,17 @@ async function resetPassword() {
       process.exit(1)
     }
 
-    // Check table columns
-    const columns = await pool.query(`
-      SELECT column_name FROM information_schema.columns
-      WHERE table_name = 'users'
-      ORDER BY ordinal_position
-    `)
-    console.log('\nUsers table columns:', columns.rows.map((r: any) => r.column_name).join(', '))
-
     const adminUser = admins.rows[0]
     console.log(`\nResetting password for: ${adminUser.email} (ID: ${adminUser.id})`)
 
-    // Hash the new password using bcrypt (Payload's default)
-    const hashedPassword = await bcrypt.hash(NEW_PASSWORD, 10)
+    // Generate salt and hash using bcrypt (Payload's default)
+    const salt = await bcrypt.genSalt(10)
+    const hash = await bcrypt.hash(NEW_PASSWORD, salt)
 
-    // Update password directly in database
+    // Update salt and hash directly in database
     const result = await pool.query(
-      `UPDATE users SET password = $1 WHERE id = $2 RETURNING id, email`,
-      [hashedPassword, adminUser.id]
+      `UPDATE users SET salt = $1, hash = $2 WHERE id = $3 RETURNING id, email`,
+      [salt, hash, adminUser.id]
     )
 
     if (result.rowCount === 1) {
