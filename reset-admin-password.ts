@@ -1,47 +1,63 @@
 import 'dotenv/config'
-import { getPayload } from 'payload'
-import config from './src/payload.config'
+import pg from 'pg'
+import bcrypt from 'bcryptjs'
 
 const NEW_PASSWORD = 'Admin@123!'
 
 async function resetPassword() {
-  const payload = await getPayload({ config })
-
-  // First, find the admin user
-  const users = await payload.find({
-    collection: 'users',
-    where: { role: { equals: 'admin' } },
-    overrideAccess: true,
+  const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
   })
 
-  console.log(`Found ${users.docs.length} admin users:`)
-  users.docs.forEach((u: any) => {
-    console.log(`  - ID: ${u.id}, Email: ${u.email}`)
-  })
+  try {
+    // Find admin users
+    const admins = await pool.query(
+      `SELECT id, email, role FROM users WHERE role = 'admin'`
+    )
 
-  if (users.docs.length === 0) {
-    console.log('No admin users found!')
+    console.log(`Found ${admins.rowCount} admin users:`)
+    admins.rows.forEach((u: any) => {
+      console.log(`  - ID: ${u.id}, Email: ${u.email}`)
+    })
+
+    if (admins.rowCount === 0) {
+      console.log('No admin users found!')
+      process.exit(1)
+    }
+
+    // Check table columns
+    const columns = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_name = 'users'
+      ORDER BY ordinal_position
+    `)
+    console.log('\nUsers table columns:', columns.rows.map((r: any) => r.column_name).join(', '))
+
+    const adminUser = admins.rows[0]
+    console.log(`\nResetting password for: ${adminUser.email} (ID: ${adminUser.id})`)
+
+    // Hash the new password using bcrypt (Payload's default)
+    const hashedPassword = await bcrypt.hash(NEW_PASSWORD, 10)
+
+    // Update password directly in database
+    const result = await pool.query(
+      `UPDATE users SET password = $1 WHERE id = $2 RETURNING id, email`,
+      [hashedPassword, adminUser.id]
+    )
+
+    if (result.rowCount === 1) {
+      console.log('\nPassword reset successfully!')
+      console.log('Email:', adminUser.email)
+      console.log('Password:', NEW_PASSWORD)
+    } else {
+      console.log('Failed to update password')
+    }
+  } catch (error) {
+    console.error('Error:', error)
     process.exit(1)
+  } finally {
+    await pool.end()
   }
-
-  // Update password for first admin user by ID
-  const adminUser = users.docs[0] as any
-  console.log(`\nResetting password for: ${adminUser.email} (ID: ${adminUser.id})`)
-
-  const updated = await payload.update({
-    collection: 'users',
-    id: adminUser.id,
-    data: { password: NEW_PASSWORD },
-    overrideAccess: true,
-  })
-
-  console.log('\nPassword reset successfully!')
-  console.log('Email:', updated.email)
-  console.log('Password:', NEW_PASSWORD)
-  process.exit(0)
 }
 
-resetPassword().catch((err) => {
-  console.error('Error:', err)
-  process.exit(1)
-})
+resetPassword()
